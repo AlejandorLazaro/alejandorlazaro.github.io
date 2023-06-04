@@ -14,4 +14,6 @@ Showing off pictures taken at Guildhall Part 1...
 
 ![Selfie at Gearbox game studio](/assets/img/gearbox.jpg)
 
+![SeaFeud banner picture with leads](/assets/img/seafeud.jpg)
+
 ![Teaching game artists how to hold a marker](/assets/img/teaching.jpg)
