@@ -6,5 +6,11 @@
 # VSCode
 .vscode/
 
+# Ruby/Gems
+Gemfile.lock
+
+# SASS
+.sass-cache
+
 # Environments
 ENV
