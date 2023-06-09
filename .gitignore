@@ -12,5 +12,8 @@ Gemfile.lock
 # SASS
 .sass-cache
 
+# Local Bundle/Jekyll leftovers
+_site
+
 # Environments
 ENV

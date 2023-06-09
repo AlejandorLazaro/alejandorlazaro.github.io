@@ -5,7 +5,7 @@ gem 'nokogiri'
 gem 'rack', '~> 2.2.4'
 gem 'rspec'
 gem 'jekyll'
-gem 'github-pages'
+gem "github-pages", group: :jekyll_plugins
 gem 'webrick'
 
 # gem "rails"
