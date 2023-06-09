@@ -7,3 +7,7 @@ https://jekyllrb.com/docs/step-by-step/
 ### Cool Stuff
 
 Free picture slideshow? Yes please! https://albumizr.com
+
+Alvaro Trigo's cool fullPage.js stuff: https://alvarotrigo.com/fullPage/docs/#introduction
+
+Neato blog for website fun: https://codeburst.io/how-to-create-a-dynamic-website-in-30-minutes-with-fullpage-js-7e91b70dcdee
