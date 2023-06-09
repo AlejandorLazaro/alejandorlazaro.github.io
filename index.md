@@ -1,5 +1,6 @@
 ---
 layout: default
+title: Home
 ---
 
 # Who is that man?
