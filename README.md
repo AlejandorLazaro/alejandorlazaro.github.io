@@ -1,4 +1,8 @@
-## Jekyll
+# Alejandro's Personal Site!
+
+Uses GitHub's standard Jekyll theme integrations with GitHub Pages. Uses [bundle](https://bundler.io) to run the site locally via `make run_site`.
+
+## Powered by Jekyll
 
 The docs are fairly useful, so follow the step-by-step guide if you need help with making new pages, navigation, custom layouts, etc!
 
