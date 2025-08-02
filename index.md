@@ -107,40 +107,46 @@ title: Alejandro L. Ramirez - Game Producer
     </div>
 </div>
 
-<div class="social-contact">
-    <h2>Let's Connect</h2>
-    <div class="contact-grid">
-        <a href="https://linkedin.com/in/alramirez" target="_blank" class="contact-item">
-            <img src="/assets/img/icons/linkedin.svg" alt="LinkedIn" class="contact-icon" />
-            <span>LinkedIn</span>
-        </a>
-
-        <a href="https://github.com/AlejandorLazaro" target="_blank" class="contact-item">
-            <img src="/assets/img/icons/github.svg" alt="GitHub" class="contact-icon" />
-            <span>GitHub</span>
-        </a>
-
-        <a href="https://www.notion.so/alejandrolramirez/45d4736fa3c54d709c489a7ceb7747a2?v=22b0c3e11b3049a8a2b6253f68fa4f76" target="_blank" class="contact-item">
-            <img src="/assets/img/icons/notion.svg" alt="Notion" class="contact-icon" />
-            <span>Notion</span>
-        </a>
-
-        <a href="https://orcid.org/0009-0005-2051-998X" target="_blank" class="contact-item">
-            <img src="/assets/img/icons/orcid.svg" alt="Orcid" class="contact-icon" />
-            <span>Orcid</span>
-        </a>
-
-        <a href="mailto:alejandro.ramirez.4693@gmail.com" class="contact-item">
-            <!-- Add icon: /assets/img/icons/email.svg -->
-            <img src="/assets/img/icons/email.svg" alt="Email" class="contact-icon" />
-            <span>Email</span>
-        </a>
+<div class="social-contact collapsible collapsed">
+    <div class="collapsible-header" onclick="toggleSection(this)">
+        <h2>Let's Connect</h2>
+        <span class="toggle-icon">▼</span>
     </div>
+    <div class="collapsible-content">
+        <div class="contact-container">
+            <div class="contact-grid">
+                <a href="https://linkedin.com/in/alramirez" target="_blank" class="contact-item">
+                    <img src="/assets/img/icons/linkedin.svg" alt="LinkedIn" class="contact-icon" />
+                    <span>LinkedIn</span>
+                </a>
 
-    <!--
-    <div class="contact-info">
-        <p><strong>Phone:</strong> (832) 474-2446</p>
-        <p><strong>Location:</strong> Plano, TX</p>
+                <a href="https://github.com/AlejandorLazaro" target="_blank" class="contact-item">
+                    <img src="/assets/img/icons/github.svg" alt="GitHub" class="contact-icon" />
+                    <span>GitHub</span>
+                </a>
+
+                <a href="https://www.notion.so/alejandrolramirez/45d4736fa3c54d709c489a7ceb7747a2?v=22b0c3e11b3049a8a2b6253f68fa4f76" target="_blank" class="contact-item">
+                    <img src="/assets/img/icons/notion.svg" alt="Notion" class="contact-icon" />
+                    <span>Notion</span>
+                </a>
+
+                <a href="https://orcid.org/0009-0005-2051-998X" target="_blank" class="contact-item">
+                    <img src="/assets/img/icons/orcid.svg" alt="Orcid" class="contact-icon" />
+                    <span>Orcid</span>
+                </a>
+
+                <a href="mailto:alejandro.ramirez.4693@gmail.com" class="contact-item">
+                    <img src="/assets/img/icons/email.svg" alt="Email" class="contact-icon" />
+                    <span>Email</span>
+                </a>
+            </div>
+
+            <!--
+            <div class="contact-info">
+                <p><strong>Phone:</strong> (832) 474-2446</p>
+                <p><strong>Location:</strong> Plano, TX</p>
+            </div>
+            -->
+        </div>
     </div>
-    -->
 </div>
