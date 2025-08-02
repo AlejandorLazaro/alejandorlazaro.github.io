@@ -109,8 +109,7 @@ title: Alejandro L. Ramirez - Game Producer
 
 <div class="social-contact collapsible collapsed">
     <div class="collapsible-header" onclick="toggleSection(this)">
-        <h2>Let's Connect</h2>
-        <span class="toggle-icon">▼</span>
+        <h2>Let's Connect&ensp;<span class="toggle-icon">▼</span></h2>
     </div>
     <div class="collapsible-content">
         <div class="contact-container">

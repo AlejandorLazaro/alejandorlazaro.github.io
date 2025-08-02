@@ -175,6 +175,8 @@
             background: rgba(255, 255, 255, 0.5);
             text-align: center;
             min-height: 80px;
+            position: relative;
+            overflow: hidden;
         }
 
         .contact-item:hover {
@@ -182,16 +184,53 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             background: rgba(255, 255, 255, 0.8);
             color: #667eea;
+            min-height: 100px; /* Expand slightly to accommodate text */
         }
 
         .contact-icon {
             font-size: 24px;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0;
             display: block;
+            transition: all 0.3s ease;
         }
 
+        /* Text label - hidden by default */
+        .contact-item span {
+            position: absolute;
+            bottom: 0.5rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            opacity: 0;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        /* Show text on hover */
+        .contact-item:hover span {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Mobile support - show text on active/focus states */
+        .contact-item:active span,
+        .contact-item:focus span {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Ensure icons stay centered when text appears */
         .contact-item:hover .contact-icon {
-            filter: opacity(1);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Optional: Add a subtle background to text for better readability */
+        .contact-item:hover span {
+            /* background: rgba(255, 255, 255, 0.75); */
+            border-radius: 2px;
+            backdrop-filter: blur(2px);
         }
 
         .contact-info {
