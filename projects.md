@@ -5,7 +5,7 @@ title: Projects
 
 # Team Game Projects
 
-![SeaFeud Title Card](/assets/img/seafeud_titlecard.png)
+![SeaFeud Title Card](/assets/img//projects/seafeud/seafeud_titlecard.png)
 
 Worked as the Line Producer for Art and Audio teams for a UE5 3D arcade racing game.
 

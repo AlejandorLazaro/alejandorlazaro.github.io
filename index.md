@@ -24,38 +24,47 @@ title: Alejandro L. Ramirez - Game Producer
             <div class="project-title">
                 <a href="/projects/wartorn.html" span class="highlight">Wartorn</a>
             </div>
-            <!-- Add image: /assets/img/wartorn-steam.jpg (Steam capsule image) -->
             <a href="/projects/wartorn.html">
-                <img src="/assets/img/wartorn-steam.png" alt="Wartorn Steam Page" class="project-image" />
+                <img src="/assets/img//projects/wartorn/wartorn-steam.png" alt="Wartorn Page" class="project-image" />
             </a>
             <div class="project-desc">
                 <strong>Developer: Stray Kite Studios</strong><br>
                 <strong>Role: Producer</strong><br>
-                Stray Kite Studios - A single-player, squad-based, RTS, roguelite for PC ("LoTR meets Oregon Trail").
+                A single-player, squad-based, RTS, roguelite for PC ("LoTR meets Oregon Trail").
             </div>
         </div>
 
         <div class="project">
             <div class="project-title">
-                <a href="https://store.steampowered.com/app/2491710/Asuryas_Embers/" target="_blank" span class="highlight">Asurya's Embers</a>
+                <a href="/projects/asuryas_embers.html" span class="highlight">Asurya's Embers</a>
             </div>
-            <!-- Add image: /assets/img/asuryas-embers-steam.jpg (Steam capsule image) -->
-            <img src="/assets/img/asuryas-embers-steam.png" alt="Asurya's Embers Steam Page" class="project-image"/>
-            <div class="project-desc">SMU Guildhall - A single-player, bow-and-arrow FPS where the sun literally burns you. <strong>Producer Credit</strong></div>
+            <a href="/projects/asuryas_embers.html">
+                <img src="/assets/img//projects/asuryas/asuryas-embers-steam.png" alt="Asurya's Embers Page" class="project-image"/>
+            </a>
+            <div class="project-desc">
+                <strong>Developer: SMU Guildhall</strong><br>
+                <strong>Role: Producer</strong><br>
+                A single-player, bow-and-arrow FPS where the sun literally burns you.
+            </div>
         </div>
 
         <div class="project">
             <div class="project-title">
-                <a href="https://store.steampowered.com/app/2322020/SeaFeud/" target="_blank" span class="highlight">SeaFeud</a>
+                <a href="/projects/seafeud.html" span class="highlight">SeaFeud</a>
             </div>
-            <!-- Keep existing image or replace with Steam version -->
-            <img src="/assets/img/seafeud_titlecard.png" alt="SeaFeud Title Card" class="project-image" />
-            <div class="project-desc">SMU Guildhall - An underwater 3D arcade racing game featuring kartfish swapping mid-race. <strong>Producer Credit</strong></div>
+            <a href="/projects/seafeud.html">
+                <img src="/assets/img//projects/seafeud/seafeud_titlecard.png" alt="SeaFeud Page" class="project-image" />
+            </a>
+            <div class="project-desc">
+                <strong>Developer: SMU Guildhall</strong><br>
+                <strong>Role: Producer</strong><br>
+                An underwater 3D arcade racing game featuring kartfish swapping mid-race.
+            </div>
         </div>
     </div>
 
     <div class="section">
-        <h2>Current Role</h2>
+        <h2>Recent Role</h2>
         <div class="project">
             <div class="project-title">Producer/Dev Tools/QA</div>
             <div class="project-subtitle">Stray Kite Studios LLC • October 2024 - Present</div>
@@ -74,7 +83,7 @@ title: Alejandro L. Ramirez - Game Producer
 
         <div class="project">
             <div class="project-title">Apple Inc.</div>
-            <div class="project-subtitle">iOS Automation Software Engineer • March 2015 - Present</div>
+            <div class="project-subtitle">iOS Automation Software Engineer • March 2015 - June 2022</div>
             <div class="project-desc">Maintained automated restore tools with >10K daily runs, led major infrastructure projects, and contributed to shipped features like LivePhoto and iCloud Photo Sharing.</div>
         </div>
 
@@ -107,7 +116,7 @@ title: Alejandro L. Ramirez - Game Producer
     </div>
 </div>
 
-<div class="social-contact collapsible collapsed">
+<div class="social-contact collapsible">
     <div class="collapsible-header" onclick="toggleSection(this)">
         <h2>Let's Connect&ensp;<span class="toggle-icon">▼</span></h2>
     </div>
@@ -139,13 +148,6 @@ title: Alejandro L. Ramirez - Game Producer
                     <span>Email</span>
                 </a>
             </div>
-
-            <!--
-            <div class="contact-info">
-                <p><strong>Phone:</strong> (832) 474-2446</p>
-                <p><strong>Location:</strong> Plano, TX</p>
-            </div>
-            -->
         </div>
     </div>
 </div>
