@@ -1324,6 +1324,15 @@
                 border: 1px solid rgba(0, 0, 0, 0.2);
             }
         }
+
+        /* Hide keyboard help on touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .keyboard-help-trigger,
+            #keyboardHelpModal,
+            .keyboard-shortcut-hint {
+                display: none !important;
+            }
+        }
     </style>
     {% include head-custom.html %}
   </head>
