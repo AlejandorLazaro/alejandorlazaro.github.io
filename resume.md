@@ -20,6 +20,30 @@ title: Alejandro L. Ramirez - Resume
     <div class="section full-width">
         <h2>Resume</h2>
 
+        <!-- Download Button - Prominent and mobile-friendly -->
+        <div class="project" style="margin-bottom: 2rem;">
+            <div class="project-desc" style="text-align: center;">
+                <a href="/assets/resume.pdf" download="Alejandro_Ramirez_Resume.pdf" class="download-btn" style="
+                    display: inline-block;
+                    padding: 12px 24px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    font-size: 1.1rem;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                    transition: all 0.3s ease;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                ">
+                    📄 Download (PDF)
+                </a>
+                <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7;">
+                    Click to download • Mobile-friendly • You're beautiful today :)
+                </p>
+            </div>
+        </div>
+
         <div class="project">
             <div class="project-desc">
                 <div style="width: 100%; height: 800px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; overflow: hidden; background: rgba(255, 255, 255, 0.05);">

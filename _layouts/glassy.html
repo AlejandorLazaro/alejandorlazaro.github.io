@@ -1062,6 +1062,268 @@
                 max-width: 100%;
             }
         }
+
+        /* Keyboard key styling */
+        kbd {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            color: #495057;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 0.85em;
+            font-weight: 600;
+            padding: 2px 6px;
+            text-align: center;
+            min-width: 20px;
+            display: inline-block;
+        }
+
+        /* Menu shortcuts */
+        .menu-shortcut {
+            margin-left: auto;
+            opacity: 0.7;
+            font-size: 0.75em;
+        }
+
+        .menu-items a, .submenu-items a {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Keyboard help modal */
+        .keyboard-help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .keyboard-help-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .keyboard-help-overlay {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .keyboard-help-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .keyboard-help-modal.active .keyboard-help-content {
+            transform: scale(1);
+        }
+
+        .keyboard-help-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid rgba(103, 126, 234, 0.2);
+        }
+
+        .keyboard-help-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.5rem;
+        }
+
+        .keyboard-help-body {
+            padding: 1.5rem 2rem;
+        }
+
+        .keyboard-help-footer {
+            padding: 1rem 2rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(103, 126, 234, 0.1);
+        }
+
+        .keyboard-help-footer p {
+            margin: 0;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* Shortcut categories */
+        .shortcut-category {
+            margin-bottom: 2rem;
+        }
+
+        .shortcut-category:last-child {
+            margin-bottom: 0;
+        }
+
+        .shortcut-category h4 {
+            color: #667eea;
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(103, 126, 234, 0.2);
+        }
+
+        .shortcut-list {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 1rem;
+            background: rgba(103, 126, 234, 0.05);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .shortcut-item:hover {
+            background: rgba(103, 126, 234, 0.1);
+            transform: translateX(3px);
+        }
+
+        .shortcut-key {
+            margin-right: 1rem;
+            min-width: 40px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .shortcut-desc {
+            color: #2c3e50;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        /* Keyboard indicator */
+        .keyboard-indicator {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 1500;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .keyboard-hint {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideInLeft 0.5s ease, pulse 2s ease-in-out infinite 3s;
+        }
+
+        .keyboard-hint kbd {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            margin: 0 4px;
+        }
+
+        /* Animations */
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .keyboard-help-overlay {
+                padding: 1rem;
+            }
+
+            .keyboard-help-content {
+                max-height: 90vh;
+            }
+
+            .keyboard-help-header,
+            .keyboard-help-body,
+            .keyboard-help-footer {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+
+            .shortcut-item {
+                padding: 0.6rem 0.8rem;
+            }
+
+            .shortcut-key {
+                min-width: 35px;
+                font-size: 0.8em;
+            }
+
+            .keyboard-indicator {
+                bottom: 1rem;
+                left: 1rem;
+            }
+
+            .keyboard-hint {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        .keyboard-help-content:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            kbd {
+                background: #ffffff;
+                border: 2px solid #000000;
+                color: #000000;
+            }
+
+            .shortcut-item {
+                border: 1px solid rgba(0, 0, 0, 0.2);
+            }
+        }
     </style>
     {% include head-custom.html %}
   </head>
@@ -1208,8 +1470,12 @@
             section.classList.toggle('collapsed');
         }
 
-        // Initialize collapsed sections on page load
+        // Initialize elements on page load
         document.addEventListener('DOMContentLoaded', function() {
+            initKeyboardShortcuts();
+            enhanceMenuWithShortcuts();
+
+            // Initialize collapsible content
             const collapsedSections = document.querySelectorAll('.collapsible');
             collapsedSections.forEach(section => {
                 const icon = section.querySelector('.toggle-icon');
@@ -1219,10 +1485,7 @@
                     }
                 }
             });
-        });
 
-        // Initialize all carousels when page loads
-        document.addEventListener('DOMContentLoaded', function() {
             // Initialize carousels
             const carousels = document.querySelectorAll('.photo-carousel');
             carousels.forEach((carousel, index) => {
@@ -1232,6 +1495,265 @@
                 initCarousel(carousel.id);
             });
         });
+
+        // Keyboard shortcuts configuration
+        const keyboardShortcuts = {
+            // Menu and navigation
+            'm': () => toggleMenu(),
+            'M': () => toggleMenu(),
+            'Escape': () => closeMenu(),
+
+            // Direct page navigation
+            'h': () => navigateToPage('/'),
+            'H': () => navigateToPage('/'),
+            'a': () => navigateToPage('/about.html'),
+            'A': () => navigateToPage('/about.html'),
+            'r': () => navigateToPage('/resume.html'),
+            'R': () => navigateToPage('/resume.html'),
+
+            // Project shortcuts
+            'w': () => navigateToPage('/projects/wartorn.html'),
+            'W': () => navigateToPage('/projects/wartorn.html'),
+            'e': () => navigateToPage('/projects/asuryas_embers.html'),
+            'E': () => navigateToPage('/projects/asuryas_embers.html'),
+            's': () => navigateToPage('/projects/seafeud.html'),
+            'S': () => navigateToPage('/projects/seafeud.html'),
+
+            // Utility shortcuts
+            '?': () => toggleKeyboardHelp(),
+            'k': () => toggleKeyboardHelp(),
+            'K': () => toggleKeyboardHelp(),
+        };
+
+        // Help modal content
+        const keyboardHelpContent = {
+            'Navigation': {
+                'M': 'Toggle menu',
+                'H': 'Home page',
+                'A': 'About page',
+                'R': 'Resume page',
+                'Esc': 'Close menu/dialogs'
+            },
+            'Projects': {
+                'W': 'Wartorn',
+                'E': 'Asurya\'s Embers',
+                'S': 'SeaFeud'
+            },
+            'Help': {
+                '?': 'Show this help',
+                'K': 'Show this help'
+            }
+        };
+
+        // Navigation function
+        function navigateToPage(url) {
+            // Close menu if open
+            const menuOverlay = document.getElementById('menuOverlay');
+            if (menuOverlay && menuOverlay.classList.contains('active')) {
+                toggleMenu();
+            }
+
+            // Navigate after a short delay to allow menu to close
+            setTimeout(() => {
+                window.location.href = url;
+            }, 100);
+        }
+
+        // Close menu function
+        function closeMenu() {
+            const menuOverlay = document.getElementById('menuOverlay');
+            const helpModal = document.getElementById('keyboardHelpModal');
+
+            if (helpModal && helpModal.classList.contains('active')) {
+                hideKeyboardHelp();
+            } else if (menuOverlay && menuOverlay.classList.contains('active')) {
+                toggleMenu();
+            }
+        }
+
+        // Toggle keyboard help modal
+        function toggleKeyboardHelp() {
+            let modal = document.getElementById('keyboardHelpModal');
+            if (modal) {
+                hideKeyboardHelp();
+            } else {
+                showKeyboardHelp();
+            }
+        }
+
+        // Show keyboard help modal
+        function showKeyboardHelp() {
+            // Create modal if it doesn't exist
+            let modal = document.getElementById('keyboardHelpModal');
+            if (!modal) {
+                modal = createKeyboardHelpModal();
+                document.body.appendChild(modal);
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        // Hide keyboard help modal
+        function hideKeyboardHelp() {
+            const modal = document.getElementById('keyboardHelpModal');
+            if (modal) {
+                // modal.classList.remove('active');
+                document.body.style.overflow = ''; // Restore scrolling
+                modal.remove();
+            }
+        }
+
+        // Create keyboard help modal
+        function createKeyboardHelpModal() {
+            const modal = document.createElement('div');
+            modal.id = 'keyboardHelpModal';
+            modal.className = 'keyboard-help-modal';
+
+            let helpHTML = `
+                <div class="keyboard-help-overlay">
+                    <div class="keyboard-help-content">
+                        <div class="keyboard-help-header">
+                            <h3>⌨️ Keyboard Shortcuts</h3>
+                            <button class="close-btn" onclick="hideKeyboardHelp()">×</button>
+                        </div>
+                        <div class="keyboard-help-body">
+            `;
+
+            // Generate help content
+            Object.entries(keyboardHelpContent).forEach(([category, shortcuts]) => {
+                helpHTML += `
+                    <div class="shortcut-category">
+                        <h4>${category}</h4>
+                        <div class="shortcut-list">
+                `;
+
+                Object.entries(shortcuts).forEach(([key, description]) => {
+                    helpHTML += `
+                        <div class="shortcut-item">
+                            <kbd class="shortcut-key">${key}</kbd>
+                            <span class="shortcut-desc">${description}</span>
+                        </div>
+                    `;
+                });
+
+                helpHTML += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            helpHTML += `
+                        </div>
+                        <div class="keyboard-help-footer">
+                            <p><em>Press <kbd>Esc</kbd> to close this dialog</em></p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.innerHTML = helpHTML;
+            return modal;
+        }
+
+        // Enhanced keyboard event handler
+        function handleKeyboardShortcuts(event) {
+            // Don't trigger shortcuts when typing in inputs or textareas
+            if (event.target.tagName === 'INPUT' ||
+                event.target.tagName === 'TEXTAREA' ||
+                event.target.contentEditable === 'true') {
+                return;
+            }
+
+            // Check for modifier keys - we want clean key presses for most shortcuts
+            if (event.ctrlKey || event.altKey || event.metaKey) {
+                return;
+            }
+
+            const key = event.key;
+
+            // Execute shortcut if it exists
+            if (keyboardShortcuts[key]) {
+                event.preventDefault(); // Prevent default browser behavior
+                keyboardShortcuts[key]();
+
+                // Visual feedback - briefly highlight the menu button for 'M'
+                if (key.toLowerCase() === 'm') {
+                    showShortcutFeedback();
+                }
+            }
+        }
+
+        // Visual feedback for shortcuts
+        function showShortcutFeedback() {
+            const hamburgerBtn = document.querySelector('.hamburger-btn');
+            if (hamburgerBtn) {
+                hamburgerBtn.style.transform = 'scale(1.1)';
+                hamburgerBtn.style.boxShadow = '0 15px 35px rgba(103, 126, 234, 0.3)';
+
+                setTimeout(() => {
+                    hamburgerBtn.style.transform = '';
+                    hamburgerBtn.style.boxShadow = '';
+                }, 200);
+            }
+        }
+
+        // Initialize keyboard shortcuts
+        function initKeyboardShortcuts() {
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+
+            // Add subtle indicator that keyboard shortcuts are available
+            addKeyboardIndicator();
+        }
+
+        // Add a subtle indicator for keyboard shortcuts
+        function addKeyboardIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'keyboard-indicator';
+            indicator.innerHTML = `
+                <div class="keyboard-hint">
+                    <span>Press <kbd>?</kbd> for shortcuts</span>
+                </div>
+            `;
+            document.body.appendChild(indicator);
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                indicator.style.opacity = '0';
+                setTimeout(() => {
+                    if (indicator.parentNode) {
+                        indicator.parentNode.removeChild(indicator);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Enhanced menu updates to show shortcuts
+        function enhanceMenuWithShortcuts() {
+            const menuItems = document.querySelectorAll('.menu-items a, .submenu-items a');
+
+            const shortcutMap = {
+                '/': 'H',
+                '/about.html': 'A',
+                '/resume.html': 'R',
+                '/projects/wartorn.html': 'W',
+                '/projects/asuryas_embers.html': 'E',
+                '/projects/seafeud.html': 'S'
+            };
+
+            menuItems.forEach(item => {
+                const href = item.getAttribute('href');
+                const shortcut = shortcutMap[href];
+
+                if (shortcut) {
+                    const text = item.textContent;
+                    item.innerHTML = `
+                        <span>${text}</span>
+                        <kbd class="menu-shortcut">${shortcut}</kbd>
+                    `;
+                }
+            });
+        }
     </script>
   </body>
 </html>
