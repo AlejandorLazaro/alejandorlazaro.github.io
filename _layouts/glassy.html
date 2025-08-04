@@ -1347,7 +1347,7 @@
         <div class="menu-overlay" id="menuOverlay">
             <div class="menu-content">
                 <div class="menu-header">
-                    <h3>Navigation</h3>
+                    <h3><u>M</u>enu</h3>
                     <button class="close-btn" onclick="toggleMenu()">×</button>
                 </div>
 
@@ -1520,6 +1520,10 @@
             'r': () => navigateToPage('/resume.html'),
             'R': () => navigateToPage('/resume.html'),
 
+            // Easter Egg navigation
+            'g': () => navigateToPage('/snake_game.html'),
+            'G': () => navigateToPage('/snake_game.html'),
+
             // Project shortcuts
             'w': () => navigateToPage('/projects/wartorn.html'),
             'W': () => navigateToPage('/projects/wartorn.html'),
@@ -1537,20 +1541,23 @@
         // Help modal content
         const keyboardHelpContent = {
             'Navigation': {
-                'M': 'Toggle menu',
-                'H': 'Home page',
-                'A': 'About page',
-                'R': 'Resume page',
+                'M': 'Toggle <u>m</u>enu',
+                'H': '<u>H</u>ome page',
+                'A': '<u>A</u>bout page',
+                'R': '<u>R</u>esume page',
                 'Esc': 'Close menu/dialogs'
             },
             'Projects': {
-                'W': 'Wartorn',
-                'E': 'Asurya\'s Embers',
-                'S': 'SeaFeud'
+                'W': '<u>W</u>artorn',
+                'E': 'Asurya\'s <u>E</u>mbers',
+                'S': '<u>S</u>eaFeud'
             },
             'Help': {
                 '?': 'Show this help',
                 'K': 'Show this help'
+            },
+            '???': {
+                'G': '🐍',
             }
         };
 
@@ -1623,7 +1630,7 @@
                 <div class="keyboard-help-overlay">
                     <div class="keyboard-help-content">
                         <div class="keyboard-help-header">
-                            <h3>⌨️ Keyboard Shortcuts</h3>
+                            <h3>⌨️ <u>K</u>eyboard Shortcuts</h3>
                             <button class="close-btn" onclick="hideKeyboardHelp()">×</button>
                         </div>
                         <div class="keyboard-help-body">

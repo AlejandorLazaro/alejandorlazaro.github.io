@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title | default: "Snake Game" }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .game-container {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+        }
+
+        #gameCanvas {
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow:
+                0 0 20px rgba(0, 255, 136, 0.2),
+                inset 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .score {
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .high-score {
+            color: #00ccff;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+        }
+
+        .controls {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+
+        .controls kbd {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: inherit;
+            font-size: 0.8em;
+            margin: 0 2px;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid rgba(255, 0, 0, 0.5);
+            display: none;
+        }
+
+        .game-over h2 {
+            color: #ff4444;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+        }
+
+        .game-over button {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .game-over button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .prestige-animation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffdd00;
+            text-shadow:
+                0 0 20px #ffdd00,
+                0 0 40px #ffdd00,
+                0 0 60px #ffdd00;
+            animation: prestigeExplosion 2s ease-out forwards;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+
+        @keyframes prestigeExplosion {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+                filter: hue-rotate(0deg);
+            }
+            20% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 1;
+                filter: hue-rotate(90deg);
+            }
+            40% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 1;
+                filter: hue-rotate(180deg);
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 1;
+                filter: hue-rotate(270deg);
+            }
+            80% {
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 0.8;
+                filter: hue-rotate(360deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+                filter: hue-rotate(720deg);
+            }
+        }
+
+        .level-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .easter-egg-note {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+        }
+
+        .easter-egg-note a {
+            color: rgba(0, 255, 136, 0.6);
+            text-decoration: none;
+        }
+
+        .easter-egg-note a:hover {
+            color: #00ff88;
+        }
+
+        /* Hide on mobile/touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            body {
+                justify-content: center;
+                align-items: center;
+            }
+
+            .game-container {
+                display: none;
+            }
+
+
+            body::before {
+                content: "🎮 This game requires a keyboard to play.\AReturn to portfolio";
+                white-space: pre;
+                text-align: center;
+                font-size: 1.2rem;
+                line-height: 1.6;
+                color: rgba(255, 255, 255, 0.7);
+            }
+        }
+
+        /* #marketplaceOverlay {
+            display: none;
+            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        #marketplaceOverlay.show {
+            display: flex;
+        } */
+
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Marketplace Overlay
+        <div id="marketplaceOverlay" style="
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        ">
+            <div style="
+                background: rgba(255,255,255,0.1);
+                padding: 30px;
+                border-radius: 15px;
+                text-align: center;
+                max-width: 400px;
+                width: 90%;
+                border: 1px solid rgba(255,255,255,0.2);
+                box-shadow: 0 0 20px rgba(0,255,136,0.2);
+            ">
+                <h2 class="game-title">Marketplace</h2>
+                <p>Wallet: <span id="walletDisplay">0</span> pts</p>
+                <div>
+                    <p>🍎 Starting Food (+1, Max 3)</p>
+                    <button onclick="buyUpgrade('foodUpgrade')">Buy for <span id="foodPrice">100</span> pts</button>
+                </div>
+                <div>
+                    <p>❤️ Lives (+1, Max 3)</p>
+                    <button onclick="buyUpgrade('lives')">Buy for <span id="lifePrice">1000</span> pts</button>
+                </div>
+                <div>
+                    <p>💫 Permeability (Pass through body)</p>
+                    <button onclick="buyUpgrade('permeability')" id="permButton">Buy for 100000 pts</button>
+                </div>
+                <br>
+                <button onclick="toggleMarketplace()" style="
+                    background: #ff4444;
+                    color: white;
+                    font-weight: bold;
+                    padding: 8px 16px;
+                    border: none;
+                    border-radius: 6px;
+                    margin-top: 10px;
+                    cursor: pointer;
+                ">Close</button>
+            </div>
+        </div> -->
+
+        <h1 class="game-title">SNAKE <u>G</u>AME</h1>
+        <p class="game-subtitle">🐍 Keyboard Warriors Only</p>
+
+        <div class="level-indicator">
+            Level: <span id="levelDisplay">1</span>
+        </div>
+
+        <div class="game-info">
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="high-score">High Score: <span id="highScore">0</span></div>
+        </div>
+
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+        <div class="controls">
+            Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> to move<br>
+            Press <kbd>Space</kbd> to pause • <!--<kbd>M</kbd> to open the Market • --><kbd>R</kbd> to restart
+        </div>
+
+        <div class="prestige-animation" id="prestigeAnimation"></div>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <h2>Game Over!</h2>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <p id="newHighScore" style="color: #00ff88; display: none;">🎉 New High Score!</p>
+        <button onclick="restartGame()">Play Again</button>
+    </div>
+
+    <div class="easter-egg-note">
+        🎮 Easter egg found! <a href="/">Back to portfolio</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('highScore');
+        const levelDisplayElement = document.getElementById('levelDisplay');
+        const gameOverElement = document.getElementById('gameOver');
+        const finalScoreElement = document.getElementById('finalScore');
+        const newHighScoreElement = document.getElementById('newHighScore');
+        const prestigeAnimationElement = document.getElementById('prestigeAnimation');
+
+        // Game constants - Define these FIRST
+        const gridSize = 20;
+        const gameSpeed = 150;
+
+        // Upgrade store state
+        let snakeWallet = parseInt(localStorage.getItem('snakeWallet') || '0');
+        let upgradeData = JSON.parse(localStorage.getItem('snakeUpgrades') || '{"foodUpgrade":0,"lives":0,"permeability":false}');
+
+        function saveUpgrades() {
+            localStorage.setItem('snakeUpgrades', JSON.stringify(upgradeData));
+            localStorage.setItem('snakeWallet', snakeWallet.toString());
+        }
+
+        // function updateMarketplaceUI() {
+        //     document.getElementById('walletDisplay').textContent = snakeWallet;
+
+        //     const foodPrices = [100, 250, 450];
+        //     const lifePrices = [1000, 4500, 10000];
+
+        //     document.getElementById('foodPrice').textContent =
+        //         upgradeData.foodUpgrade < 3 ? foodPrices[upgradeData.foodUpgrade] : 'MAX';
+
+        //     document.getElementById('lifePrice').textContent =
+        //         upgradeData.lives < 3 ? lifePrices[upgradeData.lives] : 'MAX';
+
+        //     const permBtn = document.getElementById('permButton');
+        //     if (upgradeData.permeability) {
+        //         permBtn.disabled = true;
+        //         permBtn.textContent = 'Purchased ✔️';
+        //     }
+        // }
+
+        // function buyUpgrade(type) {
+        //     const foodPrices = [100, 250, 450];
+        //     const lifePrices = [1000, 4500, 10000];
+
+        //     if (type === 'foodUpgrade' && upgradeData.foodUpgrade < 3) {
+        //         const cost = foodPrices[upgradeData.foodUpgrade];
+        //         if (snakeWallet >= cost) {
+        //             snakeWallet -= cost;
+        //             upgradeData.foodUpgrade++;
+        //         }
+        //     } else if (type === 'lives' && upgradeData.lives < 3) {
+        //         const cost = lifePrices[upgradeData.lives];
+        //         if (snakeWallet >= cost) {
+        //             snakeWallet -= cost;
+        //             upgradeData.lives++;
+        //         }
+        //     } else if (type === 'permeability' && !upgradeData.permeability) {
+        //         const cost = 100000;
+        //         if (snakeWallet >= cost) {
+        //             snakeWallet -= cost;
+        //             upgradeData.permeability = true;
+        //         }
+        //     }
+
+        //     saveUpgrades();
+        //     updateMarketplaceUI();
+        // }
+
+
+        function generateFood() {
+            let newFood;
+            let attempts = 0;
+            do {
+                newFood = {
+                    x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize,
+                    y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize
+                };
+                attempts++;
+            } while (attempts < 50 && (
+                snake.some(segment => segment.x === newFood.x && segment.y === newFood.y) ||
+                (food && food.some(f => f.x === newFood.x && f.y === newFood.y))
+            ));
+            return newFood;
+        }
+
+        function updateFoodCount() {
+            const targetFoodCount = Math.min(6, 1 + Math.floor(currentLevel / 3)) + foodUpgrade;
+
+            // Add food if we need more
+            while (food.length < targetFoodCount) {
+                food.push(generateFood());
+            }
+
+            // Remove food if we have too many (shouldn't happen, but safety)
+            while (food.length > targetFoodCount) {
+                food.pop();
+            }
+        }
+
+        function checkPrestige() {
+            const newLevel = Math.floor(snake.length / 10);
+            if (newLevel > currentLevel) {
+                currentLevel = newLevel;
+                levelDisplayElement.textContent = currentLevel + 1;
+
+                // Show celebration animation
+                showPrestigeAnimation();
+
+                if (currentLevel < 20) {
+                    // Normal prestige: reset snake body
+                    snake = [{x: snake[0].x, y: snake[0].y}];
+                    paintingMode = false;
+                    paintIndex = 0;
+
+                    // Increase speed (cap at 50ms intervals)
+                    currentSpeed = Math.max(50, gameSpeed - (currentLevel * 15));
+                    clearInterval(gameInterval);
+                    gameInterval = setInterval(gameLoop, currentSpeed);
+
+                    // Increase points per food (cap at 100 per food)
+                    pointsPerFood = Math.min(100, 10 + (currentLevel * 5));
+                } else {
+                    // Level 20+: Enter painting mode!
+                    paintingMode = true;
+                    paintIndex = 1; // Start painting from segment 1 (head stays current color)
+
+                    // Max stats reached, just show the celebration
+                    currentSpeed = 50; // Max speed
+                    pointsPerFood = 100; // Max points
+                }
+
+                // Change colors
+                currentColors = colorSchemes[currentLevel % colorSchemes.length];
+
+                // Update food count based on level
+                updateFoodCount();
+
+                // Generate new food to replace any that might be on snake
+                food = food.map(() => generateFood());
+            }
+        }
+
+        function showPrestigeAnimation() {
+            if (prestigeAnimationActive) return;
+
+            prestigeAnimationActive = true;
+            const randomWord = prestigeWords[Math.floor(Math.random() * prestigeWords.length)];
+            prestigeAnimationElement.textContent = randomWord;
+            prestigeAnimationElement.style.display = 'block';
+
+            // Hide after animation completes
+            setTimeout(() => {
+                prestigeAnimationElement.style.display = 'none';
+                prestigeAnimationActive = false;
+            }, 2000);
+        }
+
+        // Prestige system constants
+        const prestigeWords = [
+            "SNAKETACULAR!", "SNAKCELLENT!", "SSSSUPERB!", "HISS-TERICAL!",
+            "FANG-TASTIC!", "SCALE-MAZING!", "SERPENT-ASTIC!", "VIPER-IFIC!",
+            "COBRA-LICIOUS!", "PYTHON-TASTIC!", "ANACONDA-MAZING!", "BOA-UTIFUL!"
+        ];
+
+        const colorSchemes = [
+            { snake: '#00ff88', food: '#ff4444' }, // Default green/red
+            { snake: '#ff6b35', food: '#4ecdc4' }, // Orange/teal
+            { snake: '#9b59b6', food: '#f1c40f' }, // Purple/yellow
+            { snake: '#e74c3c', food: '#2ecc71' }, // Red/green
+            { snake: '#3498db', food: '#e67e22' }, // Blue/orange
+            { snake: '#1abc9c', food: '#e91e63' }, // Turquoise/pink
+            { snake: '#f39c12', food: '#8e44ad' }, // Gold/violet
+            { snake: '#2c3e50', food: '#ecf0f1' }, // Dark/light
+            { snake: '#ff1744', food: '#00e676' }, // Bright red/green
+            { snake: '#651fff', food: '#ffab00' }, // Deep purple/amber
+        ];
+
+        // Game state - Initialize AFTER functions are defined
+        let snake = [{x: 200, y: 200}];
+        let direction = {x: 0, y: 0};
+        let food = []
+        food = [generateFood()]; // Now an array of food items
+        let score = 0;
+        let highScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
+        let gameRunning = false;
+        let gamePaused = false;
+        let remainingLives = upgradeData.lives;
+        let permeabilityEnabled = upgradeData.permeability;
+
+        // Prestige system state
+        let currentLevel = 0;
+        let currentSpeed = gameSpeed;
+        let pointsPerFood = 10;
+        let currentColors = colorSchemes[0];
+        let prestigeAnimationActive = false;
+        let paintingMode = false; // For level 20+ painting system
+        let paintIndex = 0; // Tracks which segment we're painting next
+
+        highScoreElement.textContent = highScore;
+
+        function draw() {
+            // Clear canvas completely
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Fill with semi-transparent black for trail effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Reset any transformations
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+            // Draw snake with painting system
+            snake.forEach((segment, index) => {
+                ctx.shadowBlur = 10;
+
+                let segmentColor;
+                if (index === 0) {
+                    // Head is always current color and brighter
+                    segmentColor = lightenColor(currentColors.snake, 0.3);
+                } else if (paintingMode && index >= paintIndex) {
+                    // Unpainted segments keep their old color from previous level
+                    const oldColorIndex = Math.max(0, (currentLevel - 1) % colorSchemes.length);
+                    segmentColor = colorSchemes[oldColorIndex].snake;
+                } else {
+                    // Painted segments or normal mode
+                    segmentColor = currentColors.snake;
+                }
+
+                ctx.fillStyle = segmentColor;
+                ctx.shadowColor = segmentColor;
+                ctx.fillRect(segment.x + 1, segment.y + 1, gridSize - 2, gridSize - 2);
+            });
+
+            // Draw all food items
+            food.forEach((foodItem, index) => {
+                ctx.fillStyle = currentColors.food;
+                ctx.shadowColor = currentColors.food;
+                ctx.shadowBlur = 15;
+
+                // Make each food pulse slightly differently
+                // const pulseOffset = index * 0.5;
+                // const pulse = Math.sin(Date.now() * 0.01 + pulseOffset) * 2;
+                ctx.fillRect(foodItem.x, foodItem.y, gridSize - 2, gridSize - 2);
+            });
+
+            // Reset shadow
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+        }
+
+        // Helper function to lighten colors for snake head
+        function lightenColor(color, factor) {
+            // Simple hex color lightening
+            const hex = color.replace('#', '');
+            const r = Math.min(255, parseInt(hex.substr(0, 2), 16) + Math.floor(255 * factor));
+            const g = Math.min(255, parseInt(hex.substr(2, 2), 16) + Math.floor(255 * factor));
+            const b = Math.min(255, parseInt(hex.substr(4, 2), 16) + Math.floor(255 * factor));
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function update() {
+            if (!gameRunning || gamePaused) return;
+
+            // Move snake
+            const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+
+            // Check wall collision
+            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+                gameOver();
+                return;
+            }
+
+            // Check self collision
+            if (!permeabilityEnabled && snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                gameOver();
+                return;
+            }
+
+            snake.unshift(head);
+
+            // Check food collision with any food item
+            let foodEaten = false;
+            for (let i = food.length - 1; i >= 0; i--) {
+                if (head.x === food[i].x && head.y === food[i].y) {
+                    score += pointsPerFood;
+                    scoreElement.textContent = score;
+
+                    // Replace the eaten food with new food
+                    food[i] = generateFood();
+                    foodEaten = true;
+                    break; // Only eat one food per frame
+                }
+            }
+
+            if (foodEaten) {
+                // In painting mode, advance the paint brush
+                if (paintingMode && paintIndex < snake.length) {
+                    paintIndex++;
+
+                    // If we've painted the entire snake, reset painting
+                    if (paintIndex >= snake.length) {
+                        paintingMode = false;
+                        paintIndex = 0;
+                    }
+                }
+
+                // Check for prestige after growing
+                setTimeout(() => checkPrestige(), 100);
+            } else {
+                snake.pop();
+            }
+        }
+
+        function gameOver() {
+            if (remainingLives > 0) {
+                remainingLives--;
+                // On death: reset snake body
+                snake = [{x: 200, y: 200}];
+                direction = {x: 0, y: 0};
+                paintingMode = false;
+                paintIndex = 0;
+
+                // gameRunning = false;
+                gamePaused = true;
+                return;
+            }
+
+            gameRunning = false;
+            finalScoreElement.textContent = score;
+
+            if (score > highScore) {
+                highScore = score;
+                highScoreElement.textContent = highScore;
+                localStorage.setItem('snakeHighScore', highScore.toString());
+                newHighScoreElement.style.display = 'block';
+            } else {
+                newHighScoreElement.style.display = 'none';
+            }
+
+            snakeWallet += score;
+            saveUpgrades();
+            // updateMarketplaceUI();
+
+            gameOverElement.style.display = 'block';
+        }
+
+        function restartGame() {
+            snake = [{x: 200, y: 200}];
+            direction = {x: 0, y: 0};
+
+            // Handle upgrades that have changed since last time
+            food = [];
+            for (let i = 0; i < 1 + upgradeData.foodUpgrade; i++) {
+                food.push(generateFood());
+            }
+            remainingLives = upgradeData.lives;
+            permeabilityEnabled = upgradeData.permeability;
+
+            score = 0;
+            scoreElement.textContent = score;
+            gameRunning = false;
+            gamePaused = false;
+            gameOverElement.style.display = 'none';
+
+            // Reset prestige system
+            currentLevel = 0;
+            levelDisplayElement.textContent = '1';
+            currentSpeed = gameSpeed;
+            pointsPerFood = 10;
+            currentColors = colorSchemes[0];
+            paintingMode = false;
+            paintIndex = 0;
+
+            // Reset game interval to original speed
+            clearInterval(gameInterval);
+            gameInterval = setInterval(gameLoop, gameSpeed);
+        }
+
+        function startGame() {
+            if (!gameRunning && direction.x === 0 && direction.y === 0) return;
+            gameRunning = true;
+            gamePaused = false;
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            // Don't process any game movement if game is over
+            if (gameOverElement.style.display === 'block') {
+                // Only allow restart when game is over
+                if (e.key === 'r' || e.key === 'R') {
+                    restartGame();
+                }
+                return; // Block all other inputs
+            }
+
+            if (!gameRunning && (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' ||
+                                 e.key === 'ArrowDown' || e.key === 's' || e.key === 'S' ||
+                                 e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' ||
+                                 e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D')) {
+                startGame();
+            }
+
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    if (direction.y === 0) {
+                        direction = {x: 0, y: -gridSize};
+                        startGame();
+                    }
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    if (direction.y === 0) {
+                        direction = {x: 0, y: gridSize};
+                        startGame();
+                    }
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    if (direction.x === 0) {
+                        direction = {x: -gridSize, y: 0};
+                        startGame();
+                    }
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    if (direction.x === 0) {
+                        direction = {x: gridSize, y: 0};
+                        startGame();
+                    }
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    if (gameRunning) {
+                        gamePaused = !gamePaused;
+                    }
+                    break;
+                case 'r':
+                case 'R':
+                    restartGame();
+                    break;
+                // case 'm':
+                // case 'M':
+                //     toggleMarketplace();
+                //     break;
+            }
+        });
+
+        // Game loop
+        function gameLoop() {
+            update();
+            draw();
+        }
+
+        // Make sure canvas is ready before starting
+        let gameInterval;
+        window.addEventListener('load', () => {
+            // Force initial draw
+            setTimeout(() => {
+                draw();
+                console.log('Snake initial position:', snake);
+                console.log('Food position:', food);
+            }, 100);
+        });
+
+        gameInterval = setInterval(gameLoop, gameSpeed);
+
+        // function toggleMarketplace() {
+        //     // if (gameRunning) {
+        //     //     gamePaused = !gamePaused;
+        //     // }
+        //     const overlay = document.getElementById('marketplaceOverlay');
+        //     const isVisible = overlay.style.display === 'flex';
+
+        //     overlay.style.display = isVisible ? 'none' : 'flex';
+        // }
+
+        // // Close with Escape key
+        // document.addEventListener('keydown', function(e) {
+        //     if (e.key === 'Escape') {
+        //         document.getElementById('marketplaceOverlay').style.display = 'none';
+        //     }
+
+        //     // Optional shortcut: press "M" to open/close
+        //     if (e.key === 'm' || e.key === 'M') {
+        //         toggleMarketplace();
+        //     }
+        // });
+    </script>
+</body>
+</html>
