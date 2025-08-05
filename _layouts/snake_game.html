@@ -185,18 +185,36 @@
             }
         }
 
-        @keyframes goldenPickup {
+        @keyframes normalPickup {
             0% {
                 transform: scale(1) translateY(0);
                 opacity: 1;
             }
             50% {
-                transform: scale(1.5) translateY(-10px);
+                transform: scale(1.2) translateY(-10px);
                 opacity: 1;
             }
             100% {
                 transform: scale(0.8) translateY(-30px);
                 opacity: 0;
+            }
+        }
+
+        @keyframes goldenPickup {
+            0% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                transform: scale(1.5) translateY(-10px);
+                opacity: 1;
+                filter: hue-rotate(180deg);
+            }
+            100% {
+                transform: scale(0.8) translateY(-30px);
+                opacity: 0;
+                filter: hue-rotate(360deg);
             }
         }
 
@@ -302,7 +320,7 @@
 
         // Game constants - Define these FIRST
         const gridSize = 20;
-        const gameSpeed = 150;
+        const gameSpeed = 130;
 
         // Upgrade store state
         let snakeWallet = parseInt(localStorage.getItem('snakeWallet') || '0');
@@ -404,7 +422,7 @@
                     paintIndex = 0;
 
                     // Increase speed (cap at 50ms intervals)
-                    currentSpeed = Math.max(50, gameSpeed - (currentLevel * 15));
+                    currentSpeed = Math.max(60, gameSpeed - (currentLevel * 10));
                     clearInterval(gameInterval);
                     gameInterval = setInterval(gameLoop, currentSpeed);
 
@@ -431,6 +449,35 @@
             }
         }
 
+        function showPickupAnimation(x, y) {
+            const pickup = document.createElement('div');
+            const canvasRect = canvas.getBoundingClientRect();
+            pickup.style.position = 'absolute';
+            pickup.style.left = (canvasRect.left + x) + 'px';
+            pickup.style.top = (canvasRect.top + y) + 'px';
+            pickup.style.width = gridSize + 'px';
+            pickup.style.height = gridSize + 'px';
+            pickup.style.pointerEvents = 'none';
+            pickup.style.zIndex = '999';
+            pickup.style.color = "#ffdd00";
+            pickup.style.fontWeight = 'bold';
+            pickup.style.fontSize = '10px';
+            pickup.style.display = 'flex';
+            pickup.style.alignItems = 'center';
+            pickup.style.justifyContent = 'center';
+            pickup.textContent = '+' + (pointsPerFood);
+            pickup.style.textShadow = '0 0 10px #ffdd00';
+            pickup.style.animation = 'normalPickup 1s ease-out forwards';
+
+            document.body.appendChild(pickup);
+
+            setTimeout(() => {
+                if (document.body.contains(pickup)) {
+                    document.body.removeChild(pickup);
+                }
+            }, 1000);
+        }
+
         function showGoldenPickupAnimation(x, y) {
             const pickup = document.createElement('div');
             const canvasRect = canvas.getBoundingClientRect();
@@ -441,7 +488,7 @@
             pickup.style.height = gridSize + 'px';
             pickup.style.pointerEvents = 'none';
             pickup.style.zIndex = '999';
-            pickup.style.color = '#ffdd00';
+            pickup.style.color = "#ffdd00";
             pickup.style.fontWeight = 'bold';
             pickup.style.fontSize = '14px';
             pickup.style.display = 'flex';
@@ -632,6 +679,9 @@
                         showGoldenPickupAnimation(food[i].x, food[i].y);
                     } else {
                         score += pointsPerFood;
+
+                        // Show pickup animation
+                        showPickupAnimation(food[i].x, food[i].y);
                     }
 
                     scoreElement.textContent = score;
