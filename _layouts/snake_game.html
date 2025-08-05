@@ -185,6 +185,21 @@
             }
         }
 
+        @keyframes goldenPickup {
+            0% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5) translateY(-10px);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.8) translateY(-30px);
+                opacity: 0;
+            }
+        }
+
         .level-indicator {
             position: absolute;
             top: 10px;
@@ -293,6 +308,15 @@
         let snakeWallet = parseInt(localStorage.getItem('snakeWallet') || '0');
         let snakeData = JSON.parse(localStorage.getItem('snakeData') || '{"maxLevel":1,"foodUpgrade":0,"lives":0,"permeability":false}');
 
+        // Initialize game state variables early so they're accessible in functions
+        let currentLevel = 1;
+        let currentSpeed = gameSpeed;
+        let pointsPerFood = 10;
+        let currentColors;
+        let prestigeAnimationActive = false;
+        let paintingMode = false;
+        let paintIndex = 0;
+
         function saveUpgrades() {
             localStorage.setItem('snakeData', JSON.stringify(snakeData));
             localStorage.setItem('snakeWallet', snakeWallet.toString());
@@ -311,6 +335,14 @@
                 snake.some(segment => segment.x === newFood.x && segment.y === newFood.y) ||
                 (food && food.some(f => f.x === newFood.x && f.y === newFood.y))
             ));
+
+            // Check for special golden food spawn
+            const goldenChance = 3 + (currentLevel * 2); // 3% base + 2% per level
+            if (Math.random() * 100 < goldenChance) {
+                newFood.isGolden = true;
+                newFood.spawnTime = Date.now();
+            }
+
             return newFood;
         }
 
@@ -399,6 +431,35 @@
             }
         }
 
+        function showGoldenPickupAnimation(x, y) {
+            const pickup = document.createElement('div');
+            const canvasRect = canvas.getBoundingClientRect();
+            pickup.style.position = 'absolute';
+            pickup.style.left = (canvasRect.left + x) + 'px';
+            pickup.style.top = (canvasRect.top + y) + 'px';
+            pickup.style.width = gridSize + 'px';
+            pickup.style.height = gridSize + 'px';
+            pickup.style.pointerEvents = 'none';
+            pickup.style.zIndex = '999';
+            pickup.style.color = '#ffdd00';
+            pickup.style.fontWeight = 'bold';
+            pickup.style.fontSize = '14px';
+            pickup.style.display = 'flex';
+            pickup.style.alignItems = 'center';
+            pickup.style.justifyContent = 'center';
+            pickup.textContent = '+' + (pointsPerFood * 5);
+            pickup.style.textShadow = '0 0 10px #ffdd00';
+            pickup.style.animation = 'goldenPickup 1s ease-out forwards';
+
+            document.body.appendChild(pickup);
+
+            setTimeout(() => {
+                if (document.body.contains(pickup)) {
+                    document.body.removeChild(pickup);
+                }
+            }, 1000);
+        }
+
         function showPrestigeAnimation() {
             if (prestigeAnimationActive) return;
 
@@ -434,6 +495,9 @@
             { snake: '#651fff', food: '#ffab00' }, // Deep purple/amber
         ];
 
+        // Initialize currentColors after colorSchemes is defined
+        currentColors = colorSchemes[0];
+
         // Game state - Initialize AFTER functions are defined
         let snake = [{x: 200, y: 200}];
         let direction = {x: 0, y: 0};
@@ -446,15 +510,6 @@
         let startingFoodBonus = snakeData.foodUpgrade;
         let remainingLives = snakeData.lives;
         let permeabilityEnabled = snakeData.permeability;
-
-        // Prestige system state
-        let currentLevel = 1;
-        let currentSpeed = gameSpeed;
-        let pointsPerFood = 10;
-        let currentColors = colorSchemes[0];
-        let prestigeAnimationActive = false;
-        let paintingMode = false; // For level 20+ painting system
-        let paintIndex = 0; // Tracks which segment we're painting next
 
         highScoreElement.textContent = highScore;
 
@@ -493,14 +548,35 @@
 
             // Draw all food items
             food.forEach((foodItem, index) => {
-                ctx.fillStyle = currentColors.food;
-                ctx.shadowColor = currentColors.food;
-                ctx.shadowBlur = 15;
+                if (foodItem.isGolden) {
+                    // Golden food with pulsing animation
+                    const pulseTime = Date.now() - (foodItem.spawnTime || Date.now());
+                    const pulse = Math.sin(pulseTime * 0.008) * 0.3 + 0.7; // Oscillates between 0.4 and 1.0
+                    const goldIntensity = Math.sin(pulseTime * 0.006) * 0.5 + 0.5; // Color shift
 
-                // Make each food pulse slightly differently
-                // const pulseOffset = index * 0.5;
-                // const pulse = Math.sin(Date.now() * 0.01 + pulseOffset) * 2;
-                ctx.fillRect(foodItem.x, foodItem.y, gridSize - 2, gridSize - 2);
+                    const goldColor = `hsl(${45 + goldIntensity * 15}, 100%, ${60 + pulse * 20}%)`;
+
+                    ctx.fillStyle = goldColor;
+                    ctx.shadowColor = goldColor;
+                    ctx.shadowBlur = 20 + pulse * 10;
+
+                    // Draw larger golden food with pulsing size
+                    const size = (gridSize - 2) * (0.8 + pulse * 0.4);
+                    const offset = (gridSize - size) / 2;
+                    ctx.fillRect(foodItem.x + offset, foodItem.y + offset, size, size);
+
+                    // Add inner glow effect
+                    ctx.fillStyle = `rgba(255, 255, 200, ${pulse * 0.8})`;
+                    const innerSize = size * 0.6;
+                    const innerOffset = (gridSize - innerSize) / 2;
+                    ctx.fillRect(foodItem.x + innerOffset, foodItem.y + innerOffset, innerSize, innerSize);
+                } else {
+                    // Regular food
+                    ctx.fillStyle = currentColors.food;
+                    ctx.shadowColor = currentColors.food;
+                    ctx.shadowBlur = 15;
+                    ctx.fillRect(foodItem.x, foodItem.y, gridSize - 2, gridSize - 2);
+                }
             });
 
             // Reset shadow
@@ -540,9 +616,24 @@
 
             // Check food collision with any food item
             let foodEaten = false;
+            let goldenFoodEaten = false;
             for (let i = food.length - 1; i >= 0; i--) {
                 if (head.x === food[i].x && head.y === food[i].y) {
-                    score += pointsPerFood;
+                    if (food[i].isGolden) {
+                        // Golden food gives 5x points and 3 extra segments
+                        score += pointsPerFood * 5;
+                        goldenFoodEaten = true;
+
+                        // Add 2 extra segments (1 will be added normally by not popping)
+                        snake.push({...snake[snake.length - 1]});
+                        snake.push({...snake[snake.length - 1]});
+
+                        // Show pickup animation
+                        showGoldenPickupAnimation(food[i].x, food[i].y);
+                    } else {
+                        score += pointsPerFood;
+                    }
+
                     scoreElement.textContent = score;
 
                     // Replace the eaten food with new food
