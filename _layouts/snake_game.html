@@ -237,75 +237,10 @@
                 color: rgba(255, 255, 255, 0.7);
             }
         }
-
-        /* #marketplaceOverlay {
-            display: none;
-            backdrop-filter: blur(5px);
-            background: rgba(0, 0, 0, 0.5);
-            align-items: center;
-            justify-content: center;
-        }
-
-        #marketplaceOverlay.show {
-            display: flex;
-        } */
-
     </style>
 </head>
 <body>
     <div class="game-container">
-        <!-- Marketplace Overlay
-        <div id="marketplaceOverlay" style="
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        ">
-            <div style="
-                background: rgba(255,255,255,0.1);
-                padding: 30px;
-                border-radius: 15px;
-                text-align: center;
-                max-width: 400px;
-                width: 90%;
-                border: 1px solid rgba(255,255,255,0.2);
-                box-shadow: 0 0 20px rgba(0,255,136,0.2);
-            ">
-                <h2 class="game-title">Marketplace</h2>
-                <p>Wallet: <span id="walletDisplay">0</span> pts</p>
-                <div>
-                    <p>🍎 Starting Food (+1, Max 3)</p>
-                    <button onclick="buyUpgrade('foodUpgrade')">Buy for <span id="foodPrice">100</span> pts</button>
-                </div>
-                <div>
-                    <p>❤️ Lives (+1, Max 3)</p>
-                    <button onclick="buyUpgrade('lives')">Buy for <span id="lifePrice">1000</span> pts</button>
-                </div>
-                <div>
-                    <p>💫 Permeability (Pass through body)</p>
-                    <button onclick="buyUpgrade('permeability')" id="permButton">Buy for 100000 pts</button>
-                </div>
-                <br>
-                <button onclick="toggleMarketplace()" style="
-                    background: #ff4444;
-                    color: white;
-                    font-weight: bold;
-                    padding: 8px 16px;
-                    border: none;
-                    border-radius: 6px;
-                    margin-top: 10px;
-                    cursor: pointer;
-                ">Close</button>
-            </div>
-        </div> -->
-
         <h1 class="game-title">SNAKE <u>G</u>AME</h1>
         <p class="game-subtitle">🐍 Keyboard Warriors Only</p>
 
@@ -322,7 +257,7 @@
 
         <div class="controls">
             Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> to move<br>
-            Press <kbd>Space</kbd> to pause • <!--<kbd>M</kbd> to open the Market • --><kbd>R</kbd> to restart
+            Press <kbd>Space</kbd> to pause • <kbd>R</kbd> to restart
         </div>
 
         <div class="prestige-animation" id="prestigeAnimation"></div>
@@ -356,60 +291,12 @@
 
         // Upgrade store state
         let snakeWallet = parseInt(localStorage.getItem('snakeWallet') || '0');
-        let upgradeData = JSON.parse(localStorage.getItem('snakeUpgrades') || '{"foodUpgrade":0,"lives":0,"permeability":false}');
+        let snakeData = JSON.parse(localStorage.getItem('snakeData') || '{"maxLevel":1,"foodUpgrade":0,"lives":0,"permeability":false}');
 
         function saveUpgrades() {
-            localStorage.setItem('snakeUpgrades', JSON.stringify(upgradeData));
+            localStorage.setItem('snakeData', JSON.stringify(snakeData));
             localStorage.setItem('snakeWallet', snakeWallet.toString());
         }
-
-        // function updateMarketplaceUI() {
-        //     document.getElementById('walletDisplay').textContent = snakeWallet;
-
-        //     const foodPrices = [100, 250, 450];
-        //     const lifePrices = [1000, 4500, 10000];
-
-        //     document.getElementById('foodPrice').textContent =
-        //         upgradeData.foodUpgrade < 3 ? foodPrices[upgradeData.foodUpgrade] : 'MAX';
-
-        //     document.getElementById('lifePrice').textContent =
-        //         upgradeData.lives < 3 ? lifePrices[upgradeData.lives] : 'MAX';
-
-        //     const permBtn = document.getElementById('permButton');
-        //     if (upgradeData.permeability) {
-        //         permBtn.disabled = true;
-        //         permBtn.textContent = 'Purchased ✔️';
-        //     }
-        // }
-
-        // function buyUpgrade(type) {
-        //     const foodPrices = [100, 250, 450];
-        //     const lifePrices = [1000, 4500, 10000];
-
-        //     if (type === 'foodUpgrade' && upgradeData.foodUpgrade < 3) {
-        //         const cost = foodPrices[upgradeData.foodUpgrade];
-        //         if (snakeWallet >= cost) {
-        //             snakeWallet -= cost;
-        //             upgradeData.foodUpgrade++;
-        //         }
-        //     } else if (type === 'lives' && upgradeData.lives < 3) {
-        //         const cost = lifePrices[upgradeData.lives];
-        //         if (snakeWallet >= cost) {
-        //             snakeWallet -= cost;
-        //             upgradeData.lives++;
-        //         }
-        //     } else if (type === 'permeability' && !upgradeData.permeability) {
-        //         const cost = 100000;
-        //         if (snakeWallet >= cost) {
-        //             snakeWallet -= cost;
-        //             upgradeData.permeability = true;
-        //         }
-        //     }
-
-        //     saveUpgrades();
-        //     updateMarketplaceUI();
-        // }
-
 
         function generateFood() {
             let newFood;
@@ -428,7 +315,7 @@
         }
 
         function updateFoodCount() {
-            const targetFoodCount = Math.min(6, 1 + Math.floor(currentLevel / 3)) + foodUpgrade;
+            const targetFoodCount = Math.min(6, 1 + Math.floor(currentLevel / 3)) + startingFoodBonus;
 
             // Add food if we need more
             while (food.length < targetFoodCount) {
@@ -442,13 +329,41 @@
         }
 
         function checkPrestige() {
-            const newLevel = Math.floor(snake.length / 10);
+            const newLevel = 1 + Math.floor((snake.length - 1) / 5);
             if (newLevel > currentLevel) {
                 currentLevel = newLevel;
-                levelDisplayElement.textContent = currentLevel + 1;
+                levelDisplayElement.textContent = currentLevel;
 
                 // Show celebration animation
                 showPrestigeAnimation();
+
+                // Add upgrades based on max level reached
+                if (newLevel > snakeData.maxLevel) {
+                    snakeData.maxLevel = newLevel;
+
+                    switch (newLevel) {
+                        case 3:
+                            snakeData.foodUpgrade++;
+                            break;
+                        case 6:
+                                snakeData.foodUpgrade++;
+                                break;
+                        case 9:
+                                snakeData.foodUpgrade++;
+                                break;
+                        case 12:
+                                snakeData.foodUpgrade++;
+                                break;
+                        case 15:
+                                snakeData.foodUpgrade++;
+                                break;
+                        case 18:
+                                snakeData.foodUpgrade++;
+                                break;
+                        default:
+                            break;
+                    }
+                }
 
                 if (currentLevel < 20) {
                     // Normal prestige: reset snake body
@@ -528,11 +443,12 @@
         let highScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
         let gameRunning = false;
         let gamePaused = false;
-        let remainingLives = upgradeData.lives;
-        let permeabilityEnabled = upgradeData.permeability;
+        let startingFoodBonus = snakeData.foodUpgrade;
+        let remainingLives = snakeData.lives;
+        let permeabilityEnabled = snakeData.permeability;
 
         // Prestige system state
-        let currentLevel = 0;
+        let currentLevel = 1;
         let currentSpeed = gameSpeed;
         let pointsPerFood = 10;
         let currentColors = colorSchemes[0];
@@ -683,7 +599,6 @@
 
             snakeWallet += score;
             saveUpgrades();
-            // updateMarketplaceUI();
 
             gameOverElement.style.display = 'block';
         }
@@ -694,20 +609,21 @@
 
             // Handle upgrades that have changed since last time
             food = [];
-            for (let i = 0; i < 1 + upgradeData.foodUpgrade; i++) {
+            for (let i = 0; i < 1 + snakeData.foodUpgrade; i++) {
                 food.push(generateFood());
             }
-            remainingLives = upgradeData.lives;
-            permeabilityEnabled = upgradeData.permeability;
+            remainingLives = snakeData.lives;
+            permeabilityEnabled = snakeData.permeability;
 
             score = 0;
             scoreElement.textContent = score;
             gameRunning = false;
             gamePaused = false;
             gameOverElement.style.display = 'none';
+            startingFoodBonus = snakeData.foodUpgrade;
 
             // Reset prestige system
-            currentLevel = 0;
+            currentLevel = 1;
             levelDisplayElement.textContent = '1';
             currentSpeed = gameSpeed;
             pointsPerFood = 10;
@@ -787,10 +703,6 @@
                 case 'R':
                     restartGame();
                     break;
-                // case 'm':
-                // case 'M':
-                //     toggleMarketplace();
-                //     break;
             }
         });
 
@@ -812,28 +724,6 @@
         });
 
         gameInterval = setInterval(gameLoop, gameSpeed);
-
-        // function toggleMarketplace() {
-        //     // if (gameRunning) {
-        //     //     gamePaused = !gamePaused;
-        //     // }
-        //     const overlay = document.getElementById('marketplaceOverlay');
-        //     const isVisible = overlay.style.display === 'flex';
-
-        //     overlay.style.display = isVisible ? 'none' : 'flex';
-        // }
-
-        // // Close with Escape key
-        // document.addEventListener('keydown', function(e) {
-        //     if (e.key === 'Escape') {
-        //         document.getElementById('marketplaceOverlay').style.display = 'none';
-        //     }
-
-        //     // Optional shortcut: press "M" to open/close
-        //     if (e.key === 'm' || e.key === 'M') {
-        //         toggleMarketplace();
-        //     }
-        // });
     </script>
 </body>
 </html>
