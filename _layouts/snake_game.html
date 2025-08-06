@@ -92,6 +92,77 @@
             justify-content: center;
         }
 
+        .dpad-container {
+            display: none;
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 15px auto;
+        }
+
+        .dpad-button {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .dpad-button:active {
+            background: linear-gradient(145deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
+            border-color: rgba(0, 255, 136, 0.4);
+            transform: scale(0.95);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .dpad-up {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .dpad-down {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .dpad-left {
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .dpad-right {
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .dpad-center {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+        }
+
         .reset-button {
             background: linear-gradient(45deg, #ff4444, #ff6666);
             color: white;
@@ -322,6 +393,10 @@
                 display: flex;
             }
 
+            .dpad-container {
+                display: block;
+            }
+
             .controls {
                 display: none;
             }
@@ -359,6 +434,14 @@
         </div>
 
         <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+        <div class="dpad-container">
+            <button class="dpad-button dpad-up" id="dpadUp">↑</button>
+            <button class="dpad-button dpad-left" id="dpadLeft">←</button>
+            <button class="dpad-button dpad-center" id="dpadCenter">⏸</button>
+            <button class="dpad-button dpad-right" id="dpadRight">→</button>
+            <button class="dpad-button dpad-down" id="dpadDown">↓</button>
+        </div>
 
         <div class="mobile-controls">
             <button class="pause-button" id="pauseBtn">⏸️ Pause</button>
@@ -552,16 +635,22 @@
         function showPickupAnimation(x, y) {
             const pickup = document.createElement('div');
             const canvasRect = canvas.getBoundingClientRect();
+
+            // Calculate position relative to canvas bounds, accounting for mobile scaling
+            const canvasScale = canvas.offsetWidth / canvas.width;
+            const scaledX = x * canvasScale;
+            const scaledY = y * canvasScale;
+
             pickup.style.position = 'absolute';
-            pickup.style.left = (canvasRect.left + x) + 'px';
-            pickup.style.top = (canvasRect.top + y) + 'px';
-            pickup.style.width = gridSize + 'px';
-            pickup.style.height = gridSize + 'px';
+            pickup.style.left = (canvasRect.left + scaledX) + 'px';
+            pickup.style.top = (canvasRect.top + scaledY) + 'px';
+            pickup.style.width = (gridSize * canvasScale) + 'px';
+            pickup.style.height = (gridSize * canvasScale) + 'px';
             pickup.style.pointerEvents = 'none';
             pickup.style.zIndex = '999';
             pickup.style.color = "#ffdd00";
             pickup.style.fontWeight = 'bold';
-            pickup.style.fontSize = '10px';
+            pickup.style.fontSize = Math.max(10, 10 * canvasScale) + 'px';
             pickup.style.display = 'flex';
             pickup.style.alignItems = 'center';
             pickup.style.justifyContent = 'center';
@@ -581,16 +670,22 @@
         function showGoldenPickupAnimation(x, y) {
             const pickup = document.createElement('div');
             const canvasRect = canvas.getBoundingClientRect();
+
+            // Calculate position relative to canvas bounds, accounting for mobile scaling
+            const canvasScale = canvas.offsetWidth / canvas.width;
+            const scaledX = x * canvasScale;
+            const scaledY = y * canvasScale;
+
             pickup.style.position = 'absolute';
-            pickup.style.left = (canvasRect.left + x) + 'px';
-            pickup.style.top = (canvasRect.top + y) + 'px';
-            pickup.style.width = gridSize + 'px';
-            pickup.style.height = gridSize + 'px';
+            pickup.style.left = (canvasRect.left + scaledX) + 'px';
+            pickup.style.top = (canvasRect.top + scaledY) + 'px';
+            pickup.style.width = (gridSize * canvasScale) + 'px';
+            pickup.style.height = (gridSize * canvasScale) + 'px';
             pickup.style.pointerEvents = 'none';
             pickup.style.zIndex = '999';
             pickup.style.color = "#ffdd00";
             pickup.style.fontWeight = 'bold';
-            pickup.style.fontSize = '14px';
+            pickup.style.fontSize = Math.max(14, 14 * canvasScale) + 'px';
             pickup.style.display = 'flex';
             pickup.style.alignItems = 'center';
             pickup.style.justifyContent = 'center';
