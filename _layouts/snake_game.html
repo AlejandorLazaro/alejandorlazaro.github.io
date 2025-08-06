@@ -118,12 +118,15 @@
             justify-content: center;
             transition: all 0.1s ease;
             backdrop-filter: blur(10px);
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         .dpad-button:active {
             background: linear-gradient(145deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
             border-color: rgba(0, 255, 136, 0.4);
-            transform: scale(0.95);
+            transform: translateY(-2px) scale(0.95);
             box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
         }
 
@@ -133,10 +136,18 @@
             transform: translateX(-50%);
         }
 
+        .dpad-up:active {
+            transform: translateX(-50%) translateY(-2px) scale(0.95);
+        }
+
         .dpad-down {
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
+        }
+
+        .dpad-down:active {
+            transform: translateX(-50%) translateY(-2px) scale(0.95);
         }
 
         .dpad-left {
@@ -145,10 +156,18 @@
             transform: translateY(-50%);
         }
 
+        .dpad-left:active {
+            transform: translateY(-50%) translateY(-2px) scale(0.95);
+        }
+
         .dpad-right {
             right: 0;
             top: 50%;
             transform: translateY(-50%);
+        }
+
+        .dpad-right:active {
+            transform: translateY(-50%) translateY(-2px) scale(0.95);
         }
 
         .dpad-center {
@@ -161,6 +180,10 @@
             background: linear-gradient(145deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
             border: 2px solid rgba(255, 255, 255, 0.1);
             font-size: 12px;
+        }
+
+        .dpad-center:active {
+            transform: translate(-50%, -50%) translateY(-2px) scale(0.95);
         }
 
         .reset-button {
@@ -449,7 +472,7 @@
         </div>
 
         <div class="swipe-hint" style="display: none;">
-            Swipe to move • Tap buttons to pause/reset
+            Use D-pad or swipe to move • Tap buttons to pause/reset
         </div>
 
         <div class="controls">
@@ -1059,6 +1082,45 @@
         canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
         canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
         canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        // D-pad button event listeners
+        const dpadUp = document.getElementById('dpadUp');
+        const dpadDown = document.getElementById('dpadDown');
+        const dpadLeft = document.getElementById('dpadLeft');
+        const dpadRight = document.getElementById('dpadRight');
+        const dpadCenter = document.getElementById('dpadCenter');
+
+        dpadUp.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            setDirection({x: 0, y: -gridSize});
+        });
+
+        dpadDown.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            setDirection({x: 0, y: gridSize});
+        });
+
+        dpadLeft.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            setDirection({x: -gridSize, y: 0});
+        });
+
+        dpadRight.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            setDirection({x: gridSize, y: 0});
+        });
+
+        dpadCenter.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            togglePause();
+        });
+
+        // Also add click events for desktop testing
+        dpadUp.addEventListener('click', () => setDirection({x: 0, y: -gridSize}));
+        dpadDown.addEventListener('click', () => setDirection({x: 0, y: gridSize}));
+        dpadLeft.addEventListener('click', () => setDirection({x: -gridSize, y: 0}));
+        dpadRight.addEventListener('click', () => setDirection({x: gridSize, y: 0}));
+        dpadCenter.addEventListener('click', togglePause);
 
         // Button event listeners
         resetBtn.addEventListener('click', restartGame);
