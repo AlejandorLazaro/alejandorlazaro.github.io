@@ -96,7 +96,7 @@
             display: none;
             position: relative;
             width: 165px;
-            height: 120px;
+            height: 165px;
             margin: 15px auto;
         }
 
@@ -168,22 +168,6 @@
 
         .dpad-right:active {
             transform: translateY(-50%) translateY(-2px) scale(0.95);
-        }
-
-        .dpad-center {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: linear-gradient(145deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            font-size: 12px;
-        }
-
-        .dpad-center:active {
-            transform: translate(-50%, -50%) translateY(-2px) scale(0.95);
         }
 
         .reset-button {
@@ -461,7 +445,6 @@
         <div class="dpad-container">
             <button class="dpad-button dpad-up" id="dpadUp">↑</button>
             <button class="dpad-button dpad-left" id="dpadLeft">←</button>
-            <button class="dpad-button dpad-center" id="dpadCenter">⏸</button>
             <button class="dpad-button dpad-right" id="dpadRight">→</button>
             <button class="dpad-button dpad-down" id="dpadDown">↓</button>
         </div>
@@ -1088,7 +1071,6 @@
         const dpadDown = document.getElementById('dpadDown');
         const dpadLeft = document.getElementById('dpadLeft');
         const dpadRight = document.getElementById('dpadRight');
-        const dpadCenter = document.getElementById('dpadCenter');
 
         dpadUp.addEventListener('touchstart', (e) => {
             e.preventDefault();
@@ -1110,17 +1092,11 @@
             setDirection({x: gridSize, y: 0});
         });
 
-        dpadCenter.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            togglePause();
-        });
-
         // Also add click events for desktop testing
         dpadUp.addEventListener('click', () => setDirection({x: 0, y: -gridSize}));
         dpadDown.addEventListener('click', () => setDirection({x: 0, y: gridSize}));
         dpadLeft.addEventListener('click', () => setDirection({x: -gridSize, y: 0}));
         dpadRight.addEventListener('click', () => setDirection({x: gridSize, y: 0}));
-        dpadCenter.addEventListener('click', togglePause);
 
         // Button event listeners
         resetBtn.addEventListener('click', restartGame);
