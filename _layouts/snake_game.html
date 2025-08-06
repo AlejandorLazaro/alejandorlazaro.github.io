@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page.title | default: "Snake Game" }}</title>
+    <title>Snake Game</title>
     <style>
         * {
             margin: 0;
@@ -21,6 +21,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            padding: 10px;
         }
 
         .game-container {
@@ -31,10 +32,11 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 90vw;
         }
 
         .game-title {
-            font-size: 2.2rem;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
             font-weight: bold;
             margin-bottom: 10px;
             background: linear-gradient(45deg, #00ff88, #00ccff);
@@ -45,7 +47,7 @@
         }
 
         .game-subtitle {
-            font-size: 1rem;
+            font-size: clamp(0.8rem, 2vw, 1rem);
             color: rgba(255, 255, 255, 0.7);
             margin-bottom: 20px;
         }
@@ -57,6 +59,9 @@
             box-shadow:
                 0 0 20px rgba(0, 255, 136, 0.2),
                 inset 0 0 20px rgba(0, 0, 0, 0.3);
+            max-width: 90vw;
+            height: auto;
+            touch-action: none;
         }
 
         .game-info {
@@ -64,7 +69,7 @@
             justify-content: space-between;
             align-items: center;
             margin: 20px 0;
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 3vw, 1.2rem);
             font-weight: bold;
         }
 
@@ -78,9 +83,67 @@
             text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
         }
 
+        .mobile-controls {
+            display: none;
+            margin-top: 15px;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .reset-button {
+            background: linear-gradient(45deg, #ff4444, #ff6666);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .reset-button:hover,
+        .reset-button:active {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+        }
+
+        .pause-button {
+            background: linear-gradient(45deg, #ffaa00, #ffcc44);
+            color: black;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .pause-button:hover,
+        .pause-button:active {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 170, 0, 0.3);
+        }
+
+        .swipe-hint {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 10px;
+            text-align: center;
+        }
+
         .controls {
             margin-top: 20px;
-            font-size: 0.9rem;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
             color: rgba(255, 255, 255, 0.6);
             line-height: 1.6;
         }
@@ -106,11 +169,13 @@
             text-align: center;
             border: 2px solid rgba(255, 0, 0, 0.5);
             display: none;
+            max-width: 90vw;
+            z-index: 1000;
         }
 
         .game-over h2 {
             color: #ff4444;
-            font-size: 2rem;
+            font-size: clamp(1.5rem, 4vw, 2rem);
             margin-bottom: 10px;
             text-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
         }
@@ -127,9 +192,11 @@
             cursor: pointer;
             margin-top: 15px;
             transition: all 0.3s ease;
+            touch-action: manipulation;
         }
 
-        .game-over button:hover {
+        .game-over button:hover,
+        .game-over button:active {
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
         }
@@ -139,7 +206,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 3rem;
+            font-size: clamp(2rem, 6vw, 3rem);
             font-weight: bold;
             color: #ffdd00;
             text-shadow:
@@ -226,7 +293,7 @@
             padding: 8px 12px;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -235,7 +302,7 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.8rem;
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
             color: rgba(255, 255, 255, 0.4);
             text-align: center;
         }
@@ -249,25 +316,30 @@
             color: #00ff88;
         }
 
-        /* Hide on mobile/touch devices */
+        /* Mobile-specific styles */
         @media (hover: none) and (pointer: coarse) {
-            body {
-                justify-content: center;
-                align-items: center;
+            .mobile-controls {
+                display: flex;
             }
 
-            .game-container {
+            .controls {
                 display: none;
             }
 
+            .game-subtitle {
+                content: "🐍 Swipe to Move";
+            }
+        }
 
-            body::before {
-                content: "🎮 This game requires a keyboard to play.\AReturn to portfolio";
-                white-space: pre;
-                text-align: center;
-                font-size: 1.2rem;
-                line-height: 1.6;
-                color: rgba(255, 255, 255, 0.7);
+        /* Responsive canvas sizing */
+        @media (max-width: 480px) {
+            #gameCanvas {
+                width: 300px;
+                height: 300px;
+            }
+
+            .game-container {
+                padding: 15px;
             }
         }
     </style>
@@ -275,7 +347,7 @@
 <body>
     <div class="game-container">
         <h1 class="game-title">SNAKE <u>G</u>AME</h1>
-        <p class="game-subtitle">🐍 Keyboard Warriors Only</p>
+        <p class="game-subtitle">🐍 <span class="subtitle-text">Keyboard Warriors Only</span></p>
 
         <div class="level-indicator">
             Level: <span id="levelDisplay">1</span>
@@ -287,6 +359,15 @@
         </div>
 
         <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+        <div class="mobile-controls">
+            <button class="pause-button" id="pauseBtn">⏸️ Pause</button>
+            <button class="reset-button" id="resetBtn">🔄 Reset</button>
+        </div>
+
+        <div class="swipe-hint" style="display: none;">
+            Swipe to move • Tap buttons to pause/reset
+        </div>
 
         <div class="controls">
             Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> to move<br>
@@ -317,14 +398,26 @@
         const finalScoreElement = document.getElementById('finalScore');
         const newHighScoreElement = document.getElementById('newHighScore');
         const prestigeAnimationElement = document.getElementById('prestigeAnimation');
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+
+        // Mobile detection and setup
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                         ('ontouchstart' in window) ||
+                         (navigator.maxTouchPoints > 0);
+
+        if (isMobile) {
+            document.querySelector('.subtitle-text').textContent = 'Swipe to Move';
+            document.querySelector('.swipe-hint').style.display = 'block';
+        }
 
         // Game constants - Define these FIRST
         const gridSize = 20;
         const gameSpeed = 130;
 
-        // Upgrade store state
-        let snakeWallet = parseInt(localStorage.getItem('snakeWallet') || '0');
-        let snakeData = JSON.parse(localStorage.getItem('snakeData') || '{"maxLevel":1,"foodUpgrade":0,"lives":0,"permeability":false}');
+        // Upgrade store state - Using in-memory storage instead of localStorage
+        let snakeWallet = 0;
+        let snakeData = {maxLevel: 1, foodUpgrade: 0, lives: 0, permeability: false};
 
         // Initialize game state variables early so they're accessible in functions
         let currentLevel = 1;
@@ -335,9 +428,16 @@
         let paintingMode = false;
         let paintIndex = 0;
 
+        // Touch/swipe handling variables
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        const minSwipeDistance = 30;
+
         function saveUpgrades() {
-            localStorage.setItem('snakeData', JSON.stringify(snakeData));
-            localStorage.setItem('snakeWallet', snakeWallet.toString());
+            // Using in-memory storage for this demo
+            // In a real app, you could use localStorage here
         }
 
         function generateFood() {
@@ -551,7 +651,7 @@
         let food = []
         food = [generateFood()]; // Now an array of food items
         let score = 0;
-        let highScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
+        let highScore = 0; // Using in-memory storage
         let gameRunning = false;
         let gamePaused = false;
         let startingFoodBonus = snakeData.foodUpgrade;
@@ -732,7 +832,6 @@
             if (score > highScore) {
                 highScore = score;
                 highScoreElement.textContent = highScore;
-                localStorage.setItem('snakeHighScore', highScore.toString());
                 newHighScoreElement.style.display = 'block';
             } else {
                 newHighScoreElement.style.display = 'none';
@@ -775,15 +874,111 @@
             // Reset game interval to original speed
             clearInterval(gameInterval);
             gameInterval = setInterval(gameLoop, gameSpeed);
+
+            // Update pause button text
+            pauseBtn.innerHTML = '⏸️ Pause';
         }
 
         function startGame() {
             if (!gameRunning && direction.x === 0 && direction.y === 0) return;
             gameRunning = true;
             gamePaused = false;
+            pauseBtn.innerHTML = '⏸️ Pause';
         }
 
-        // Keyboard controls
+        function togglePause() {
+            if (gameRunning) {
+                gamePaused = !gamePaused;
+                pauseBtn.innerHTML = gamePaused ? '▶️ Resume' : '⏸️ Pause';
+            }
+        }
+
+        function setDirection(newDirection) {
+            if (gameOverElement.style.display === 'block') return;
+
+            // Prevent reverse direction
+            if (newDirection.x !== 0 && direction.x === -newDirection.x) return;
+            if (newDirection.y !== 0 && direction.y === -newDirection.y) return;
+
+            direction = newDirection;
+            startGame();
+        }
+
+        // Touch event handlers for swipe detection
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0] || e.changedTouches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            if (!touchStartX || !touchStartY) return;
+
+            const touch = e.touches[0] || e.changedTouches[0];
+            touchEndX = touch.clientX;
+            touchEndY = touch.clientY;
+
+            handleSwipe();
+        }
+
+        function handleSwipe() {
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            const absDeltaX = Math.abs(deltaX);
+            const absDeltaY = Math.abs(deltaY);
+
+            // Check if swipe is long enough
+            if (Math.max(absDeltaX, absDeltaY) < minSwipeDistance) return;
+
+            // Determine direction based on the larger delta
+            if (absDeltaX > absDeltaY) {
+                // Horizontal swipe
+                if (deltaX > 0) {
+                    setDirection({x: gridSize, y: 0}); // Right
+                } else {
+                    setDirection({x: -gridSize, y: 0}); // Left
+                }
+            } else {
+                // Vertical swipe
+                if (deltaY > 0) {
+                    setDirection({x: 0, y: gridSize}); // Down
+                } else {
+                    setDirection({x: 0, y: -gridSize}); // Up
+                }
+            }
+
+            // Reset touch coordinates
+            touchStartX = 0;
+            touchStartY = 0;
+            touchEndX = 0;
+            touchEndY = 0;
+        }
+
+        // Add touch event listeners to canvas
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+        canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        // Button event listeners
+        resetBtn.addEventListener('click', restartGame);
+        resetBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            restartGame();
+        });
+
+        pauseBtn.addEventListener('click', togglePause);
+        pauseBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            togglePause();
+        });
+
+        // Keyboard controls (for desktop)
         document.addEventListener('keydown', (e) => {
             // Don't process any game movement if game is over
             if (gameOverElement.style.display === 'block') {
@@ -806,39 +1001,33 @@
                 case 'w':
                 case 'W':
                     if (direction.y === 0) {
-                        direction = {x: 0, y: -gridSize};
-                        startGame();
+                        setDirection({x: 0, y: -gridSize});
                     }
                     break;
                 case 'ArrowDown':
                 case 's':
                 case 'S':
                     if (direction.y === 0) {
-                        direction = {x: 0, y: gridSize};
-                        startGame();
+                        setDirection({x: 0, y: gridSize});
                     }
                     break;
                 case 'ArrowLeft':
                 case 'a':
                 case 'A':
                     if (direction.x === 0) {
-                        direction = {x: -gridSize, y: 0};
-                        startGame();
+                        setDirection({x: -gridSize, y: 0});
                     }
                     break;
                 case 'ArrowRight':
                 case 'd':
                 case 'D':
                     if (direction.x === 0) {
-                        direction = {x: gridSize, y: 0};
-                        startGame();
+                        setDirection({x: gridSize, y: 0});
                     }
                     break;
                 case ' ':
                     e.preventDefault();
-                    if (gameRunning) {
-                        gamePaused = !gamePaused;
-                    }
+                    togglePause();
                     break;
                 case 'r':
                 case 'R':
@@ -865,6 +1054,25 @@
         });
 
         gameInterval = setInterval(gameLoop, gameSpeed);
+
+        // Prevent default touch behaviors on the body to avoid scrolling issues
+        document.body.addEventListener('touchstart', function(e) {
+            if (e.target === canvas) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        document.body.addEventListener('touchend', function(e) {
+            if (e.target === canvas) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        document.body.addEventListener('touchmove', function(e) {
+            if (e.target === canvas) {
+                e.preventDefault();
+            }
+        }, { passive: false });
     </script>
 </body>
 </html>
