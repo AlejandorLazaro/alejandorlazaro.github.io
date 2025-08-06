@@ -95,20 +95,20 @@
         .dpad-container {
             display: none;
             position: relative;
-            width: 120px;
+            width: 165px;
             height: 120px;
             margin: 15px auto;
         }
 
         .dpad-button {
             position: absolute;
-            width: 40px;
-            height: 40px;
+            width: 55px;
+            height: 55px;
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             color: #ffffff;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
             user-select: none;
@@ -621,7 +621,7 @@
                     }
                 }
 
-                if (currentLevel < 20) {
+                if (currentLevel < 10) {
                     // Normal prestige: reset snake body
                     snake = [{x: snake[0].x, y: snake[0].y}];
                     paintingMode = false;
@@ -635,7 +635,7 @@
                     // Increase points per food (cap at 100 per food)
                     pointsPerFood = Math.min(100, 10 + (currentLevel * 5));
                 } else {
-                    // Level 20+: Enter painting mode!
+                    // Level 10+: Enter painting mode!
                     paintingMode = true;
                     paintIndex = 1; // Start painting from segment 1 (head stays current color)
 
