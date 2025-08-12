@@ -375,6 +375,28 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+        .stats-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 100px;
+        }
+
+        .stats-panel div {
+            margin-bottom: 4px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .stats-panel .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9em;
+        }
+
         .easter-egg-note {
             position: absolute;
             bottom: 20px;
@@ -392,6 +414,17 @@
 
         .easter-egg-note a:hover {
             color: #00ff88;
+        }
+
+        .storage-warning {
+            background: rgba(255, 170, 0, 0.1);
+            border: 1px solid rgba(255, 170, 0, 0.3);
+            color: rgba(255, 170, 0, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            text-align: left;
         }
 
         /* Mobile-specific styles */
@@ -428,11 +461,20 @@
 </head>
 <body>
     <div class="game-container">
+        <div class="storage-warning" id="storageWarning" style="display: none;">
+            ⚠️ <strong>Note:</strong> Data persistence requires localStorage support. localStorage is disabled in this browser context, and stats will not be stored.
+        </div>
+
         <h1 class="game-title">SNAKE <u>G</u>AME</h1>
-        <p class="game-subtitle">🐍 <span class="subtitle-text">Keyboard Warriors Only</span></p>
+        <p class="game-subtitle">🐍</p>
 
         <div class="level-indicator">
             Level: <span id="levelDisplay">1</span>
+        </div>
+
+        <div class="stats-panel">
+            <div><span class="stat-label">Games:</span> <span id="gamesPlayed">0</span></div>
+            <div><span class="stat-label">Best Level:</span> <span id="bestLevel">1</span></div>
         </div>
 
         <div class="game-info">
@@ -460,7 +502,7 @@
 
         <div class="controls">
             Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> to move<br>
-            Press <kbd>Space</kbd> to pause • <kbd>R</kbd> to restart
+            Press <kbd>Space</kbd> to pause • <kbd>R</kbd> to restart • <kbd>C</kbd> to clear data
         </div>
 
         <div class="prestige-animation" id="prestigeAnimation"></div>
@@ -470,6 +512,7 @@
         <h2>Game Over!</h2>
         <p>Final Score: <span id="finalScore">0</span></p>
         <p id="newHighScore" style="color: #00ff88; display: none;">🎉 New High Score!</p>
+        <p id="newBestLevel" style="color: #ffdd00; display: none;">🌟 New Best Level!</p>
         <button onclick="restartGame()">Play Again</button>
     </div>
 
@@ -486,9 +529,15 @@
         const gameOverElement = document.getElementById('gameOver');
         const finalScoreElement = document.getElementById('finalScore');
         const newHighScoreElement = document.getElementById('newHighScore');
+        const newBestLevelElement = document.getElementById('newBestLevel');
         const prestigeAnimationElement = document.getElementById('prestigeAnimation');
         const resetBtn = document.getElementById('resetBtn');
         const pauseBtn = document.getElementById('pauseBtn');
+
+        // Stats elements
+        const gamesPlayedElement = document.getElementById('gamesPlayed');
+        const bestLevelElement = document.getElementById('bestLevel');
+        const storageWarningElement = document.getElementById('storageWarning');
 
         // Mobile detection and setup
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
@@ -500,13 +549,132 @@
             document.querySelector('.swipe-hint').style.display = 'block';
         }
 
-        // Game constants - Define these FIRST
+        // Game constants
         const gridSize = 20;
         const gameSpeed = 130;
 
-        // Upgrade store state - Using in-memory storage instead of localStorage
-        let snakeWallet = 0;
-        let snakeData = {maxLevel: 1, foodUpgrade: 0, lives: 0, permeability: false};
+        // localStorage support check and persistence management
+        let storageSupported = false;
+        try {
+            localStorage.setItem('snakeTest', 'test');
+            localStorage.removeItem('snakeTest');
+            storageSupported = true;
+        } catch (e) {
+            storageWarningElement.style.display = 'block';
+        }
+
+        // Persistent game data structure
+        let persistentData = {
+            highScore: 0,
+            gamesPlayed: 0,
+            bestLevel: 1,
+            firstPlayDate: null,
+            lastPlayDate: null,
+            totalPlayTime: 0, // in seconds
+            snakeWallet: 0,
+            snakeData: {
+                maxLevel: 1,
+                foodUpgrade: 0,
+                lives: 0,
+                permeability: false
+            }
+        };
+
+        // Session tracking
+        let sessionStartTime = Date.now();
+        let sessionInterval;
+
+        function loadPersistentData() {
+            if (!storageSupported) return;
+
+            try {
+                const saved = localStorage.getItem('snakeGameData');
+                if (saved) {
+                    const loadedData = JSON.parse(saved);
+                    // Merge with defaults to handle new fields
+                    persistentData = { ...persistentData, ...loadedData };
+
+                    // Ensure nested objects exist
+                    if (!persistentData.snakeData) {
+                        persistentData.snakeData = {
+                            maxLevel: 1,
+                            foodUpgrade: 0,
+                            lives: 0,
+                            permeability: false
+                        };
+                    }
+                }
+
+                if (!persistentData.firstPlayDate) {
+                    persistentData.firstPlayDate = new Date().toISOString();
+                }
+                persistentData.lastPlayDate = new Date().toISOString();
+            } catch (e) {
+                console.error('Error loading persistent data:', e);
+            }
+
+            updateStatsDisplay();
+        }
+
+        function applyUpgrades() {
+            startingFoodBonus = persistentData.snakeData.foodUpgrade;
+            remainingLives = persistentData.snakeData.lives;
+            permeabilityEnabled = persistentData.snakeData.permeability;
+
+            // Update initial food count based on upgrades
+            food = [];
+            for (let i = 0; i < 1 + startingFoodBonus; i++) {
+                food.push(generateFood());
+            }
+        }
+
+        function savePersistentData() {
+            if (!storageSupported) return;
+
+            try {
+                persistentData.lastPlayDate = new Date().toISOString();
+                localStorage.setItem('snakeGameData', JSON.stringify(persistentData));
+            } catch (e) {
+                console.error('Error saving persistent data:', e);
+            }
+        }
+
+        function updateStatsDisplay() {
+            highScoreElement.textContent = persistentData.highScore;
+            gamesPlayedElement.textContent = persistentData.gamesPlayed;
+            bestLevelElement.textContent = persistentData.bestLevel;
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all saved data? This cannot be undone.')) {
+                if (storageSupported) {
+                    localStorage.removeItem('snakeGameData');
+                }
+
+                // Reset to defaults
+                persistentData = {
+                    highScore: 0,
+                    gamesPlayed: 0,
+                    bestLevel: 1,
+                    firstPlayDate: null,
+                    lastPlayDate: null,
+                    totalPlayTime: 0,
+                    snakeWallet: 0,
+                    snakeData: {
+                        maxLevel: 1,
+                        foodUpgrade: 0,
+                        lives: 0,
+                        permeability: false
+                    }
+                };
+
+                updateStatsDisplay();
+                restartGame();
+            }
+        }
+
+        // Initialize persistent data early
+        loadPersistentData();
 
         // Initialize game state variables early so they're accessible in functions
         let currentLevel = 1;
@@ -523,11 +691,6 @@
         let touchEndX = 0;
         let touchEndY = 0;
         const minSwipeDistance = 30;
-
-        function saveUpgrades() {
-            // Using in-memory storage for this demo
-            // In a real app, you could use localStorage here
-        }
 
         function generateFood() {
             let newFood;
@@ -568,40 +731,44 @@
         }
 
         function checkPrestige() {
-            const newLevel = 1 + Math.floor((snake.length - 1) / 5);
+            let newLevel = 1 + Math.floor((snake.length - 1) / 5);
+            // If we stopped painting due to maxing out the snake colors
+            if (currentLevel >= 10 && !paintingMode) {
+                newLevel = 1 + currentLevel;
+            }
+
             if (newLevel > currentLevel) {
                 currentLevel = newLevel;
                 levelDisplayElement.textContent = currentLevel;
+
+                // Update best level if new record
+                if (currentLevel > persistentData.bestLevel) {
+                    persistentData.bestLevel = currentLevel;
+                    savePersistentData();
+                    // updateStatsDisplay();
+                }
 
                 // Show celebration animation
                 showPrestigeAnimation();
 
                 // Add upgrades based on max level reached
-                if (newLevel > snakeData.maxLevel) {
-                    snakeData.maxLevel = newLevel;
+                if (newLevel > persistentData.snakeData.maxLevel) {
+                    persistentData.snakeData.maxLevel = newLevel;
 
                     switch (newLevel) {
                         case 3:
-                            snakeData.foodUpgrade++;
+                            persistentData.snakeData.foodUpgrade++;
                             break;
                         case 6:
-                                snakeData.foodUpgrade++;
-                                break;
+                            persistentData.snakeData.foodUpgrade++;
+                            break;
                         case 9:
-                                snakeData.foodUpgrade++;
-                                break;
-                        case 12:
-                                snakeData.foodUpgrade++;
-                                break;
-                        case 15:
-                                snakeData.foodUpgrade++;
-                                break;
-                        case 18:
-                                snakeData.foodUpgrade++;
-                                break;
+                            persistentData.snakeData.foodUpgrade++;
+                            break;
                         default:
                             break;
                     }
+                    savePersistentData();
                 }
 
                 if (currentLevel < 10) {
@@ -610,7 +777,7 @@
                     paintingMode = false;
                     paintIndex = 0;
 
-                    // Increase speed (cap at 50ms intervals)
+                    // Increase speed (cap at 60ms intervals)
                     currentSpeed = Math.max(60, gameSpeed - (currentLevel * 10));
                     clearInterval(gameInterval);
                     gameInterval = setInterval(gameLoop, currentSpeed);
@@ -623,7 +790,7 @@
                     paintIndex = 1; // Start painting from segment 1 (head stays current color)
 
                     // Max stats reached, just show the celebration
-                    currentSpeed = 50; // Max speed
+                    currentSpeed = 60; // Max speed
                     pointsPerFood = 100; // Max points
                 }
 
@@ -752,14 +919,11 @@
         let food = []
         food = [generateFood()]; // Now an array of food items
         let score = 0;
-        let highScore = 0; // Using in-memory storage
         let gameRunning = false;
         let gamePaused = false;
-        let startingFoodBonus = snakeData.foodUpgrade;
-        let remainingLives = snakeData.lives;
-        let permeabilityEnabled = snakeData.permeability;
-
-        highScoreElement.textContent = highScore;
+        let startingFoodBonus = persistentData.snakeData.foodUpgrade;
+        let remainingLives = persistentData.snakeData.lives;
+        let permeabilityEnabled = persistentData.snakeData.permeability;
 
         function draw() {
             // Clear canvas completely
@@ -865,21 +1029,21 @@
             // Check food collision with any food item
             let foodEaten = false;
             let goldenFoodEaten = false;
+            let segmentsToAdd = 0;
+
             for (let i = food.length - 1; i >= 0; i--) {
                 if (head.x === food[i].x && head.y === food[i].y) {
                     if (food[i].isGolden) {
                         // Golden food gives 5x points and 3 extra segments
                         score += pointsPerFood * 5;
                         goldenFoodEaten = true;
-
-                        // Add 2 extra segments (1 will be added normally by not popping)
-                        snake.push({...snake[snake.length - 1]});
-                        snake.push({...snake[snake.length - 1]});
+                        segmentsToAdd = 3;
 
                         // Show pickup animation
                         showGoldenPickupAnimation(food[i].x, food[i].y);
                     } else {
                         score += pointsPerFood;
+                        segmentsToAdd = 1;
 
                         // Show pickup animation
                         showPickupAnimation(food[i].x, food[i].y);
@@ -895,19 +1059,32 @@
             }
 
             if (foodEaten) {
-                // In painting mode, advance the paint brush
-                if (paintingMode && paintIndex < snake.length) {
-                    paintIndex++;
+                // Add the segments
+                if (currentLevel < 10) {
+                    for (let i = 0; i < segmentsToAdd; i++) {
+                        snake.push({...snake[snake.length - 1]});
+                    }
+                }
+                // In painting mode, advance the paint brush per segments to add
+                else {
+                    while (segmentsToAdd > 0) {
+                        paintIndex++;
+                        segmentsToAdd--;
 
-                    // If we've painted the entire snake, reset painting
-                    if (paintIndex >= snake.length) {
-                        paintingMode = false;
-                        paintIndex = 0;
+                        // If we've painted the entire snake, reset painting
+                        if (paintIndex >= snake.length) {
+                            paintingMode = false;
+                            paintIndex = 0;
+                        }
                     }
                 }
 
+                // Don't forget to remove the extra slot from the head while in paint mode
+                snake.pop();
+
                 // Check for prestige after growing
                 setTimeout(() => checkPrestige(), 100);
+                updateStatsDisplay();
             } else {
                 snake.pop();
             }
@@ -921,8 +1098,6 @@
                 direction = {x: 0, y: 0};
                 paintingMode = false;
                 paintIndex = 0;
-
-                // gameRunning = false;
                 gamePaused = true;
                 return;
             }
@@ -930,16 +1105,32 @@
             gameRunning = false;
             finalScoreElement.textContent = score;
 
-            if (score > highScore) {
-                highScore = score;
-                highScoreElement.textContent = highScore;
+            // Update persistent statistics
+            persistentData.gamesPlayed++;
+            persistentData.snakeWallet += score;
+
+            let isNewHighScore = false;
+            let isNewBestLevel = false;
+
+            if (score > persistentData.highScore) {
+                persistentData.highScore = score;
+                isNewHighScore = true;
                 newHighScoreElement.style.display = 'block';
             } else {
                 newHighScoreElement.style.display = 'none';
             }
 
-            snakeWallet += score;
-            saveUpgrades();
+            if (currentLevel > persistentData.bestLevel) {
+                persistentData.bestLevel = currentLevel;
+                isNewBestLevel = true;
+                newBestLevelElement.style.display = 'block';
+            } else {
+                newBestLevelElement.style.display = 'none';
+            }
+
+            // Save all progress
+            savePersistentData();
+            updateStatsDisplay();
 
             gameOverElement.style.display = 'block';
         }
@@ -950,18 +1141,18 @@
 
             // Handle upgrades that have changed since last time
             food = [];
-            for (let i = 0; i < 1 + snakeData.foodUpgrade; i++) {
+            for (let i = 0; i < 1 + persistentData.snakeData.foodUpgrade; i++) {
                 food.push(generateFood());
             }
-            remainingLives = snakeData.lives;
-            permeabilityEnabled = snakeData.permeability;
+            remainingLives = persistentData.snakeData.lives;
+            permeabilityEnabled = persistentData.snakeData.permeability;
 
             score = 0;
             scoreElement.textContent = score;
             gameRunning = false;
             gamePaused = false;
             gameOverElement.style.display = 'none';
-            startingFoodBonus = snakeData.foodUpgrade;
+            startingFoodBonus = persistentData.snakeData.foodUpgrade;
 
             // Reset prestige system
             currentLevel = 1;
@@ -1166,6 +1357,10 @@
                 case 'R':
                     restartGame();
                     break;
+                case 'c':
+                case 'C':
+                    clearAllData();
+                    break;
             }
         });
 
@@ -1178,6 +1373,9 @@
         // Make sure canvas is ready before starting
         let gameInterval;
         window.addEventListener('load', () => {
+            // Apply upgrades on page load
+            applyUpgrades();
+
             // Force initial draw
             setTimeout(() => {
                 draw();
@@ -1206,6 +1404,16 @@
                 e.preventDefault();
             }
         }, { passive: false });
+
+        // Save data periodically and on page unload
+        setInterval(savePersistentData, 30000); // Save every 30 seconds
+
+        window.addEventListener('beforeunload', () => {
+            // Save session time
+            persistentData.totalPlayTime += Math.floor((Date.now() - sessionStartTime) / 1000);
+            savePersistentData();
+            clearInterval(sessionInterval);
+        });
     </script>
 </body>
 </html>
