@@ -52,6 +52,17 @@
             padding: 0;
         }
 
+        /* Background particle system */
+        #bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1; /* Behind all other elements */
+            pointer-events: none;
+        }
+
         .nav-menu {
             position: fixed;
             top: 2rem;
@@ -1320,8 +1331,12 @@
         }
     </style>
     {% include head-custom.html %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tsparticles/2.12.0/tsparticles.bundle.min.js"></script>
   </head>
   <body>
+    <div id="bg-particles"></div>
+
     <nav class="nav-menu">
         <div class="hamburger-btn" onclick="toggleMenu()">
             <span class="hamburger-line"></span>
@@ -1755,6 +1770,97 @@
                 }
             });
         }
+
+        // Background particle system initialization
+        async function initBackgroundParticles() {
+            const options = {
+                background: {
+                    color: {
+                        value: "transparent",
+                    },
+                },
+                fpsLimit: 60,
+                interactivity: {
+                    events: {
+                        onHover: {
+                            enable: true,
+                            mode: "repulse",
+                        },
+                        onClick: {
+                            enable: true,
+                            mode: "repulse",
+                        },
+                        resize: true,
+                    },
+                    modes: {
+                        repulse: {
+                            distance: 100,
+                            duration: 0.4,
+                            speed: 1,
+                        },
+                    },
+                },
+                particles: {
+                    color: {
+                        value: ["rgba(255,255,255,0.5)", "rgba(144,136,234,0.5)", "rgba(148,145,242,0.5)"],
+                    },
+                    links: {
+                        color: "rgba(255,255,255,0.4)",
+                        distance: 120,
+                        enable: true,
+                        opacity: 0.2,
+                        width: 1,
+                    },
+                    move: {
+                        direction: "none",
+                        enable: true,
+                        outModes: {
+                            default: "bounce",
+                        },
+                        random: true,
+                        speed: 0.5,
+                        straight: false,
+                    },
+                    number: {
+                        density: {
+                            enable: true,
+                            area: 1000,
+                        },
+                        value: 80,
+                    },
+                    opacity: {
+                        value: { min: 0.2, max: 0.8 },
+                        animation: {
+                            enable: true,
+                            speed: 0.5,
+                            opacity_min: 0.2,
+                        },
+                    },
+                    shape: {
+                        type: "circle",
+                    },
+                    size: {
+                        value: { min: 1, max: 3 },
+                        animation: {
+                            enable: true,
+                            speed: 1,
+                            size_min: 0.5,
+                        },
+                    },
+                },
+                detectRetina: true,
+            };
+
+            await tsParticles.load("bg-particles", options);
+        }
+
+        // Initialize background particles when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add this to your existing DOMContentLoaded function
+            initBackgroundParticles();
+
+            // ... your existing initialization code ...
+        });
     </script>
   </body>
 </html>
