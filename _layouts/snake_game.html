@@ -83,142 +83,6 @@
             text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
         }
 
-        .mobile-controls {
-            display: none;
-            margin-top: 15px;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .dpad-container {
-            display: none;
-            position: relative;
-            width: 165px;
-            height: 165px;
-            margin: 15px auto;
-        }
-
-        .dpad-button {
-            position: absolute;
-            width: 55px;
-            height: 55px;
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: #ffffff;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            user-select: none;
-            touch-action: manipulation;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.1s ease;
-            backdrop-filter: blur(10px);
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-        }
-
-        .dpad-button:active {
-            background: linear-gradient(145deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
-            border-color: rgba(0, 255, 136, 0.4);
-            transform: translateY(-2px) scale(0.95);
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
-        }
-
-        .dpad-up {
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .dpad-up:active {
-            transform: translateX(-50%) translateY(-2px) scale(0.95);
-        }
-
-        .dpad-down {
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .dpad-down:active {
-            transform: translateX(-50%) translateY(-2px) scale(0.95);
-        }
-
-        .dpad-left {
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .dpad-left:active {
-            transform: translateY(-50%) translateY(-2px) scale(0.95);
-        }
-
-        .dpad-right {
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .dpad-right:active {
-            transform: translateY(-50%) translateY(-2px) scale(0.95);
-        }
-
-        .reset-button {
-            background: linear-gradient(45deg, #ff4444, #ff6666);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-family: inherit;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-            user-select: none;
-        }
-
-        .reset-button:hover,
-        .reset-button:active {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
-        }
-
-        .pause-button {
-            background: linear-gradient(45deg, #ffaa00, #ffcc44);
-            color: black;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-family: inherit;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-            user-select: none;
-        }
-
-        .pause-button:hover,
-        .pause-button:active {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(255, 170, 0, 0.3);
-        }
-
-        .swipe-hint {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 10px;
-            text-align: center;
-        }
-
         .controls {
             margin-top: 20px;
             font-size: clamp(0.8rem, 2vw, 0.9rem);
@@ -416,6 +280,27 @@
             color: #00ff88;
         }
 
+        /* Hide on mobile/touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            body {
+                justify-content: center;
+                align-items: center;
+            }
+
+            .game-container {
+                display: none;
+            }
+
+            body::before {
+                content: "🎮 This game requires a keyboard to play.\AReturn to portfolio";
+                white-space: pre;
+                text-align: center;
+                font-size: 1.2rem;
+                line-height: 1.6;
+                color: rgba(255, 255, 255, 0.7);
+            }
+        }
+
         .storage-warning {
             background: rgba(255, 170, 0, 0.1);
             border: 1px solid rgba(255, 170, 0, 0.3);
@@ -425,25 +310,6 @@
             margin-bottom: 15px;
             font-size: 0.85rem;
             text-align: left;
-        }
-
-        /* Mobile-specific styles */
-        @media (hover: none) and (pointer: coarse) {
-            .mobile-controls {
-                display: flex;
-            }
-
-            .dpad-container {
-                display: block;
-            }
-
-            .controls {
-                display: none;
-            }
-
-            .game-subtitle {
-                content: "🐍 Swipe to Move";
-            }
         }
 
         /* Responsive canvas sizing */
@@ -484,22 +350,6 @@
 
         <canvas id="gameCanvas" width="400" height="400"></canvas>
 
-        <div class="dpad-container">
-            <button class="dpad-button dpad-up" id="dpadUp">↑</button>
-            <button class="dpad-button dpad-left" id="dpadLeft">←</button>
-            <button class="dpad-button dpad-right" id="dpadRight">→</button>
-            <button class="dpad-button dpad-down" id="dpadDown">↓</button>
-        </div>
-
-        <div class="mobile-controls">
-            <button class="pause-button" id="pauseBtn">⏸️ Pause</button>
-            <button class="reset-button" id="resetBtn">🔄 Reset</button>
-        </div>
-
-        <div class="swipe-hint" style="display: none;">
-            Use D-pad or swipe to move • Tap buttons to pause/reset
-        </div>
-
         <div class="controls">
             Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> to move<br>
             Press <kbd>Space</kbd> to pause • <kbd>R</kbd> to restart • <kbd>C</kbd> to clear data
@@ -538,16 +388,6 @@
         const gamesPlayedElement = document.getElementById('gamesPlayed');
         const bestLevelElement = document.getElementById('bestLevel');
         const storageWarningElement = document.getElementById('storageWarning');
-
-        // Mobile detection and setup
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                         ('ontouchstart' in window) ||
-                         (navigator.maxTouchPoints > 0);
-
-        if (isMobile) {
-            document.querySelector('.subtitle-text').textContent = 'Swipe to Move';
-            document.querySelector('.swipe-hint').style.display = 'block';
-        }
 
         // Game constants
         const gridSize = 20;
@@ -684,13 +524,6 @@
         let prestigeAnimationActive = false;
         let paintingMode = false;
         let paintIndex = 0;
-
-        // Touch/swipe handling variables
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-        const minSwipeDistance = 30;
 
         function generateFood() {
             let newFood;
@@ -1196,112 +1029,6 @@
             startGame();
         }
 
-        // Touch event handlers for swipe detection
-        function handleTouchStart(e) {
-            e.preventDefault();
-            const touch = e.touches[0] || e.changedTouches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-        }
-
-        function handleTouchMove(e) {
-            e.preventDefault();
-        }
-
-        function handleTouchEnd(e) {
-            e.preventDefault();
-            if (!touchStartX || !touchStartY) return;
-
-            const touch = e.touches[0] || e.changedTouches[0];
-            touchEndX = touch.clientX;
-            touchEndY = touch.clientY;
-
-            handleSwipe();
-        }
-
-        function handleSwipe() {
-            const deltaX = touchEndX - touchStartX;
-            const deltaY = touchEndY - touchStartY;
-            const absDeltaX = Math.abs(deltaX);
-            const absDeltaY = Math.abs(deltaY);
-
-            // Check if swipe is long enough
-            if (Math.max(absDeltaX, absDeltaY) < minSwipeDistance) return;
-
-            // Determine direction based on the larger delta
-            if (absDeltaX > absDeltaY) {
-                // Horizontal swipe
-                if (deltaX > 0) {
-                    setDirection({x: gridSize, y: 0}); // Right
-                } else {
-                    setDirection({x: -gridSize, y: 0}); // Left
-                }
-            } else {
-                // Vertical swipe
-                if (deltaY > 0) {
-                    setDirection({x: 0, y: gridSize}); // Down
-                } else {
-                    setDirection({x: 0, y: -gridSize}); // Up
-                }
-            }
-
-            // Reset touch coordinates
-            touchStartX = 0;
-            touchStartY = 0;
-            touchEndX = 0;
-            touchEndY = 0;
-        }
-
-        // Add touch event listeners to canvas
-        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-        canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-        // D-pad button event listeners
-        const dpadUp = document.getElementById('dpadUp');
-        const dpadDown = document.getElementById('dpadDown');
-        const dpadLeft = document.getElementById('dpadLeft');
-        const dpadRight = document.getElementById('dpadRight');
-
-        dpadUp.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            setDirection({x: 0, y: -gridSize});
-        });
-
-        dpadDown.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            setDirection({x: 0, y: gridSize});
-        });
-
-        dpadLeft.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            setDirection({x: -gridSize, y: 0});
-        });
-
-        dpadRight.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            setDirection({x: gridSize, y: 0});
-        });
-
-        // Also add click events for desktop testing
-        dpadUp.addEventListener('click', () => setDirection({x: 0, y: -gridSize}));
-        dpadDown.addEventListener('click', () => setDirection({x: 0, y: gridSize}));
-        dpadLeft.addEventListener('click', () => setDirection({x: -gridSize, y: 0}));
-        dpadRight.addEventListener('click', () => setDirection({x: gridSize, y: 0}));
-
-        // Button event listeners
-        resetBtn.addEventListener('click', restartGame);
-        resetBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            restartGame();
-        });
-
-        pauseBtn.addEventListener('click', togglePause);
-        pauseBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            togglePause();
-        });
-
         // Keyboard controls (for desktop)
         document.addEventListener('keydown', (e) => {
             // Don't process any game movement if game is over
@@ -1385,25 +1112,6 @@
         });
 
         gameInterval = setInterval(gameLoop, gameSpeed);
-
-        // Prevent default touch behaviors on the body to avoid scrolling issues
-        document.body.addEventListener('touchstart', function(e) {
-            if (e.target === canvas) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        document.body.addEventListener('touchend', function(e) {
-            if (e.target === canvas) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        document.body.addEventListener('touchmove', function(e) {
-            if (e.target === canvas) {
-                e.preventDefault();
-            }
-        }, { passive: false });
 
         // Save data periodically and on page unload
         setInterval(savePersistentData, 30000); // Save every 30 seconds
