@@ -652,7 +652,7 @@
         </div>
     </div>
 
-    <button class="leaderboard-toggle" onclick="openLeaderboard()">🏆 Leaderboard</button>
+    <!-- <button class="leaderboard-toggle" onclick="openLeaderboard()">🏆 Leaderboard</button>
 
     <div class="leaderboard-modal" id="leaderboardModal">
         <div class="leaderboard-content">
@@ -682,7 +682,7 @@
                 <div class="loading">Loading leaderboard...</div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <div class="easter-egg-note">
         🎮 Easter egg found! <a href="/">Back to portfolio</a>
@@ -1261,7 +1261,8 @@
             persistentData.snakeWallet += score;
 
             // IMPORTANT: Check qualification BEFORE updating persistentData.highScore
-            isEligibleForSubmission = checkScoreQualification(score, persistentData.highScore);
+            // TODO: Re-enable when leaderboard API is supported
+            // isEligibleForSubmission = checkScoreQualification(score, persistentData.highScore);
 
             let isNewHighScore = false;
             let isNewBestLevel = false;
@@ -1275,13 +1276,14 @@
                 newHighScoreElement.style.display = 'none';
             }
 
-            if (currentLevel > persistentData.bestLevel) {
-                persistentData.bestLevel = currentLevel;
-                isNewBestLevel = true;
-                newBestLevelElement.style.display = 'block';
-            } else {
-                newBestLevelElement.style.display = 'none';
-            }
+            // TODO: Re-enable when leaderboard API is supported
+            // if (currentLevel > persistentData.bestLevel) {
+            //     persistentData.bestLevel = currentLevel;
+            //     isNewBestLevel = true;
+            //     newBestLevelElement.style.display = 'block';
+            // } else {
+            //     newBestLevelElement.style.display = 'none';
+            // }
 
             // Store pending score for potential leaderboard submission
             if (isEligibleForSubmission) {
@@ -1875,7 +1877,7 @@
         window.addEventListener('load', () => {
             // Apply upgrades on page load
             applyUpgrades();
-            initializeLeaderboard();
+            // initializeLeaderboard();
 
             // Force initial draw
             setTimeout(() => {
