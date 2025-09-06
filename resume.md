@@ -12,47 +12,52 @@ title: Alejandro L. Ramirez - Resume
     <h1>Resume</h1>
     <div class="title">Alejandro L. Ramirez - Game Producer & Developer Tools Engineer</div>
     <div class="bio">
-        View or download my complete resume below. For the most up-to-date version and additional portfolio information, please visit my <a href="/" class="highlight">main portfolio page</a>.
+        View or download my complete resume below. Choose between game development or software engineering focus. For additional portfolio information, please visit my <a href="/" class="highlight">main portfolio page</a>.
     </div>
 </div>
 
 <div class="sections">
     <div class="section full-width">
-        <h2>Resume</h2>
+        <h2>Resume Selection</h2>
 
-        <!-- Download Button - Prominent and mobile-friendly -->
-        <div class="project" style="margin-bottom: 2rem;">
-            <div class="project-desc" style="text-align: center;">
-                <a href="/assets/resume.pdf" download="Alejandro_Ramirez_Resume.pdf" class="download-btn" style="
-                    display: inline-block;
-                    padding: 12px 24px;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    font-size: 1.1rem;
-                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-                    transition: all 0.3s ease;
-                    border: 1px solid rgba(255, 255, 255, 0.2);
-                ">
-                    📄 Download (PDF)
+        <!-- Resume Type Selector -->
+        <div class="resume-selector" style="margin-bottom: 2rem;">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <button id="gamedevBtn" class="resume-type-btn active" onclick="switchResume('gamedev')">
+                    🎮 Game Development
+                </button>
+                <button id="softwareBtn" class="resume-type-btn" onclick="switchResume('software')">
+                    💻 Software Engineering
+                </button>
+            </div>
+
+            <!-- Download Buttons -->
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <a id="gamedevDownload" href="/assets/resume_gamedev.pdf" download="Alejandro_Ramirez_GameDev_Resume.pdf" class="download-btn">
+                    📄 Download Game Dev Resume (PDF)
                 </a>
-                <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7;">
-                    Click to download • Mobile-friendly • You're beautiful today :)
-                </p>
+                <a id="softwareDownload" href="/assets/resume_software.pdf" download="Alejandro_Ramirez_Software_Resume.pdf" class="download-btn" style="display: none;">
+                    📄 Download Software Resume (PDF)
+                </a>
             </div>
         </div>
 
+        <!-- Resume Viewers -->
         <div class="project">
             <div class="project-desc">
-                <div style="width: 100%; height: 800px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; overflow: hidden; background: rgba(255, 255, 255, 0.05);">
-                    <embed src="/assets/resume.pdf" type="application/pdf" width="100%" height="100%" style="border: none;">
-
-                    <!-- Fallback for browsers that don't support embed -->
-                    <div style="padding: 40px; text-align: center">
+                <div id="gamedevViewer" class="resume-viewer" style="width: 100%; height: 800px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; overflow: hidden; background: rgba(255, 255, 255, 0.05);">
+                    <iframe src="/assets/resume_gamedev.pdf" width="100%" height="100%" style="border: none;" type="application/pdf"></iframe>
+                    <div class="pdf-fallback" style="display: none;">
                         <p>Your browser doesn't support PDF viewing.</p>
-                        <p>Please <a href="/assets/resume.pdf" download="Alejandro_Ramirez_Resume.pdf" class="highlight">download the resume</a> to view it.</p>
+                        <p>Please <a href="/assets/resume_gamedev.pdf" download="Alejandro_Ramirez_GameDev_Resume.pdf" class="highlight">download the game dev resume</a> to view it.</p>
+                    </div>
+                </div>
+
+                <div id="softwareViewer" class="resume-viewer" style="display: none; width: 100%; height: 800px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; overflow: hidden; background: rgba(255, 255, 255, 0.05);">
+                    <iframe src="/assets/resume_software.pdf" width="100%" height="100%" style="border: none;" type="application/pdf"></iframe>
+                    <div class="pdf-fallback" style="display: none;">
+                        <p>Your browser doesn't support PDF viewing.</p>
+                        <p>Please <a href="/assets/resume_software.pdf" download="Alejandro_Ramirez_Software_Resume.pdf" class="highlight">download the software resume</a> to view it.</p>
                     </div>
                 </div>
             </div>
@@ -62,14 +67,29 @@ title: Alejandro L. Ramirez - Resume
     <div class="section full-width">
         <h2>Summary</h2>
 
-        <div class="project">
-            <div class="project-title">Professional Highlights</div>
-            <div class="project-desc">
-                <strong>Recent Role:</strong> Producer/Dev Tools/QA at Stray Kite Studios<br>
-                <strong>Background:</strong> iOS Automation Software Engineer at Apple Inc.<br>
-                <strong>Education:</strong> M.S. Interactive Technology (SMU), B.S. Computer Science (LeTourneau)<br>
-                <strong>Shipped Titles:</strong> Wartorn, Asurya's Embers, SeaFeud<br>
-                <strong>Specialties:</strong> Game Production, Developer Tools, QA, Automation
+        <div id="gamedevSummary" class="resume-summary">
+            <div class="project">
+                <div class="project-title">Game Development Highlights</div>
+                <div class="project-desc">
+                    <strong>Recent Role:</strong> Producer/Dev Tools/QA at Stray Kite Studios<br>
+                    <strong>Shipped Titles:</strong> Wartorn, Asurya's Embers, SeaFeud<br>
+                    <strong>Education:</strong> M.S. Interactive Technology (SMU), B.S. Computer Science (LeTourneau)<br>
+                    <strong>Core Skills:</strong> Game Production, Games User Testing, QA Automation, Team Leadership<br>
+                    <strong>Specialties:</strong> Developer Tools, Gameplay Programming, Production Pipeline
+                </div>
+            </div>
+        </div>
+
+        <div id="softwareSummary" class="resume-summary">
+            <div class="project">
+                <div class="project-title">Software Engineering Highlights</div>
+                <div class="project-desc">
+                    <strong>Recent Role:</strong> iOS Automation Software Engineer at Apple Inc.<br>
+                    <strong>Background:</strong> Full-stack development, Automation, and Developer Tools<br>
+                    <strong>Education:</strong> M.S. Interactive Technology (SMU), B.S. Computer Science (LeTourneau)<br>
+                    <strong>Core Skills:</strong> Python, C++, Test Automation, CI/CD<br>
+                    <strong>Specialties:</strong> Developer Tools, Test Framework Design, Process Automation
+                </div>
             </div>
         </div>
     </div>
@@ -100,3 +120,68 @@ title: Alejandro L. Ramirez - Resume
         </div>
     </div>
 </div>
+
+<script>
+    // Resume switching functionality
+    function switchResume(type) {
+        const gamedevBtn = document.getElementById('gamedevBtn');
+        const softwareBtn = document.getElementById('softwareBtn');
+        const gamedevViewer = document.getElementById('gamedevViewer');
+        const softwareViewer = document.getElementById('softwareViewer');
+        const gamedevDownload = document.getElementById('gamedevDownload');
+        const softwareDownload = document.getElementById('softwareDownload');
+        const gamedevSummary = document.getElementById('gamedevSummary');
+        const softwareSummary = document.getElementById('softwareSummary');
+
+        if (type === 'gamedev') {
+            // Update buttons
+            gamedevBtn.classList.add('active');
+            softwareBtn.classList.remove('active');
+
+            // Show/hide viewers
+            gamedevViewer.style.display = 'block';
+            softwareViewer.style.display = 'none';
+            refreshiFrame(gamedevViewer, '/assets/resume_gamedev.pdf');
+
+            // Show/hide download links
+            gamedevDownload.style.display = 'inline-block';
+            softwareDownload.style.display = 'none';
+
+            // Show/hide summaries
+            gamedevSummary.style.display = 'block';
+            softwareSummary.style.display = 'none';
+        } else if (type === 'software') {
+            // Update buttons
+            softwareBtn.classList.add('active');
+            gamedevBtn.classList.remove('active');
+
+            // Show/hide viewers
+            softwareViewer.style.display = 'block';
+            gamedevViewer.style.display = 'none';
+            refreshiFrame(softwareViewer, '/assets/resume_software.pdf');
+
+            // Show/hide download links
+            softwareDownload.style.display = 'inline-block';
+            gamedevDownload.style.display = 'none';
+
+            // Show/hide summaries
+            softwareSummary.style.display = 'block';
+            gamedevSummary.style.display = 'none';
+        }
+    }
+
+    // Helper function to refresh iframe elements
+    function refreshiFrame(container, pdfSrc) {
+        const iframe = container.querySelector('iframe');
+        if (iframe) {
+            const newIframe = iframe.cloneNode(true);
+            newIframe.src = pdfSrc + '?t=' + Date.now(); // force reload
+            iframe.parentNode.replaceChild(newIframe, iframe);
+        }
+    }
+
+    // Initialize resume view on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        switchResume('gamedev');
+    });
+</script>
