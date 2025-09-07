@@ -10,9 +10,9 @@ title: Alejandro L. Ramirez - Game Producer
     <div class="profile-img">AL</div>
     {% endif %}
     <h1>Alejandro L. Ramirez</h1>
-    <div class="title">Game Producer & Developer Tools Engineer</div>
+    <div class="title">Game Producer & DevTools/Sotfware Engineer</div>
     <div class="bio">
-        Dedicated game development professional seeking production or dev tool roles. Quick to learn new skills and relentless in searching for opportunities to <span class="highlight">automate himself out of a job</span>. Currently Producer/Dev Tools/QA at Stray Kite Studios with a background as iOS Automation Software Engineer at Apple Inc.
+        Dedicated game development professional seeking production, dev tool, or software engineering roles. Quick to learn new skills and relentless in searching for opportunities to <span class="highlight">automate himself out of a job</span>. Most recently Producer/Dev Tools/QA at Stray Kite Studios with a background as iOS Automation Software Engineer at Apple Inc.
     </div>
 </div>
 
@@ -67,7 +67,7 @@ title: Alejandro L. Ramirez - Game Producer
         <h2>Recent Role</h2>
         <div class="project">
             <div class="project-title">Producer/Dev Tools/QA</div>
-            <div class="project-subtitle">Stray Kite Studios LLC • October 2024 - Present</div>
+            <div class="project-subtitle">Stray Kite Studios LLC • October 2024 - August 2025</div>
             <div class="project-desc">
                 <strong>Production:</strong> Jira administration, scrum/meeting management, project estimation via Google Sheet dashboards, and roadmap development.
                 <br><br>

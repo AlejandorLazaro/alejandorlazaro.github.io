@@ -10,7 +10,7 @@ title: Alejandro L. Ramirez - Resume
     <div class="profile-img">AL</div>
     {% endif %}
     <h1>Resume</h1>
-    <div class="title">Alejandro L. Ramirez - Game Producer & Developer Tools Engineer</div>
+    <div class="title">Alejandro L. Ramirez - Game Producer & DevTools/Software Engineer</div>
     <div class="bio">
         View or download my complete resume below. Choose between game development or software engineering focus. For additional portfolio information, please visit my <a href="/" class="highlight">main portfolio page</a>.
     </div>
