@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block Puzzle 3D</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 10px;
+            touch-action: none;
+        }
+
+        .game-container {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 95vw;
+        }
+
+        .game-title {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+        }
+
+        #gameCanvas {
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow:
+                0 0 20px rgba(0, 255, 136, 0.2),
+                inset 0 0 20px rgba(0, 0, 0, 0.3);
+            max-width: 90vw;
+            max-height: 60vh;
+            display: block;
+            margin: 0 auto;
+            touch-action: none;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 20px 0;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            font-weight: bold;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .info-item {
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .controls {
+            margin-top: 20px;
+            font-size: clamp(0.7rem, 2vw, 0.85rem);
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+
+        .controls kbd {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: inherit;
+            font-size: 0.85em;
+            margin: 0 2px;
+        }
+
+        .win-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .win-message.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .win-message h2 {
+            color: #00ff88;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .win-message button {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .win-message button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .orientation-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: clamp(0.7rem, 2vw, 0.85rem);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .controls kbd {
+                display: none;
+            }
+
+            .controls::after {
+                content: "Swipe to move the block";
+                display: block;
+            }
+        }
+
+        .loading {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">BLOCK PUZZLE 3D</h1>
+        <p class="game-subtitle">Roll the block to the exit hole</p>
+
+        <div class="orientation-indicator" id="orientationDisplay">
+            Standing
+        </div>
+
+        <div class="game-info">
+            <div class="info-item">Level: <span id="levelDisplay">1</span></div>
+            <div class="info-item">Moves: <span id="moveDisplay">0</span></div>
+        </div>
+
+        <div id="canvasContainer" style="position: relative;">
+            <canvas id="gameCanvas" width="600" height="600"></canvas>
+        </div>
+
+        <div class="button-group">
+            <button class="btn" onclick="resetLevel()">🔄 Reset</button>
+            <button class="btn" onclick="toggleCamera()">📷 Camera</button>
+        </div>
+
+        <div class="controls">
+            Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> to tip the block<br>
+            <kbd>R</kbd> to reset • <kbd>C</kbd> to toggle camera
+        </div>
+    </div>
+
+    <div class="win-message" id="winMessage">
+        <h2>🎉 Level Complete! 🎉</h2>
+        <p>Moves: <span id="finalMoves">0</span></p>
+        <button onclick="nextLevel()">Next Level</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Game state
+        const gameState = {
+            level: 1,
+            moves: 0,
+            blockPosition: { x: 0, y: 0 },
+            blockOrientation: 'standing', // 'standing', 'lying-x', 'lying-y'
+            isAnimating: false,
+            isResetting: false,
+            cameraMode: 'isometric' // 'isometric' or 'top'
+        };
+
+        // Level data
+        const levels = [
+            {
+                id: 1,
+                grid: [
+                    [1, 1, 1, 1],
+                    [1, 1, 1, 1],
+                    [1, 1, 1, 1],
+                    [1, 1, 1, 2]
+                ],
+                start: { x: 0, y: 0, orientation: 'standing' },
+            },
+            {
+                id: 2,
+                grid: [
+                    [1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1],
+                    [0, 1, 1, 1, 1],
+                    [0, 0, 1, 1, 2]
+                ],
+                start: { x: 0, y: 0, orientation: 'standing' },
+            },
+            {
+                id: 3,
+                grid: [
+                    [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 1, 1, 2, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                ],
+                start: { x: 1, y: 1, orientation: 'standing' },
+            }
+        ];
+
+        let currentLevel = levels[0];
+
+        // Three.js setup
+        const canvas = document.getElementById('gameCanvas');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a0a);
+
+        const camera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(canvas.width, canvas.height);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 5);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.shadow.camera.near = 0.5;
+        directionalLight.shadow.camera.far = 50;
+        directionalLight.shadow.camera.left = -10;
+        directionalLight.shadow.camera.right = 10;
+        directionalLight.shadow.camera.top = 10;
+        directionalLight.shadow.camera.bottom = -10;
+        scene.add(directionalLight);
+
+        // Game objects
+        let gridTiles = [];
+        let playerBlock = null;
+        let exitTile = null;
+
+        // Materials
+        const tileMaterial = new THREE.MeshStandardMaterial({
+            color: 0x2a2a3a,
+            roughness: 0.7,
+            metalness: 0.3
+        });
+
+        const exitMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00ff88,
+            emissive: 0x00ff88,
+            emissiveIntensity: 0.3,
+            roughness: 0.5,
+            metalness: 0.5
+        });
+
+        const blockMaterial = new THREE.MeshStandardMaterial({
+            color: 0xCC562A,
+            roughness: 0.5,
+            metalness: 0.3
+        });
+
+        // Build grid
+        function buildGrid() {
+            // Clear existing grid
+            gridTiles.forEach(tile => scene.remove(tile));
+            gridTiles = [];
+            if (exitTile) scene.remove(exitTile);
+
+            const grid = currentLevel.grid;
+            const tileSize = 1;
+            const tileHeight = 0.2;
+
+            for (let y = 0; y < grid.length; y++) {
+                for (let x = 0; x < grid[y].length; x++) {
+                    const tileType = grid[y][x];
+
+                    if (tileType > 0) {
+                        const geometry = new THREE.BoxGeometry(tileSize, tileHeight, tileSize);
+                        const material = tileType === 2 ? exitMaterial.clone() : tileMaterial.clone();
+                        const tile = new THREE.Mesh(geometry, material);
+
+                        tile.position.set(x * tileSize, 0, y * tileSize);
+                        tile.castShadow = false;
+                        tile.receiveShadow = true;
+
+                        scene.add(tile);
+                        gridTiles.push(tile);
+
+                        if (tileType === 2) {
+                            exitTile = tile;
+                            currentLevel.exit = { x, y }
+                            // Add a glow effect
+                            const glowGeometry = new THREE.BoxGeometry(tileSize * 0.8, tileHeight + 0.1, tileSize * 0.8);
+                            const glowMaterial = new THREE.MeshBasicMaterial({
+                                color: 0x00ff88,
+                                transparent: true,
+                                opacity: 0.3
+                            });
+                            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+                            glow.position.y = 0.05;
+                            tile.add(glow);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Create player block
+        function createPlayerBlock() {
+            if (playerBlock) scene.remove(playerBlock);
+
+            const blockWidth = 1.0;
+            const blockHeight = 2.0;
+            const geometry = new THREE.BoxGeometry(blockWidth, blockHeight, blockWidth);
+            playerBlock = new THREE.Mesh(geometry, blockMaterial);
+            playerBlock.castShadow = true;
+            playerBlock.receiveShadow = true;
+
+            updateBlockPosition(false);
+            scene.add(playerBlock);
+        }
+
+        // Update block position based on game state
+        function updateBlockPosition(animate = true, direction = null) {
+            const { x, y } = gameState.blockPosition;
+            const tileSize = 1;
+
+            let targetPosition = new THREE.Vector3(x * tileSize, 0, y * tileSize);
+            let targetRotation = new THREE.Euler(0, 0, 0);
+
+            // Adjust height based on orientation
+            switch (gameState.blockOrientation) {
+                case 'standing':
+                    targetPosition.y = 1.1; // Half of 2.0 (block height) + 0.1 (tile height)
+                    break;
+                case 'lying-x':
+                    targetPosition.y = 0.6; // Half of 1.0 (block width) + 0.1
+                    targetRotation.z = -Math.PI / 2;
+                    break;
+                case 'lying-y':
+                    targetPosition.y = 0.6;
+                    targetRotation.x = Math.PI / 2;
+                    break;
+            }
+
+            // Adjust rotation based on direction
+            //
+            //                Z+
+            //                |
+            //                |
+            //                |
+            //                ^
+            //              /   \
+            //             /     \
+            //            /       \
+            //           Y+        X+
+            //
+            //
+            // switch (direction) {
+            //     case 'up':
+            //         targetRotation.x = Math.PI / 2;  // Rotate clockwise in the negative Y direction
+            //         break;
+            //     case 'right':
+            //         targetRotation.z = Math.PI / 2;  // Rotate clockwise in the negative X direction
+            //         break;
+            //     case 'down':
+            //         targetRotation.x = -Math.PI / 2;  // Rotate clockwise in the positive Y direction
+            //         break;
+            //     case 'left':
+            //         targetRotation.z = -Math.PI / 2;  // Rotate clockwise in the positive X direction
+            //         break;
+            // }
+
+            if (animate && playerBlock) {
+                animateBlock(targetPosition, targetRotation);
+            } else if (playerBlock) {
+                playerBlock.position.copy(targetPosition);
+                playerBlock.rotation.copy(targetRotation);
+            }
+        }
+
+        // Animate block movement
+        function animateBlock(targetPosition, targetRotation) {
+            if (!playerBlock) return;
+
+            gameState.isAnimating = true;
+            const startPosition = playerBlock.position.clone();
+            const startRotation = playerBlock.rotation.clone();
+            const duration = 400; // ms
+            const startTime = Date.now();
+
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = easeInOutCubic(progress);
+
+                playerBlock.position.lerpVectors(startPosition, targetPosition, eased);
+                playerBlock.rotation.x = startRotation.x + (targetRotation.x - startRotation.x) * eased;
+                playerBlock.rotation.y = startRotation.y + (targetRotation.y - startRotation.y) * eased;
+                playerBlock.rotation.z = startRotation.z + (targetRotation.z - startRotation.z) * eased;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    gameState.isAnimating = false;
+                    checkWinCondition();
+                }
+            }
+
+            animate();
+        }
+
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        // Calculate block footprint
+        function getBlockFootprint() {
+            const { x, y } = gameState.blockPosition;
+            const orientation = gameState.blockOrientation;
+
+            switch (orientation) {
+                case 'standing':
+                    return [{ x, y }];
+                case 'lying-x':
+                    return [{ x, y }, { x: x + 1, y }];
+                case 'lying-y':
+                    return [{ x, y }, { x, y: y + 1 }];
+                default:
+                    return [{ x, y }];
+            }
+        }
+
+        // Check if position is valid
+        function isValidPosition(x, y) {
+            const grid = currentLevel.grid;
+            if (y < 0 || y >= grid.length || x < 0 || x >= grid[0].length) {
+                return false;
+            }
+            return grid[y][x] > 0;
+        }
+
+        // Move block
+        function moveBlock(direction) {
+            if (gameState.isAnimating || gameState.isResetting || gameState.hasWon) return;
+
+            const { x, y } = gameState.blockPosition;
+            const orientation = gameState.blockOrientation;
+            let newX = x, newY = y, newOrientation = orientation;
+
+            // Calculate new position and orientation based on tipping
+            switch (direction) {
+                case 'up':
+                    if (orientation === 'standing') {
+                        newY = y - 2;
+                        newOrientation = 'lying-y';
+                    } else if (orientation === 'lying-y') {
+                        newY = y - 1;
+                        newOrientation = 'standing';
+                    } else if (orientation === 'lying-x') {
+                        newY = y - 1;
+                        newOrientation = 'lying-x';
+                    }
+                    break;
+                case 'down':
+                    if (orientation === 'standing') {
+                        newY = y + 1;
+                        newOrientation = 'lying-y';
+                    } else if (orientation === 'lying-y') {
+                        newY = y + 2;
+                        newOrientation = 'standing';
+                    } else if (orientation === 'lying-x') {
+                        newY = y + 1;
+                        newOrientation = 'lying-x';
+                    }
+                    break;
+                case 'left':
+                    if (orientation === 'standing') {
+                        newX = x - 2;
+                        newOrientation = 'lying-x';
+                    } else if (orientation === 'lying-x') {
+                        newX = x - 1;
+                        newOrientation = 'standing';
+                    } else if (orientation === 'lying-y') {
+                        newX = x - 1;
+                        newOrientation = 'lying-y';
+                    }
+                    break;
+                case 'right':
+                    if (orientation === 'standing') {
+                        newX = x + 1;
+                        newOrientation = 'lying-x';
+                    } else if (orientation === 'lying-x') {
+                        newX = x + 2;
+                        newOrientation = 'standing';
+                    } else if (orientation === 'lying-y') {
+                        newX = x + 1;
+                        newOrientation = 'lying-y';
+                    }
+                    break;
+            }
+
+            // Validate all footprint positions
+            const testState = { x: newX, y: newY, orientation: newOrientation };
+            const footprint = getFootprintForState(testState);
+            const valid = footprint.every(pos => isValidPosition(pos.x, pos.y));
+
+            // Store previous state for animation
+            const prevX = gameState.blockPosition.x;
+            const prevY = gameState.blockPosition.y;
+            const prevOrientation = gameState.blockOrientation;
+
+            gameState.blockPosition = { x: newX, y: newY };
+            gameState.blockOrientation = newOrientation;
+            gameState.moves++;
+
+            updateDisplay();
+
+            if (valid) {
+                // updateBlockPosition(true, direction);
+                animateBlockTipping(prevX, prevY, prevOrientation, direction);
+            } else {
+                // Invalid move - animate falling off
+                animateBlockFalling(prevX, prevY, prevOrientation, direction);
+            }
+        }
+
+        // Animate block tipping with proper pivot rotation
+        function animateBlockTipping(prevX, prevY, prevOrientation, direction) {
+            if (!playerBlock) return;
+
+            const tileSize = 1;
+            const { x: newX, y: newY } = gameState.blockPosition;
+            const newOrientation = gameState.blockOrientation;
+
+            gameState.isAnimating = true;
+            const duration = 400;
+            const startTime = Date.now();
+
+            const startPos = playerBlock.position.clone();
+            const startRot = { x: playerBlock.rotation.x, y: playerBlock.rotation.y, z: playerBlock.rotation.z };
+
+            const targetPos = new THREE.Vector3(
+                newX * tileSize,
+                newOrientation === 'standing' ? 1.1 : 0.6,
+                newY * tileSize
+            );
+
+            const targetRot = {
+                x: newOrientation === 'lying-y' ? Math.PI / 2 : 0,
+                y: 0,
+                z: newOrientation === 'lying-x' ? Math.PI / 2 : 0
+            };
+
+            // For lying movements that just slide
+            const isSliding = (prevOrientation === 'lying-x' && (direction === 'up' || direction === 'down')) ||
+                             (prevOrientation === 'lying-y' && (direction === 'left' || direction === 'right'));
+
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = easeInOutCubic(progress);
+
+                if (isSliding) {
+                    // Simple linear interpolation for sliding
+                    playerBlock.position.lerpVectors(startPos, targetPos, eased);
+                } else {
+                    // Arc motion for tipping
+                    const arcHeight = 0.3;
+                    playerBlock.position.x = startPos.x + (targetPos.x - startPos.x) * eased;
+                    playerBlock.position.y = startPos.y + (targetPos.y - startPos.y) * eased +
+                                            Math.sin(eased * Math.PI) * arcHeight;
+                    playerBlock.position.z = startPos.z + (targetPos.z - startPos.z) * eased;
+                }
+
+                // Interpolate rotation
+                playerBlock.rotation.x = startRot.x + (targetRot.x - startRot.x) * eased;
+                playerBlock.rotation.y = startRot.y + (targetRot.y - startRot.y) * eased;
+                playerBlock.rotation.z = startRot.z + (targetRot.z - startRot.z) * eased;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Snap to final position
+                    playerBlock.position.copy(targetPos);
+                    playerBlock.rotation.x = targetRot.x;
+                    playerBlock.rotation.y = targetRot.y;
+                    playerBlock.rotation.z = targetRot.z;
+
+                    gameState.isAnimating = false;
+                    checkWinCondition();
+                }
+            }
+
+            animate();
+        }
+
+        // Animate block falling off the grid
+        function animateBlockFalling(prevX, prevY, prevOrientation, direction) {
+            if (!playerBlock) return;
+
+            gameState.isAnimating = true;
+            const duration = 1200;
+            const startTime = Date.now();
+            const tileSize = 1;
+
+            const startPos = playerBlock.position.clone();
+            const startRot = { x: playerBlock.rotation.x, y: playerBlock.rotation.y, z: playerBlock.rotation.z };
+            const startColor = new THREE.Color(blockMaterial.color);
+            const endColor = new THREE.Color(0x000000);
+
+            // Calculate fall direction
+            let fallDirX = 0, fallDirZ = 0;
+            switch (direction) {
+                case 'up': fallDirZ = -1; break;
+                case 'down': fallDirZ = 1; break;
+                case 'left': fallDirX = -1; break;
+                case 'right': fallDirX = 1; break;
+            }
+
+            function fallAnimate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Parabolic fall with rotation
+                const fallDistance = 5;
+                const horizontalProgress = progress * 2; // Move faster horizontally
+                const verticalProgress = progress * progress * 2; // Accelerate downward
+
+                playerBlock.position.x = startPos.x + fallDirX * horizontalProgress * fallDistance;
+                playerBlock.position.y = startPos.y - verticalProgress * fallDistance;
+                playerBlock.position.z = startPos.z + fallDirZ * horizontalProgress * fallDistance;
+
+                // Tumbling rotation
+                playerBlock.rotation.x = startRot.x + progress * Math.PI * 2 * fallDirZ;
+                playerBlock.rotation.y = startRot.y + progress * Math.PI * 3;
+                playerBlock.rotation.z = startRot.z + progress * Math.PI * 2 * fallDirX;
+
+                // Fade to black
+                const currentColor = new THREE.Color().lerpColors(startColor, endColor, progress);
+                playerBlock.material.color.copy(currentColor);
+
+                if (progress < 1) {
+                    requestAnimationFrame(fallAnimate);
+                } else {
+                    gameState.isAnimating = false;
+                    gameState.isResetting = true;
+                    // Reset level after falling
+                    setTimeout(() => {
+                        // Restore original color
+                        playerBlock.material.color.copy(startColor);
+                        resetLevel();
+                    }, 500);
+                }
+            }
+
+            fallAnimate();
+        }
+
+        function getFootprintForState(state) {
+            const { x, y, orientation } = state;
+            switch (orientation) {
+                case 'standing':
+                    return [{ x, y }];
+                case 'lying-x':
+                    return [{ x, y }, { x: x + 1, y }];
+                case 'lying-y':
+                    return [{ x, y }, { x, y: y + 1 }];
+                default:
+                    return [{ x, y }];
+            }
+        }
+
+        // Check win condition
+        function checkWinCondition() {
+            const { x, y } = gameState.blockPosition;
+            const exit = currentLevel.exit;
+
+            if (x === exit.x && y === exit.y && gameState.blockOrientation === 'standing') {
+                winLevel();
+            }
+        }
+
+        // Win level
+        function winLevel() {
+            gameState.hasWon = true;
+            document.getElementById('finalMoves').textContent = gameState.moves;
+            document.getElementById('winMessage').classList.add('show');
+        }
+
+        // Next level
+        function nextLevel() {
+            document.getElementById('winMessage').classList.remove('show');
+            gameState.level++;
+
+            if (gameState.level <= levels.length) {
+                currentLevel = levels[gameState.level - 1];
+                resetLevel();
+            } else {
+                alert('Congratulations! You completed all levels and finished the game!');
+                gameState.level = 1;
+                currentLevel = levels[0];
+                resetLevel();
+            }
+        }
+
+        // Reset level
+        function resetLevel() {
+            gameState.blockPosition = { ...currentLevel.start };
+            gameState.blockOrientation = currentLevel.start.orientation;
+            gameState.moves = 0;
+            gameState.isAnimating = false;
+            gameState.isResetting = false;
+            gameState.hasWon = false;
+
+            buildGrid();
+            createPlayerBlock();
+            updateCamera();
+            updateDisplay();
+        }
+
+        // Update display
+        function updateDisplay() {
+            document.getElementById('levelDisplay').textContent = gameState.level;
+            document.getElementById('moveDisplay').textContent = gameState.moves;
+
+            const orientationText = {
+                'standing': 'Standing',
+                'lying-x': 'Lying (→)',
+                'lying-y': 'Lying (↓)'
+            };
+            document.getElementById('orientationDisplay').textContent = orientationText[gameState.blockOrientation];
+        }
+
+        // Toggle camera
+        function toggleCamera() {
+            gameState.cameraMode = gameState.cameraMode === 'isometric' ? 'top' : 'isometric';
+            updateCamera();
+        }
+
+        function updateCamera() {
+            const grid = currentLevel.grid;
+            const gridWidth = grid[0].length;
+            const gridHeight = grid.length;
+
+            // Calculate grid bounds
+            const centerX = (gridWidth - 1) / 2;
+            const centerY = (gridHeight - 1) / 2;
+
+            // Calculate distance needed to fit the entire grid
+            // Use a minimum distance for small grids, scale up for larger ones
+            const maxDimension = Math.max(gridWidth, gridHeight);
+            const minDistance = 5; // Minimum distance for small grids
+            const baseDist = Math.max(minDistance, maxDimension * 0.7);
+
+            if (gameState.cameraMode === 'isometric') {
+                camera.position.set(centerX + baseDist, baseDist * 1.2, centerY + baseDist);
+                camera.lookAt(centerX, 0, centerY);
+            } else {
+                camera.position.set(centerX, baseDist * 1.8, centerY);
+                camera.lookAt(centerX, 0, centerY);
+            }
+        }
+
+        // Touch/Swipe controls
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, false);
+
+        canvas.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, false);
+
+        function handleSwipe() {
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+            const minSwipeDistance = 30;
+
+            if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+                return;
+            }
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Horizontal swipe
+                if (deltaX > 0) {
+                    moveBlock('right');
+                } else {
+                    moveBlock('left');
+                }
+            } else {
+                // Vertical swipe
+                if (deltaY > 0) {
+                    moveBlock('down');
+                } else {
+                    moveBlock('up');
+                }
+            }
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (gameState.isAnimating || gameState.isResetting || gameState.hasWon) return;
+
+            switch(e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'w':
+                    e.preventDefault();
+                    moveBlock('up');
+                    break;
+                case 'arrowdown':
+                case 's':
+                    e.preventDefault();
+                    moveBlock('down');
+                    break;
+                case 'arrowleft':
+                case 'a':
+                    e.preventDefault();
+                    moveBlock('left');
+                    break;
+                case 'arrowright':
+                case 'd':
+                    e.preventDefault();
+                    moveBlock('right');
+                    break;
+                case 'r':
+                    resetLevel();
+                    break;
+                case 'c':
+                    toggleCamera();
+                    break;
+            }
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Pulse exit tile
+            if (exitTile && exitTile.children[0]) {
+                const time = Date.now() * 0.002;
+                exitTile.children[0].material.opacity = 0.2 + Math.sin(time) * 0.1;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('canvasContainer');
+            const maxWidth = Math.min(window.innerWidth * 0.9, 600);
+            const maxHeight = Math.min(window.innerHeight * 0.6, 600);
+            const size = Math.min(maxWidth, maxHeight);
+
+            canvas.width = size;
+            canvas.height = size;
+            renderer.setSize(size, size);
+            camera.aspect = 1;
+            camera.updateProjectionMatrix();
+        });
+
+        // Initialize game
+        function init() {
+            resetLevel();
+            updateCamera();
+            animate();
+        }
+
+        init();
+    </script>
+</body>
+</html>
