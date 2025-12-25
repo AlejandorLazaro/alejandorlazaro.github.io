@@ -253,89 +253,92 @@
             cameraMode: 'isometric' // 'isometric' or 'top'
         };
 
-        // // Level data
-        // const levels = [
-        //     {
-        //         id: 1,
-        //         grid: [
-        //             [1, 1, 1, 1],
-        //             [1, 1, 1, 1],
-        //             [1, 1, 1, 1],
-        //             [1, 1, 1, 2]
-        //         ],
-        //         start: { x: 0, y: 0, orientation: 'standing' },
-        //     },
-        //     {
-        //         id: 2,
-        //         grid: [
-        //             [1, 1, 1, 1, 1],
-        //             [1, 1, 1, 1, 1],
-        //             [0, 1, 1, 1, 1],
-        //             [0, 0, 1, 1, 2]
-        //         ],
-        //         start: { x: 0, y: 0, orientation: 'standing' },
-        //     },
-        //     {
-        //         id: 3,
-        //         grid: [
-        //             [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-        //             [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-        //             [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-        //             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        //             [0, 0, 0, 0, 0, 1, 1, 2, 1, 1],
-        //             [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
-        //         ],
-        //         start: { x: 1, y: 1, orientation: 'standing' },
-        //     },
-        //     {
-        //         id: 4,
-        //         grid: [
-        //             [0, 0, 0   , 0, 0, 0, 1, 1, 1   , 1, 0, 0, 1, 1, 1],
-        //             [1, 1, 1   , 1, 0, 0, 1, 1, "h4", 1, 0, 0, 1, 2, 1],
-        //             [1, 1, "s3", 1, 0, 0, 1, 1, 1   , 1, 0, 0, 1, 1, 1],
-        //             [1, 1, 1   , 1, 0, 0, 1, 1, 1   , 1, 0, 0, 1, 1, 1],
-        //             [1, 1, 1   , 1, 3, 3, 1, 1, 1   , 1, 4, 4, 1, 1, 1],
-        //             [1, 1, 1   , 1, 0, 0, 1, 1, 1   , 1, 0, 0, 0, 0, 0],
-        //         ],
-        //         start: { x: 1, y: 1, orientation: 'standing' },
-        //     },
-        // ];
-
         // New level format using text representation
         const levelDefinitions = [
             {
                 id: 1,
                 name: "Tutorial",
                 layout: `
-                    1 1 1 1
-                    1 1 1 1
-                    1 1 1 1
-                    1 1 1 2
+                    * 1 1 1 0
+                    1 1 1 1 0
+                    0 0 1 1 1
+                    0 0 1 @ 1
+                    0 0 1 1 1
                 `,
-                start: { x: 0, y: 0, orientation: 'standing' }
+                password: "12345",
             },
             {
                 id: 2,
-                name: "Bridge Test",
+                name: "Simplex",
                 layout: `
-                    1  1  1  sEa  1
-                    1  1  1  1    1
-                    0  1  1  bDa  1
-                    0  0  1  1    2
+                    1 1 1 0 0 0 0 0 0 0
+                    1 * 1 1 1 1 0 0 0 0
+                    1 1 1 1 1 1 1 1 1 0
+                    0 1 1 1 1 1 1 1 1 1
+                    0 0 0 0 0 1 1 @ 1 1
+                    0 0 0 0 0 0 1 1 1 0
                 `,
-                start: { x: 0, y: 0, orientation: 'standing' }
+                password: "l3vl2"
             },
             {
                 id: 3,
-                name: "Fragile Floor",
+                name: "Bridges",
                 layout: `
-                    1 1 1 0
-                    1 3 3 3
-                    1 3 3 3
-                    0 1 1 2
+                    0 0 0    0 0  0  1 1 1    1  0  0  1 1 1
+                    1 * 1    1 0  0  1 1 hEb  1  0  0  1 @ 1
+                    1 1 sEa  1 0  0  1 1 1    1  0  0  1 1 1
+                    1 1 1    1 0  0  1 1 1    1  0  0  1 1 1
+                    1 1 1    1 ba ba 1 1 1    1  bb bb 1 1 1
+                    1 1 1    1 0  0  1 1 1    1  0  0  0 0 0
                 `,
-                start: { x: 0, y: 0, orientation: 'standing' }
-            }
+                password: "2brdg", // TODO: Add support to provide passwords to jump to levels
+            },
+            {
+                id: 4,
+                name: "Sections",
+                layout: `
+                    0 0 0 0 0 0 1 1 1 1 1 1 1 0 0
+                    1 1 1 1 0 0 1 1 1 0 0 1 1 0 0
+                    1 1 1 1 1 1 1 1 1 0 0 1 1 1 1
+                    1 * 1 1 0 0 0 0 0 0 0 1 1 @ 1
+                    1 1 1 1 0 0 0 0 0 0 0 1 1 1 1
+                    0 0 0 0 0 0 0 0 0 0 0 0 1 1 1
+                `,
+                password: "53cts"
+            },
+            {
+                id: 4,
+                name: "Delicate",
+                layout: `
+                    0 0 0 f f f f f f f 0 0 0 0
+                    0 0 0 f f f f f f f 0 0 0 0
+                    1 1 1 1 0 0 0 0 0 1 1 1 0 0
+                    1 1 1 0 0 0 0 0 0 0 1 1 0 0
+                    1 1 1 0 0 0 0 0 0 0 1 1 0 0
+                    1 * 1 0 0 1 1 1 1 f f f f f
+                    1 1 1 0 0 1 1 1 1 f f f f f
+                    0 0 0 0 0 1 @ 1 0 0 f f 1 f
+                    0 0 0 0 0 1 1 1 0 0 f f f f
+                `,
+                password: "delc8"
+            },
+            {
+                id: 5,
+                name: "Switches",
+                layout: `
+                    0 0 0 0   0 0   0   0 0   0   1 1 1 1 1
+                    0 1 1 1   1 bEa bEa 1 sa  1   1 1 1 * 1
+                    0 1 1 1   1 0   0   0 0   0   0 0 1 1 1
+                    0 1 1 sEc 1 0   0   0 0   0   0 0 0 0 0
+                    0 1 1 1   1 0   0   0 0   0   0 0 0 0 0
+                    0 0 0 1   1 1   sDc 1 bEb bEb 1 1 1 0 0
+                    0 0 0 0   0 0   0   0 0   0   1 1 1 1 sc
+                    1 1 1 0   0 0   0   0 0   0   1 1 1 1 1
+                    1 @ 1 1   1 bEc bEc 1 1   1   1 1 1 0 0
+                    1 1 1 1   0 0   0   0 0   0   0 0 0 0 0
+                `,
+                password: "sw1tc"
+            },
         ];
 
         // Parse level layout text into grid data
@@ -344,6 +347,7 @@
             const grid = [];
             const bridges = {}; // Store bridge tile info by ID
             const switches = {}; // Store switch info by ID
+            let start = { x: 1, y: 1 };
 
             lines.forEach((line, y) => {
                 const tiles = line.split(/\s+/);
@@ -352,6 +356,10 @@
                 tiles.forEach((tile, x) => {
                     const parsed = parseTile(tile, x, y);
                     row.push(parsed);
+
+                    if (parsed.type === 'start') {
+                        start = { x: x, y: y };
+                    }
 
                     // Track bridges and switches for linking
                     if (parsed.type === 'bridge') {
@@ -367,11 +375,16 @@
                 grid.push(row);
             });
 
-            return { grid, bridges, switches };
+            return { grid, bridges, switches, start };
         }
 
         function parseTile(tileStr, x, y) {
             tileStr = tileStr.trim();
+
+            // Player start (always a plain tile)
+            if (tileStr === '*') {
+                return { type: 'start', value: 1 };
+            }
 
             // Empty/hole
             if (tileStr === '0') {
@@ -384,12 +397,12 @@
             }
 
             // Exit
-            if (tileStr === '2') {
+            if (tileStr === '@') {
                 return { type: 'exit', value: 2 };
             }
 
             // Fragile tile
-            if (tileStr === '3') {
+            if (tileStr === 'f') {
                 return { type: 'fragile', value: 3 };
             }
 
@@ -461,7 +474,7 @@
                 grid: parsed.grid,
                 bridges: parsed.bridges,
                 switches: parsed.switches,
-                start: levelDef.start
+                start: parsed.start
             };
         }
 
@@ -500,6 +513,27 @@
         let playerBlock = null;
         let exitTile = null;
 
+        // TODO: Textures are expensive when randomly rotating the block; it freezes the game
+        // Load in textures for the game objects
+        const textureLoader = new THREE.TextureLoader();
+
+        // Load textures for the different faces
+        const tileTexture = textureLoader.load('/assets/img/tile.png', () => {
+            console.log('Tile texture loaded successfully');
+        });
+        // const blockSideTexture = textureLoader.load('/assets/img/box_long_face.jpg', () => {
+        //     console.log('Side texture loaded successfully');
+        // });
+        // // Create materials using the loaded textures
+        const tileMaterials = [
+            new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ map: tileTexture, color: 0xDED3CC }), // Front face (1x1 face)
+            new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7, metalness: 0.3 }), // Back face (1x1 face)
+            new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7, metalness: 0.3 }),
+        ];
+
         // Materials
         const tileMaterial = new THREE.MeshStandardMaterial({
             color: 0x2a2a3a,
@@ -513,15 +547,27 @@
             metalness: 0.3
         });
 
-        const exitMaterial = new THREE.MeshStandardMaterial({
+        const fragileTileMaterials = [
+            new THREE.MeshStandardMaterial({ color: 0xcc562a, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0xcc562a, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ map: tileTexture, color: 0xcc562a }), // Front face (1x1 face)
+            new THREE.MeshStandardMaterial({ color: 0xcc562a, roughness: 0.7, metalness: 0.3 }), // Back face (1x1 face)
+            new THREE.MeshStandardMaterial({ color: 0xcc562a, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0xcc562a, roughness: 0.7, metalness: 0.3 }),
+        ];
+
+        const exitHoleMaterial = new THREE.MeshStandardMaterial({
+            transparent: true,
+            opacity: 0
+        });
+        const exitHoleGlowMaterial = new THREE.MeshStandardMaterial({
             color: 0x00ff88,
-            emissive: 0x00ff88,
-            emissiveIntensity: 0.3,
-            roughness: 0.5,
-            metalness: 0.5
+            transparent: true,
+            opacity: 0.6
         });
 
         const blockMaterial = new THREE.MeshStandardMaterial({
+            // map: blockTexture,
             color: 0xcc562a,
             roughness: 0.5,
             metalness: 0.3
@@ -538,6 +584,7 @@
             const tileSize = 1;
             const tileHeight = 0.2;
             const spacing = gameState.showGridSpacing ? 0.05 : 0;
+            const adjustedSize = tileSize - (spacing * 2);
 
             for (let y = 0; y < grid.length; y++) {
                 for (let x = 0; x < grid[y].length; x++) {
@@ -545,22 +592,17 @@
 
                     if (tileData.type === 'empty') continue;
 
-                    const adjustedSize = tileSize - (spacing * 2);
                     const geometry = new THREE.BoxGeometry(adjustedSize, tileHeight, adjustedSize);
                     let material;
 
                     // Choose material based on tile type
                     switch(tileData.type) {
                         case 'exit':
-                            material = exitMaterial.clone();
+                            material = exitHoleMaterial.clone();
                             break;
 
                         case 'fragile':
-                            material = new THREE.MeshStandardMaterial({
-                                color: 0x8B4513,
-                                roughness: 0.8,
-                                metalness: 0.2
-                            });
+                            material = fragileTileMaterials;
                             break;
 
                         case 'bridge':
@@ -598,7 +640,7 @@
                             break;
 
                         default: // normal tile
-                            material = tileMaterial.clone();
+                            material = tileMaterials//.clone();
                     }
 
                     const tile = new THREE.Mesh(geometry, material);
@@ -621,26 +663,30 @@
                         currentLevel.exit = { x, y };
 
                         // Add glow effect
-                        const glowGeometry = new THREE.BoxGeometry(adjustedSize * 0.8, tileHeight + 0.1, adjustedSize * 0.8);
-                        const glowMaterial = new THREE.MeshBasicMaterial({
-                            color: 0x00ff88,
-                            transparent: true,
-                            opacity: 0.3
-                        });
-                        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-                        glow.position.y = 0.05;
+                        const glowGeometry = new THREE.BoxGeometry(adjustedSize * 0.9, 0.05, adjustedSize * 0.9);
+                        const glow = new THREE.Mesh(glowGeometry, exitHoleGlowMaterial);
+                        glow.position.y = -0.3;
                         tile.add(glow);
                     }
 
                     // Add visual indicator for switches
                     if (tileData.type === 'switch') {
-                        const indicatorGeometry = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 16);
-                        const indicatorMaterial = new THREE.MeshStandardMaterial({
+                        let indicatorGeometry = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 16);
+                        let indicatorMaterial = new THREE.MeshStandardMaterial({
                             color: material.color,
                             emissive: material.color,
                             emissiveIntensity: 0.5
                         });
-                        const indicator = new THREE.Mesh(indicatorGeometry, indicatorMaterial);
+                        if (tileData.subtype === 'heavy') {
+                            indicatorGeometry = new THREE.BoxGeometry(.6, .2, .6);
+                            indicatorMaterial = new THREE.MeshStandardMaterial({
+                                color: material.color,
+                                emissive: material.color,
+                                emissiveIntensity: 0.5
+                            });
+                        }
+
+                        let indicator = new THREE.Mesh(indicatorGeometry, indicatorMaterial);
                         indicator.position.y = 0.25;
                         tile.add(indicator);
                     }
@@ -790,7 +836,7 @@
                     requestAnimationFrame(animate);
                 } else {
                     gameState.isAnimating = false;
-                    checkWinCondition();
+                    checkExitTile();
                 }
             }
 
@@ -847,8 +893,8 @@
                     setTimeout(() => {
                         buildGrid();
                         // Block will fall after grid rebuilds
-                        animateBlockFalling(x, y, orientation, 'down');
-                    }, 100);
+                        animateBlockFalling(x, y, orientation, 'in-place');
+                    }, 500);
 
                     return true; // Tile broke
                 }
@@ -937,17 +983,17 @@
                 // animateBlockTippingDirectAngle(prevX, prevY, prevOrientation, direction);
 
                 // After animation completes, check for special tiles
-                setTimeout(() => {
-                    // Check switch activation
-                    const footprint = getBlockFootprint();
-                    footprint.forEach(pos => {
-                        checkSwitchActivation(pos.x, pos.y, gameState.blockOrientation);
-                    });
+                // setTimeout(() => {
+                // Check switch activation
+                const footprint = getBlockFootprint();
+                footprint.forEach(pos => {
+                    checkSwitchActivation(pos.x, pos.y, gameState.blockOrientation);
+                });
 
-                    // Check fragile tiles (only check center tile)
-                    const didBreak = checkFragileTile(gameState.blockPosition.x, gameState.blockPosition.y, gameState.blockOrientation);
+                // Check fragile tiles (only check center tile)
+                const didBreak = checkFragileTile(gameState.blockPosition.x, gameState.blockPosition.y, gameState.blockOrientation);
 
-                }, /** duration + **/ 50); // Slight delay after animation
+                // }, /** duration + **/ 1050); // Slight delay after animation
             } else {
                 // Invalid move - animate falling off
                 animateBlockFalling(prevX, prevY, prevOrientation, direction);
@@ -969,6 +1015,7 @@
 
             const startPos = playerBlock.position.clone();
             const startRot = playerBlock.rotation.clone(); // Store current rotation as THREE.Vector3
+            // console.log(`StartPos: (${startPos.x}, ${startPos.y}, ${startPos.z}); StartRot: (${startRot.x}, ${startRot.y}, ${startRot.z})`);
 
             const targetPos = new THREE.Vector3(
                 newX * tileSize,
@@ -1015,7 +1062,47 @@
             }
 
             // Combine with current rotation
+            const startQuaternion = new THREE.Quaternion().setFromEuler(startRot);
             const newQuaternion = new THREE.Quaternion().multiplyQuaternions(quaternion, new THREE.Quaternion().setFromEuler(startRot));
+
+            // Normalize the start and target quaternions before interpolation
+            startQuaternion.normalize();
+            newQuaternion.normalize();
+
+            // // Check if quaternion is defined and log details
+            // if (startQuaternion) {
+            //     console.log(`Start Quaternion:
+            //     x: ${startQuaternion.x},
+            //     y: ${startQuaternion.y},
+            //     z: ${startQuaternion.z},
+            //     w: ${startQuaternion.w}`);
+
+            //     // Check if the quaternion is valid (non-zero and normalized)
+            //     console.log(`Is Quaternion Valid? ${startQuaternion.length() > 0 ? 'Yes' : 'No'}`);
+
+            //     // Logging the length to check if it is normalized
+            //     console.log(`Quaternion Length: ${startQuaternion.length()}`);
+            // } else {
+            //     console.error('Error: startQuaternion is undefined');
+            // }
+
+
+            // // Check if quaternion is defined and log details
+            // if (newQuaternion) {
+            //     console.log(`New Quaternion:
+            //     x: ${newQuaternion.x},
+            //     y: ${newQuaternion.y},
+            //     z: ${newQuaternion.z},
+            //     w: ${newQuaternion.w}`);
+
+            //     // Check if the quaternion is valid (non-zero and normalized)
+            //     console.log(`Is Quaternion Valid? ${newQuaternion.length() > 0 ? 'Yes' : 'No'}`);
+
+            //     // Logging the length to check if it is normalized
+            //     console.log(`Quaternion Length: ${newQuaternion.length()}`);
+            // } else {
+            //     console.error('Error: newQuaternion is undefined');
+            // }
 
             function animate() {
                 const elapsed = Date.now() - startTime;
@@ -1025,18 +1112,49 @@
                 // Calculate new position
                 playerBlock.position.lerpVectors(startPos, targetPos, eased);
 
-                // Interpolate rotation using Euler angles
-                let interpolatedQuaternion = new THREE.Quaternion().slerpQuaternions(new THREE.Quaternion().setFromEuler(startRot), newQuaternion, eased);
-                // playerBlock.rotation.setFromQuaternion(interpolatedQuaternion);  // THIS IS CAUSING FAILURES!!!
+                // Interpolate rotation using Euler angles in the animate function
+                let interpolatedQuaternion = new THREE.Quaternion(); // Initialize this variable
+
+                // Interpolating the rotation
+                interpolatedQuaternion.slerp(startQuaternion, newQuaternion, eased);
+
+                // // Interpolate rotation using Euler angles
+                // let interpolatedQuaternion = new THREE.Quaternion().slerpQuaternions(new THREE.Quaternion().setFromEuler(startRot), newQuaternion, eased);
+
+                // // Check if interpolatedQuaternion is defined and log details
+                // if (interpolatedQuaternion) {
+                //     console.log(`Interpolated Quaternion (after slerp):
+                //     x: ${interpolatedQuaternion.x},
+                //     y: ${interpolatedQuaternion.y},
+                //     z: ${interpolatedQuaternion.z},
+                //     w: ${interpolatedQuaternion.w}`);
+
+                //     // Check if the quaternion is valid (non-zero and normalized)
+                //     console.log(`Is Quaternion Valid? ${interpolatedQuaternion.length() > 0 ? 'Yes' : 'No'}`);
+
+                //     // Logging the length to check if it is normalized
+                //     console.log(`Quaternion Length: ${interpolatedQuaternion.length()}`);
+                // } else {
+                //     console.error('Error: interpolatedQuaternion is undefined');
+                // }
+
+                // playerBlock.rotation.setFromQuaternion(interpolatedQuaternion);  // THIS IS CAUSING FAILURES TO EVEN MOVE!!!
 
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
                     playerBlock.position.copy(targetPos);
                     playerBlock.rotation.setFromQuaternion(newQuaternion);
+                    // console.log(`Quaternion (after animating):
+                    // x: ${playerBlock.rotation.x},
+                    // y: ${playerBlock.rotation.y},
+                    // z: ${playerBlock.rotation.z},
+                    // w: ${playerBlock.rotation.w}`);
+
+                    // console.log(`EndPos: (${playerBlock.position.x}, ${playerBlock.position.y}, ${playerBlock.position.z}); StartRot: (${playerBlock.rotation.x}, ${playerBlock.rotation.y}, ${playerBlock.rotation.z})`);
 
                     gameState.isAnimating = false;
-                    checkWinCondition();
+                    checkExitTile();
                 }
             }
 
@@ -1128,7 +1246,7 @@
                     playerBlock.rotation.z = targetRot.z;
 
                     gameState.isAnimating = false;
-                    checkWinCondition();
+                    checkExitTile();
                 }
             }
 
@@ -1136,7 +1254,7 @@
         }
 
         // Animate block falling off the grid
-        function animateBlockFalling(prevX, prevY, prevOrientation, direction) {
+        function animateBlockFalling(prevX, prevY, prevOrientation, direction, reset = true) {
             if (!playerBlock) return;
 
             gameState.isAnimating = true;
@@ -1156,6 +1274,7 @@
                 case 'down': fallDirZ = 1; break;
                 case 'left': fallDirX = -1; break;
                 case 'right': fallDirX = 1; break;
+                case 'in-place': break;
             }
 
             function fallAnimate() {
@@ -1163,6 +1282,8 @@
                 const progress = Math.min(elapsed / duration, 1);
 
                 // Parabolic fall with rotation
+                // TODO: Works... but fails with gimbal lock/local rotation issues without quaternions.
+
                 const fallDistance = 5;
                 const horizontalProgress = progress * 2; // Move faster horizontally
                 const verticalProgress = progress * progress * 2; // Accelerate downward
@@ -1173,8 +1294,7 @@
 
                 // Tumbling rotation
                 playerBlock.rotation.x = startRot.x + progress * Math.PI * 2 * fallDirZ;
-                playerBlock.rotation.y = startRot.y + progress * Math.PI * 3;
-                playerBlock.rotation.z = startRot.z + progress * Math.PI * 2 * fallDirX;
+                playerBlock.rotation.z = startRot.z + progress * Math.PI * 2 * -fallDirX;
 
                 // Fade to black
                 const currentColor = new THREE.Color().lerpColors(startColor, endColor, progress);
@@ -1189,7 +1309,9 @@
                     setTimeout(() => {
                         // Restore original color
                         playerBlock.material.color.copy(startColor);
-                        resetLevel();
+                        if (reset) {
+                            resetLevel();
+                        }
                     }, 500);
                 }
             }
@@ -1212,17 +1334,36 @@
         }
 
         // Check win condition
-        function checkWinCondition() {
+        function checkExitTile() {
             const { x, y } = gameState.blockPosition;
+            const tileData = getTileAt(x, y);
             const exit = currentLevel.exit;
 
-            if (x === exit.x && y === exit.y && gameState.blockOrientation === 'standing') {
-                winLevel();
+            if (tileData && tileData.type == 'exit') {
+                if (gameState.blockOrientation === 'standing'){
+                    setTimeout(() => {
+                        animateBlockFalling(x, y, 'standing', 'in-place', reset = false);
+
+                        setTimeout(() => {
+                            winLevel();
+                        }, 100);
+                    }, 100);
+
+                    return true;
+                }
             }
+
+            return false;
         }
 
         // Win level
         function winLevel() {
+            if (gameState.isAnimating) {
+                // Wait for animation to finish
+                setTimeout(winLevel, 100);
+                return;
+            }
+
             gameState.hasWon = true;
             document.getElementById('finalMoves').textContent = gameState.moves;
             document.getElementById('winMessage').classList.add('show');
@@ -1248,7 +1389,7 @@
         function resetLevel() {
             currentLevel = loadLevel(levelDefinitions[gameState.level - 1]);
             gameState.blockPosition = { ...currentLevel.start };
-            gameState.blockOrientation = currentLevel.start.orientation;
+            gameState.blockOrientation = 'standing';
             gameState.moves = 0;
             gameState.isAnimating = false;
             gameState.isResetting = false;
