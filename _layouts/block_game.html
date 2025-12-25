@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -202,6 +203,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="game-container">
         <h1 class="game-title">BLOCK PUZZLE 3D</h1>
@@ -226,7 +228,8 @@
         </div>
 
         <div class="controls">
-            Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> to tip the block<br>
+            Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd>
+            <kbd>D</kbd> to tip the block<br>
             <kbd>R</kbd> to reset • <kbd>C</kbd> to toggle camera
         </div>
     </div>
@@ -250,43 +253,219 @@
             cameraMode: 'isometric' // 'isometric' or 'top'
         };
 
-        // Level data
-        const levels = [
+        // // Level data
+        // const levels = [
+        //     {
+        //         id: 1,
+        //         grid: [
+        //             [1, 1, 1, 1],
+        //             [1, 1, 1, 1],
+        //             [1, 1, 1, 1],
+        //             [1, 1, 1, 2]
+        //         ],
+        //         start: { x: 0, y: 0, orientation: 'standing' },
+        //     },
+        //     {
+        //         id: 2,
+        //         grid: [
+        //             [1, 1, 1, 1, 1],
+        //             [1, 1, 1, 1, 1],
+        //             [0, 1, 1, 1, 1],
+        //             [0, 0, 1, 1, 2]
+        //         ],
+        //         start: { x: 0, y: 0, orientation: 'standing' },
+        //     },
+        //     {
+        //         id: 3,
+        //         grid: [
+        //             [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+        //             [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+        //             [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        //             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        //             [0, 0, 0, 0, 0, 1, 1, 2, 1, 1],
+        //             [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+        //         ],
+        //         start: { x: 1, y: 1, orientation: 'standing' },
+        //     },
+        //     {
+        //         id: 4,
+        //         grid: [
+        //             [0, 0, 0   , 0, 0, 0, 1, 1, 1   , 1, 0, 0, 1, 1, 1],
+        //             [1, 1, 1   , 1, 0, 0, 1, 1, "h4", 1, 0, 0, 1, 2, 1],
+        //             [1, 1, "s3", 1, 0, 0, 1, 1, 1   , 1, 0, 0, 1, 1, 1],
+        //             [1, 1, 1   , 1, 0, 0, 1, 1, 1   , 1, 0, 0, 1, 1, 1],
+        //             [1, 1, 1   , 1, 3, 3, 1, 1, 1   , 1, 4, 4, 1, 1, 1],
+        //             [1, 1, 1   , 1, 0, 0, 1, 1, 1   , 1, 0, 0, 0, 0, 0],
+        //         ],
+        //         start: { x: 1, y: 1, orientation: 'standing' },
+        //     },
+        // ];
+
+        // New level format using text representation
+        const levelDefinitions = [
             {
                 id: 1,
-                grid: [
-                    [1, 1, 1, 1],
-                    [1, 1, 1, 1],
-                    [1, 1, 1, 1],
-                    [1, 1, 1, 2]
-                ],
-                start: { x: 0, y: 0, orientation: 'standing' },
+                name: "Tutorial",
+                layout: `
+                    1 1 1 1
+                    1 1 1 1
+                    1 1 1 1
+                    1 1 1 2
+                `,
+                start: { x: 0, y: 0, orientation: 'standing' }
             },
             {
                 id: 2,
-                grid: [
-                    [1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1],
-                    [0, 1, 1, 1, 1],
-                    [0, 0, 1, 1, 2]
-                ],
-                start: { x: 0, y: 0, orientation: 'standing' },
+                name: "Bridge Test",
+                layout: `
+                    1  1  1  sEa  1
+                    1  1  1  1    1
+                    0  1  1  bDa  1
+                    0  0  1  1    2
+                `,
+                start: { x: 0, y: 0, orientation: 'standing' }
             },
             {
                 id: 3,
-                grid: [
-                    [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-                    [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [0, 0, 0, 0, 0, 1, 1, 2, 1, 1],
-                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
-                ],
-                start: { x: 1, y: 1, orientation: 'standing' },
+                name: "Fragile Floor",
+                layout: `
+                    1 1 1 0
+                    1 3 3 3
+                    1 3 3 3
+                    0 1 1 2
+                `,
+                start: { x: 0, y: 0, orientation: 'standing' }
             }
         ];
 
-        let currentLevel = levels[0];
+        // Parse level layout text into grid data
+        function parseLevelLayout(layoutText) {
+            const lines = layoutText.trim().split('\n').map(line => line.trim());
+            const grid = [];
+            const bridges = {}; // Store bridge tile info by ID
+            const switches = {}; // Store switch info by ID
+
+            lines.forEach((line, y) => {
+                const tiles = line.split(/\s+/);
+                const row = [];
+
+                tiles.forEach((tile, x) => {
+                    const parsed = parseTile(tile, x, y);
+                    row.push(parsed);
+
+                    // Track bridges and switches for linking
+                    if (parsed.type === 'bridge') {
+                        if (!bridges[parsed.id]) bridges[parsed.id] = [];
+                        bridges[parsed.id].push({ x, y });
+                    }
+                    if (parsed.type === 'switch') {
+                        if (!switches[parsed.id]) switches[parsed.id] = [];
+                        switches[parsed.id].push({ x, y, mode: parsed.mode });
+                    }
+                });
+
+                grid.push(row);
+            });
+
+            return { grid, bridges, switches };
+        }
+
+        function parseTile(tileStr, x, y) {
+            tileStr = tileStr.trim();
+
+            // Empty/hole
+            if (tileStr === '0') {
+                return { type: 'empty', value: 0 };
+            }
+
+            // Plain tile
+            if (tileStr === '1') {
+                return { type: 'normal', value: 1 };
+            }
+
+            // Exit
+            if (tileStr === '2') {
+                return { type: 'exit', value: 2 };
+            }
+
+            // Fragile tile
+            if (tileStr === '3') {
+                return { type: 'fragile', value: 3 };
+            }
+
+            // Bridge tile (e.g., "ba", "bEb", "bDc")
+            if (tileStr.startsWith('b')) {
+                let active_status = false; // default
+                let id = tileStr.substring(1);
+
+                if (id.startsWith('E')) {
+                    active_status = true;
+                    id = id.substring(1);
+                } else if (id.startsWith('D')) {
+                    active_status = false;
+                    id = id.substring(1);
+                }
+
+                return { type: 'bridge', value: 4, id, active: active_status };
+            }
+
+            // Simple switch (e.g., "sEa", "sDa", "sa")
+            if (tileStr.startsWith('s')) {
+                let mode = 'toggle'; // default
+                let id = tileStr.substring(1);
+
+                if (id.startsWith('E')) {
+                    mode = 'enable';
+                    id = id.substring(1);
+                } else if (id.startsWith('D')) {
+                    mode = 'disable';
+                    id = id.substring(1);
+                }
+
+                return { type: 'switch', subtype: 'simple', value: 5, id, mode };
+            }
+
+            // Heavy switch (requires standing, e.g., "hEa", "hDa", "ha")
+            if (tileStr.startsWith('h')) {
+                let mode = 'toggle';
+                let id = tileStr.substring(1);
+
+                if (id.startsWith('E')) {
+                    mode = 'enable';
+                    id = id.substring(1);
+                } else if (id.startsWith('D')) {
+                    mode = 'disable';
+                    id = id.substring(1);
+                }
+
+                return { type: 'switch', subtype: 'heavy', value: 6, id, mode };
+            }
+
+            // Teleport switch (e.g., "ta")
+            if (tileStr.startsWith('t')) {
+                const id = tileStr.substring(1);
+                return { type: 'switch', subtype: 'teleport', value: 7, id };
+            }
+
+            // Default to normal tile
+            return { type: 'normal', value: 1 };
+        }
+
+        // Convert parsed level to usable format
+        function loadLevel(levelDef) {
+            const parsed = parseLevelLayout(levelDef.layout);
+
+            return {
+                id: levelDef.id,
+                name: levelDef.name,
+                grid: parsed.grid,
+                bridges: parsed.bridges,
+                switches: parsed.switches,
+                start: levelDef.start
+            };
+        }
+
+        let currentLevel = loadLevel(levelDefinitions[0]);
 
         // Three.js setup
         const canvas = document.getElementById('gameCanvas');
@@ -328,6 +507,12 @@
             metalness: 0.3
         });
 
+        const fragileTileMaterial = new THREE.MeshStandardMaterial({
+            color: 0xcc562a,
+            roughness: 0.7,
+            metalness: 0.3
+        });
+
         const exitMaterial = new THREE.MeshStandardMaterial({
             color: 0x00ff88,
             emissive: 0x00ff88,
@@ -337,12 +522,12 @@
         });
 
         const blockMaterial = new THREE.MeshStandardMaterial({
-            color: 0xCC562A,
+            color: 0xcc562a,
             roughness: 0.5,
             metalness: 0.3
         });
 
-        // Build grid
+        // Build grid with special tile support
         function buildGrid() {
             // Clear existing grid
             gridTiles.forEach(tile => scene.remove(tile));
@@ -352,40 +537,159 @@
             const grid = currentLevel.grid;
             const tileSize = 1;
             const tileHeight = 0.2;
+            const spacing = gameState.showGridSpacing ? 0.05 : 0;
 
             for (let y = 0; y < grid.length; y++) {
                 for (let x = 0; x < grid[y].length; x++) {
-                    const tileType = grid[y][x];
+                    const tileData = grid[y][x];
 
-                    if (tileType > 0) {
-                        const geometry = new THREE.BoxGeometry(tileSize, tileHeight, tileSize);
-                        const material = tileType === 2 ? exitMaterial.clone() : tileMaterial.clone();
-                        const tile = new THREE.Mesh(geometry, material);
+                    if (tileData.type === 'empty') continue;
 
-                        tile.position.set(x * tileSize, 0, y * tileSize);
-                        tile.castShadow = false;
-                        tile.receiveShadow = true;
+                    const adjustedSize = tileSize - (spacing * 2);
+                    const geometry = new THREE.BoxGeometry(adjustedSize, tileHeight, adjustedSize);
+                    let material;
 
-                        scene.add(tile);
-                        gridTiles.push(tile);
+                    // Choose material based on tile type
+                    switch(tileData.type) {
+                        case 'exit':
+                            material = exitMaterial.clone();
+                            break;
 
-                        if (tileType === 2) {
-                            exitTile = tile;
-                            currentLevel.exit = { x, y }
-                            // Add a glow effect
-                            const glowGeometry = new THREE.BoxGeometry(tileSize * 0.8, tileHeight + 0.1, tileSize * 0.8);
-                            const glowMaterial = new THREE.MeshBasicMaterial({
-                                color: 0x00ff88,
-                                transparent: true,
-                                opacity: 0.3
+                        case 'fragile':
+                            material = new THREE.MeshStandardMaterial({
+                                color: 0x8B4513,
+                                roughness: 0.8,
+                                metalness: 0.2
                             });
-                            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-                            glow.position.y = 0.05;
-                            tile.add(glow);
-                        }
+                            break;
+
+                        case 'bridge':
+                            material = new THREE.MeshStandardMaterial({
+                                color: tileData.active ? 0x4169E1 : 0x1a1a2e,
+                                roughness: 0.6,
+                                metalness: 0.4,
+                                transparent: !tileData.active,
+                                opacity: tileData.active ? 1.0 : 0.3
+                            });
+                            break;
+
+                        case 'switch':
+                            let switchColor;
+                            switch(tileData.subtype) {
+                                case 'simple':
+                                    switchColor = 0xFFD700; // Gold
+                                    break;
+                                case 'heavy':
+                                    switchColor = 0xFF4500; // Orange-red
+                                    break;
+                                case 'teleport':
+                                    switchColor = 0xFF00FF; // Magenta
+                                    break;
+                                default:
+                                    switchColor = 0xFFD700;
+                            }
+                            material = new THREE.MeshStandardMaterial({
+                                color: switchColor,
+                                emissive: switchColor,
+                                emissiveIntensity: 0.2,
+                                roughness: 0.5,
+                                metalness: 0.5
+                            });
+                            break;
+
+                        default: // normal tile
+                            material = tileMaterial.clone();
+                    }
+
+                    const tile = new THREE.Mesh(geometry, material);
+                    tile.position.set(x * tileSize, 0, y * tileSize);
+                    tile.castShadow = false;
+                    tile.receiveShadow = true;
+
+                    // Store tile metadata
+                    tile.userData = {
+                        gridX: x,
+                        gridY: y,
+                        tileData: tileData
+                    };
+
+                    scene.add(tile);
+                    gridTiles.push(tile);
+
+                    if (tileData.type === 'exit') {
+                        exitTile = tile;
+                        currentLevel.exit = { x, y };
+
+                        // Add glow effect
+                        const glowGeometry = new THREE.BoxGeometry(adjustedSize * 0.8, tileHeight + 0.1, adjustedSize * 0.8);
+                        const glowMaterial = new THREE.MeshBasicMaterial({
+                            color: 0x00ff88,
+                            transparent: true,
+                            opacity: 0.3
+                        });
+                        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+                        glow.position.y = 0.05;
+                        tile.add(glow);
+                    }
+
+                    // Add visual indicator for switches
+                    if (tileData.type === 'switch') {
+                        const indicatorGeometry = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 16);
+                        const indicatorMaterial = new THREE.MeshStandardMaterial({
+                            color: material.color,
+                            emissive: material.color,
+                            emissiveIntensity: 0.5
+                        });
+                        const indicator = new THREE.Mesh(indicatorGeometry, indicatorMaterial);
+                        indicator.position.y = 0.25;
+                        tile.add(indicator);
                     }
                 }
             }
+        }
+
+        // Check for switch activation
+        function checkSwitchActivation(x, y, orientation) {
+            const tileData = getTileAt(x, y);
+
+            if (!tileData || tileData.type !== 'switch') return;
+
+            // Heavy switches require standing
+            if (tileData.subtype === 'heavy' && orientation !== 'standing') return;
+
+            // Activate switch
+            activateSwitch(tileData.id, tileData.mode);
+        }
+
+        function activateSwitch(switchId, mode) {
+            if (!currentLevel.bridges[switchId]) return;
+
+            const bridgeTiles = currentLevel.bridges[switchId];
+
+            bridgeTiles.forEach(pos => {
+                const tileData = currentLevel.grid[pos.y][pos.x];
+
+                switch(mode) {
+                    case 'enable':
+                        tileData.active = true;
+                        break;
+                    case 'disable':
+                        tileData.active = false;
+                        break;
+                    case 'toggle':
+                        tileData.active = !tileData.active;
+                        break;
+                }
+            });
+
+            // Rebuild grid to reflect changes
+            buildGrid();
+        }
+
+        // Helper to get tile at position
+        function getTileAt(x, y) {
+            if (!currentLevel.grid[y] || !currentLevel.grid[y][x]) return null;
+            return currentLevel.grid[y][x];
         }
 
         // Create player block
@@ -418,11 +722,11 @@
                     break;
                 case 'lying-x':
                     targetPosition.y = 0.6; // Half of 1.0 (block width) + 0.1
-                    targetRotation.z = -Math.PI / 2;
+                    // targetRotation.z = -Math.PI / 2;
                     break;
                 case 'lying-y':
                     targetPosition.y = 0.6;
-                    targetRotation.x = Math.PI / 2;
+                    // targetRotation.x = Math.PI / 2;
                     break;
             }
 
@@ -435,24 +739,24 @@
             //                ^
             //              /   \
             //             /     \
-            //            /       \
+            //      down  /       \  right
             //           Y+        X+
             //
             //
-            // switch (direction) {
-            //     case 'up':
-            //         targetRotation.x = Math.PI / 2;  // Rotate clockwise in the negative Y direction
-            //         break;
-            //     case 'right':
-            //         targetRotation.z = Math.PI / 2;  // Rotate clockwise in the negative X direction
-            //         break;
-            //     case 'down':
-            //         targetRotation.x = -Math.PI / 2;  // Rotate clockwise in the positive Y direction
-            //         break;
-            //     case 'left':
-            //         targetRotation.z = -Math.PI / 2;  // Rotate clockwise in the positive X direction
-            //         break;
-            // }
+            switch (direction) {
+                case 'up':
+                    targetRotation.x -= Math.PI / 2;  // Rotate clockwise in the negative Y direction
+                    break;
+                case 'right':
+                    targetRotation.z += Math.PI / 2;  // Rotate clockwise in the negative X direction
+                    break;
+                case 'down':
+                    targetRotation.x += Math.PI / 2;  // Rotate clockwise in the positive Y direction
+                    break;
+                case 'left':
+                    targetRotation.z = Math.PI / 2;  // Rotate clockwise in the positive X direction
+                    break;
+            }
 
             if (animate && playerBlock) {
                 animateBlock(targetPosition, targetRotation);
@@ -516,11 +820,41 @@
 
         // Check if position is valid
         function isValidPosition(x, y) {
-            const grid = currentLevel.grid;
-            if (y < 0 || y >= grid.length || x < 0 || x >= grid[0].length) {
-                return false;
+            const tileData = getTileAt(x, y);
+            if (!tileData) return false;
+
+            // Empty tiles are invalid
+            if (tileData.type === 'empty') return false;
+
+            // Inactive bridges are invalid
+            if (tileData.type === 'bridge' && !tileData.active) return false;
+
+            return true;
+        }
+
+        // Check fragile tile breaking
+        function checkFragileTile(x, y, orientation) {
+            const tileData = getTileAt(x, y);
+
+            if (tileData && tileData.type === 'fragile') {
+                // Fragile tiles break if standing on them
+                if (orientation === 'standing') {
+                    // Make tile disappear
+                    tileData.type = 'empty';
+                    tileData.value = 0;
+
+                    // Rebuild to show broken tile
+                    setTimeout(() => {
+                        buildGrid();
+                        // Block will fall after grid rebuilds
+                        animateBlockFalling(x, y, orientation, 'down');
+                    }, 100);
+
+                    return true; // Tile broke
+                }
             }
-            return grid[y][x] > 0;
+
+            return false; // Tile didn't break
         }
 
         // Move block
@@ -597,19 +931,32 @@
             gameState.blockOrientation = newOrientation;
             gameState.moves++;
 
-            updateDisplay();
-
             if (valid) {
                 // updateBlockPosition(true, direction);
-                animateBlockTipping(prevX, prevY, prevOrientation, direction);
+                animateBlockTippingQuaternion(prevX, prevY, prevOrientation, direction);
+                // animateBlockTippingDirectAngle(prevX, prevY, prevOrientation, direction);
+
+                // After animation completes, check for special tiles
+                setTimeout(() => {
+                    // Check switch activation
+                    const footprint = getBlockFootprint();
+                    footprint.forEach(pos => {
+                        checkSwitchActivation(pos.x, pos.y, gameState.blockOrientation);
+                    });
+
+                    // Check fragile tiles (only check center tile)
+                    const didBreak = checkFragileTile(gameState.blockPosition.x, gameState.blockPosition.y, gameState.blockOrientation);
+
+                }, /** duration + **/ 50); // Slight delay after animation
             } else {
                 // Invalid move - animate falling off
                 animateBlockFalling(prevX, prevY, prevOrientation, direction);
             }
+
+            updateDisplay();
         }
 
-        // Animate block tipping with proper pivot rotation
-        function animateBlockTipping(prevX, prevY, prevOrientation, direction) {
+        function animateBlockTippingQuaternion(prevX, prevY, prevOrientation, direction) {
             if (!playerBlock) return;
 
             const tileSize = 1;
@@ -621,7 +968,7 @@
             const startTime = Date.now();
 
             const startPos = playerBlock.position.clone();
-            const startRot = { x: playerBlock.rotation.x, y: playerBlock.rotation.y, z: playerBlock.rotation.z };
+            const startRot = playerBlock.rotation.clone(); // Store current rotation as THREE.Vector3
 
             const targetPos = new THREE.Vector3(
                 newX * tileSize,
@@ -629,32 +976,142 @@
                 newY * tileSize
             );
 
-            const targetRot = {
-                x: newOrientation === 'lying-y' ? Math.PI / 2 : 0,
-                y: 0,
-                z: newOrientation === 'lying-x' ? Math.PI / 2 : 0
-            };
+            // Create a quaternion for the new rotation
+            const quaternion = new THREE.Quaternion();
 
-            // For lying movements that just slide
-            const isSliding = (prevOrientation === 'lying-x' && (direction === 'up' || direction === 'down')) ||
-                             (prevOrientation === 'lying-y' && (direction === 'left' || direction === 'right'));
+            switch (direction) {
+                case 'up':
+                    quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
+                    if (newOrientation == 'lying-y') {
+                        targetPos.z += .5;
+                    } else if (newOrientation == 'lying-x') {
+                        targetPos.x += .5;
+                    }
+                    break;
+                case 'down':
+                    quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+                    if (newOrientation == 'lying-y') {
+                        targetPos.z += .5;
+                    } else if (newOrientation == 'lying-x') {
+                        targetPos.x += .5;
+                    }
+                    break;
+                case 'left':
+                    quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
+                    if (newOrientation == 'lying-x') {
+                        targetPos.x += .5;
+                    } else if (newOrientation == 'lying-y') {
+                        targetPos.z += .5;
+                    }
+                    break;
+                case 'right':
+                    quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -Math.PI / 2);
+                    if (newOrientation == 'lying-x') {
+                        targetPos.x += .5;
+                    } else if (newOrientation == 'lying-y') {
+                        targetPos.z += .5;
+                    }
+                    break;
+            }
+
+            // Combine with current rotation
+            const newQuaternion = new THREE.Quaternion().multiplyQuaternions(quaternion, new THREE.Quaternion().setFromEuler(startRot));
 
             function animate() {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 const eased = easeInOutCubic(progress);
 
-                if (isSliding) {
-                    // Simple linear interpolation for sliding
-                    playerBlock.position.lerpVectors(startPos, targetPos, eased);
+                // Calculate new position
+                playerBlock.position.lerpVectors(startPos, targetPos, eased);
+
+                // Interpolate rotation using Euler angles
+                let interpolatedQuaternion = new THREE.Quaternion().slerpQuaternions(new THREE.Quaternion().setFromEuler(startRot), newQuaternion, eased);
+                // playerBlock.rotation.setFromQuaternion(interpolatedQuaternion);  // THIS IS CAUSING FAILURES!!!
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
                 } else {
-                    // Arc motion for tipping
-                    const arcHeight = 0.3;
-                    playerBlock.position.x = startPos.x + (targetPos.x - startPos.x) * eased;
-                    playerBlock.position.y = startPos.y + (targetPos.y - startPos.y) * eased +
-                                            Math.sin(eased * Math.PI) * arcHeight;
-                    playerBlock.position.z = startPos.z + (targetPos.z - startPos.z) * eased;
+                    playerBlock.position.copy(targetPos);
+                    playerBlock.rotation.setFromQuaternion(newQuaternion);
+
+                    gameState.isAnimating = false;
+                    checkWinCondition();
                 }
+            }
+
+            animate();
+        }
+
+        // Animate block tipping with proper pivot rotation
+        function animateBlockTippingDirectAngle(prevX, prevY, prevOrientation, direction) {
+            if (!playerBlock) return;
+
+            const tileSize = 1;
+            const { x: newX, y: newY } = gameState.blockPosition;
+            const newOrientation = gameState.blockOrientation;
+
+            gameState.isAnimating = true;
+            const duration = 400;
+            const startTime = Date.now();
+
+            const startPos = playerBlock.position.clone();
+            const startRot = playerBlock.rotation.clone();
+
+            const targetPos = new THREE.Vector3(
+                newX * tileSize,
+                newOrientation === 'standing' ? 1.1 : 0.6,
+                newY * tileSize
+            );
+
+            // Adjust rotation based on direction
+            //
+            //                Z+
+            //                |
+            //                |
+            //                |
+            //                ^
+            //              /   \
+            //             /     \
+            //      down  /       \  right
+            //           Y+        X+
+            //
+            //
+
+            let x_rotation = playerBlock.rotation.x;
+            let z_rotation = playerBlock.rotation.z;
+            switch (direction) {
+                case 'up':
+                    x_rotation -= Math.PI / 2;
+                    break;
+                case 'down':
+                    x_rotation += Math.PI / 2;
+                    break;
+                case 'left':
+                    z_rotation += Math.PI / 2;
+                    break;
+                case 'right':
+                    z_rotation -= Math.PI / 2;
+                    break;
+            }
+
+            const targetRot = {
+                x: x_rotation,
+                y: playerBlock.rotation.y,
+                z: z_rotation // newOrientation === 'lying-x' ? Math.PI / 2 : 0
+            };
+
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = easeInOutCubic(progress);
+
+                // Arc motion for tipping
+                const arcHeight = 0.3;
+                playerBlock.position.x = startPos.x + (targetPos.x - startPos.x) * eased;
+                playerBlock.position.y = startPos.y + (targetPos.y - startPos.y) * eased +
+                    Math.sin(eased * Math.PI) * arcHeight;
+                playerBlock.position.z = startPos.z + (targetPos.z - startPos.z) * eased;
 
                 // Interpolate rotation
                 playerBlock.rotation.x = startRot.x + (targetRot.x - startRot.x) * eased;
@@ -776,19 +1233,20 @@
             document.getElementById('winMessage').classList.remove('show');
             gameState.level++;
 
-            if (gameState.level <= levels.length) {
-                currentLevel = levels[gameState.level - 1];
+            if (gameState.level <= levelDefinitions.length) {
+                currentLevel = loadLevel(levelDefinitions[gameState.level - 1]);
                 resetLevel();
             } else {
                 alert('Congratulations! You completed all levels and finished the game!');
                 gameState.level = 1;
-                currentLevel = levels[0];
+                currentLevel = loadLevel(levelDefinitions[gameState.level - 1]);
                 resetLevel();
             }
         }
 
         // Reset level
         function resetLevel() {
+            currentLevel = loadLevel(levelDefinitions[gameState.level - 1]);
             gameState.blockPosition = { ...currentLevel.start };
             gameState.blockOrientation = currentLevel.start.orientation;
             gameState.moves = 0;
@@ -813,6 +1271,7 @@
                 'lying-y': 'Lying (↓)'
             };
             document.getElementById('orientationDisplay').textContent = orientationText[gameState.blockOrientation];
+            // document.getElementById('orientationDisplay').textContent = `Rot Angle: (x: ${playerBlock.rotation.x}, y: ${playerBlock.rotation.y}, z: ${playerBlock.rotation.z})`;
         }
 
         // Toggle camera
@@ -833,11 +1292,11 @@
             // Calculate distance needed to fit the entire grid
             // Use a minimum distance for small grids, scale up for larger ones
             const maxDimension = Math.max(gridWidth, gridHeight);
-            const minDistance = 5; // Minimum distance for small grids
+            const minDistance = 6; // Minimum distance for small grids
             const baseDist = Math.max(minDistance, maxDimension * 0.7);
 
             if (gameState.cameraMode === 'isometric') {
-                camera.position.set(centerX + baseDist, baseDist * 1.2, centerY + baseDist);
+                camera.position.set(centerX + baseDist - 3, baseDist * 1.2, centerY + baseDist + 2);
                 camera.lookAt(centerX, 0, centerY);
             } else {
                 camera.position.set(centerX, baseDist * 1.8, centerY);
@@ -892,7 +1351,7 @@
         document.addEventListener('keydown', (e) => {
             if (gameState.isAnimating || gameState.isResetting || gameState.hasWon) return;
 
-            switch(e.key.toLowerCase()) {
+            switch (e.key.toLowerCase()) {
                 case 'arrowup':
                 case 'w':
                     e.preventDefault();
@@ -959,4 +1418,5 @@
         init();
     </script>
 </body>
+
 </html>
