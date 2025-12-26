@@ -174,7 +174,7 @@
             transform: scale(0.95);
         }
 
-        .orientation-indicator {
+        .passcode-indicator {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -183,6 +183,140 @@
             border-radius: 8px;
             font-size: clamp(0.7rem, 2vw, 0.85rem);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .passcode-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+        }
+
+        .passcode-modal.show {
+            display: flex;
+        }
+
+        .passcode-content {
+            background: rgba(26, 26, 46, 0.95);
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .passcode-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .passcode-input-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .passcode-input {
+            width: 50px;
+            height: 60px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 8px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+        }
+
+        .passcode-input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .passcode-input.error {
+            border-color: #ff4444;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .passcode-message {
+            color: #ff4444;
+            font-size: 0.9rem;
+            min-height: 20px;
+            margin-top: 10px;
+        }
+
+        .passcode-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .passcode-btn {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .passcode-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .passcode-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .level-select-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .level-select-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
         }
 
         /* Hide on mobile/touch devices */
@@ -210,8 +344,8 @@
         <h1 class="game-title">BLOCK PUZZLE 3D</h1>
         <p class="game-subtitle">Roll the block to the exit hole</p>
 
-        <div class="orientation-indicator" id="orientationDisplay">
-            Standing
+        <div class="passcode-indicator" id="passcodeDisplay">
+            -----
         </div>
 
         <div class="game-info">
@@ -226,6 +360,7 @@
         <div class="button-group">
             <button class="btn" onclick="resetLevel()">🔄 Reset</button>
             <button class="btn" onclick="toggleCamera()">📷 Camera</button>
+            <button class="btn" onclick="openPasswordModal()">🔏 Load Level</button>
         </div>
 
         <div class="controls">
@@ -281,7 +416,7 @@
                     0 0 0 0 0 1 1 @ 1 1
                     0 0 0 0 0 0 1 1 1 0
                 `,
-                password: "l3vl2"
+                password: "l3vl2",
             },
             {
                 id: 3,
@@ -294,7 +429,7 @@
                     1 1 1    1 ba ba 1 1 1    1  bb bb 1 1 1
                     1 1 1    1 0  0  1 1 1    1  0  0  0 0 0
                 `,
-                password: "2brdg", // TODO: Add support to provide passwords to jump to levels
+                password: "2brdg",
             },
             {
                 id: 4,
@@ -307,7 +442,7 @@
                     1 1 1 1 0 0 0 0 0 0 0 1 1 1 1
                     0 0 0 0 0 0 0 0 0 0 0 0 1 1 1
                 `,
-                password: "53cts"
+                password: "53cts",
             },
             {
                 id: 4,
@@ -323,7 +458,7 @@
                     0 0 0 0 0 1 @ 1 0 0 f f 1 f
                     0 0 0 0 0 1 1 1 0 0 f f f f
                 `,
-                password: "delc8"
+                password: "delc8",
             },
             {
                 id: 5,
@@ -340,7 +475,7 @@
                     1 @ 1 1   1 bEc bEc 1 1   1   1 1 1 0 0
                     1 1 1 1   0 0   0   0 0   0   0 0 0 0 0
                 `,
-                password: "sw1tc"
+                password: "sw1tc",
             },
         ];
 
@@ -582,9 +717,10 @@
             opacity: 0.6
         });
 
+        const defaultBlockColor = 0xcc562a;
         const blockMaterial = new THREE.MeshStandardMaterial({
             // map: blockTexture,
-            color: 0xcc562a,
+            color: defaultBlockColor,
             roughness: 0.5,
             metalness: 0.3
         });
@@ -764,6 +900,9 @@
             playerBlock = new THREE.Mesh(geometry, blockMaterial);
             playerBlock.castShadow = true;
             playerBlock.receiveShadow = true;
+
+            // Restore original color (may be needed if the block fell and was darkened)
+            playerBlock.material.color = new THREE.Color(defaultBlockColor);
 
             updateBlockPosition(false);
             scene.add(playerBlock);
@@ -1323,8 +1462,6 @@
                     gameState.isResetting = true;
                     // Reset level after falling
                     setTimeout(() => {
-                        // Restore original color
-                        playerBlock.material.color.copy(startColor);
                         if (reset) {
                             resetLevel();
                         }
@@ -1421,14 +1558,7 @@
         function updateDisplay() {
             document.getElementById('levelDisplay').textContent = gameState.level;
             document.getElementById('moveDisplay').textContent = gameState.moves;
-
-            const orientationText = {
-                'standing': 'Standing',
-                'lying-x': 'Lying (→)',
-                'lying-y': 'Lying (↓)'
-            };
-            document.getElementById('orientationDisplay').textContent = orientationText[gameState.blockOrientation];
-            // document.getElementById('orientationDisplay').textContent = `Rot Angle: (x: ${playerBlock.rotation.x}, y: ${playerBlock.rotation.y}, z: ${playerBlock.rotation.z})`;
+            document.getElementById('passcodeDisplay').textContent = levelDefinitions[gameState.level - 1].password.toUpperCase() || '-----';
         }
 
         // Toggle camera
@@ -1471,6 +1601,166 @@
                 camera.position.set(centerX, baseDist * 1.8, centerY);
                 camera.lookAt(centerX, 0, centerY);
             }
+        }
+
+        // Open password modal
+        function openPasswordModal() {
+            // Create modal if it doesn't exist
+            let modal = document.getElementById('passcodeModal');
+            if (!modal) {
+                gameState.passwordModalOpen = true;
+                createPasswordModal();
+                modal = document.getElementById('passcodeModal');
+            }
+
+            modal.classList.add('show');
+
+            // Clear inputs
+            for (let i = 1; i <= 5; i++) {
+                const input = document.getElementById(`pass${i}`);
+                if (input) {
+                    input.value = '';
+                    input.classList.remove('error');
+                }
+            }
+
+            // Clear message
+            const messageEl = document.getElementById('passcodeMessage');
+            if (messageEl) {
+                messageEl.textContent = '';
+            }
+
+            // Focus first input
+            setTimeout(() => {
+                const firstInput = document.getElementById('pass1');
+                if (firstInput) firstInput.focus();
+            }, 100);
+        }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('passcodeModal');
+            if (modal) {
+                modal.classList.remove('show');
+                gameState.passwordModalOpen = false;
+            }
+        }
+
+        function createPasswordModal() {
+            const modalHTML = `
+                <div class="passcode-modal" id="passcodeModal">
+                    <div class="passcode-content">
+                        <h2 class="passcode-title">🔢 Enter Level Passcode</h2>
+                        <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-bottom: 15px;">
+                            Enter a 5-character code to jump to a level
+                        </p>
+                        <div class="passcode-input-container">
+                            <input type="text" class="passcode-input" id="pass1" maxlength="1">
+                            <input type="text" class="passcode-input" id="pass2" maxlength="1">
+                            <input type="text" class="passcode-input" id="pass3" maxlength="1">
+                            <input type="text" class="passcode-input" id="pass4" maxlength="1">
+                            <input type="text" class="passcode-input" id="pass5" maxlength="1">
+                        </div>
+                        <div class="passcode-message" id="passcodeMessage"></div>
+                        <div class="passcode-buttons">
+                            <button class="passcode-btn" onclick="submitPasscode()">Submit</button>
+                            <button class="passcode-btn passcode-cancel" onclick="closePasswordModal()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            setupPasswordInputs();
+        }
+
+        function setupPasswordInputs() {
+            const inputs = [];
+            for (let i = 1; i <= 5; i++) {
+                const input = document.getElementById(`pass${i}`);
+                if (input) inputs.push(input);
+            }
+
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', function() {
+                    // Allow alphanumeric
+                    this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+                    // Move to next input if filled
+                    if (this.value.length === 1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+
+                    // Clear error state
+                    this.classList.remove('error');
+                });
+
+                // Handle paste
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pastedText = e.clipboardData.getData('text').toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+
+                    for (let i = 0; i < Math.min(pastedText.length, 5 - index); i++) {
+                        inputs[index + i].value = pastedText[i];
+                    }
+
+                    // Focus next empty or last input
+                    const nextEmpty = inputs.findIndex((inp, idx) => idx > index && inp.value === '');
+                    if (nextEmpty !== -1) {
+                        inputs[nextEmpty].focus();
+                    } else {
+                        inputs[4].focus();
+                    }
+                });
+            });
+        }
+
+        function submitPasscode() {
+            const inputs = [];
+            for (let i = 1; i <= 5; i++) {
+                const input = document.getElementById(`pass${i}`);
+                if (input) inputs.push(input);
+            }
+
+            const passcode = inputs.map(input => input.value).join('').toLowerCase();
+            const messageEl = document.getElementById('passcodeMessage');
+
+            if (passcode.length !== 5) {
+                if (messageEl) messageEl.textContent = 'Please enter all 5 characters';
+                inputs.forEach(input => input.classList.add('error'));
+                return;
+            }
+
+            // Find level with matching passcode
+            const levelIndex = levelDefinitions.findIndex(level =>
+                level.password && level.password.toLowerCase() === passcode
+            );
+
+            if (levelIndex !== -1) {
+                // Success! Load the level
+                gameState.level = levelIndex + 1;
+                currentLevel = loadLevel(levelDefinitions[levelIndex]);
+                closePasswordModal();
+                resetLevel();
+            } else {
+                // Invalid passcode
+                if (messageEl) messageEl.textContent = 'Invalid passcode. Try again.';
+                inputs.forEach(input => input.classList.add('error'));
+            }
+        }
+
+        function loadLevelByPassword(password) {
+            const levelIndex = levelDefinitions.findIndex(level =>
+                level.password && level.password.toLowerCase() === password.toLowerCase()
+            );
+
+            if (levelIndex !== -1) {
+                gameState.level = levelIndex + 1;
+                currentLevel = loadLevel(levelDefinitions[levelIndex]);
+                resetLevel();
+                return true;
+            }
+
+            return false;
         }
 
         // Touch/Swipe controls
@@ -1518,7 +1808,7 @@
 
         // Keyboard controls
         document.addEventListener('keydown', (e) => {
-            if (gameState.isAnimating || gameState.isResetting || gameState.hasWon) return;
+            if (gameState.isAnimating || gameState.isResetting || gameState.hasWon || gameState.passwordModalOpen) return;
 
             switch (e.key.toLowerCase()) {
                 case 'arrowup':
