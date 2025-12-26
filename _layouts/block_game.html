@@ -185,7 +185,8 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        @media (max-width: 768px) {
+        /* Hide on mobile/touch devices */
+        @media (hover: none) and (pointer: coarse) {
             .controls kbd {
                 display: none;
             }
@@ -242,6 +243,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
+        const ISDEBUG = false;
+
         // Game state
         const gameState = {
             level: 1,
@@ -485,18 +488,31 @@
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x0a0a0a);
 
-        const camera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 0.1, 1000);
+        const aspect = canvas.innerWidth / canvas.innerHeight
+        const orthographicCamera = new THREE.OrthographicCamera();
+        const perspectiveCamera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
         renderer.setSize(canvas.width, canvas.height);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        // (debug) grid
+        if (ISDEBUG === true) {
+            const geometry = new THREE.PlaneGeometry( 100, 100, 100, 100 );
+            const material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
+            const grid = new THREE.Mesh( geometry, material );
+            grid.rotation.order = 'YXZ';
+            grid.rotation.y = - Math.PI / 2;
+            grid.rotation.x = - Math.PI / 2;
+            scene.add(grid);
+        }
 
         // Lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(5, 10, 5);
+        directionalLight.position.set(9.5, 12, 2.5);
         directionalLight.castShadow = true;
         directionalLight.shadow.mapSize.width = 2048;
         directionalLight.shadow.mapSize.height = 2048;
@@ -526,12 +542,12 @@
         // });
         // // Create materials using the loaded textures
         const tileMaterials = [
-            new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7, metalness: 0.3 }),
-            new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0x9494a4, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0x9494a4, roughness: 0.7, metalness: 0.3 }),
             new THREE.MeshStandardMaterial({ map: tileTexture, color: 0xDED3CC }), // Front face (1x1 face)
-            new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7, metalness: 0.3 }), // Back face (1x1 face)
-            new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7, metalness: 0.3 }),
-            new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0x727282, roughness: 0.7, metalness: 0.3 }), // Back face (1x1 face)
+            new THREE.MeshStandardMaterial({ color: 0x727282, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0x727282, roughness: 0.7, metalness: 0.3 }),
         ];
 
         // Materials
@@ -611,7 +627,7 @@
                                 roughness: 0.6,
                                 metalness: 0.4,
                                 transparent: !tileData.active,
-                                opacity: tileData.active ? 1.0 : 0.3
+                                opacity: tileData.active ? 0.8 : 0.3
                             });
                             break;
 
@@ -1434,12 +1450,24 @@
             // Use a minimum distance for small grids, scale up for larger ones
             const maxDimension = Math.max(gridWidth, gridHeight);
             const minDistance = 6; // Minimum distance for small grids
-            const baseDist = Math.max(minDistance, maxDimension * 0.7);
+            const baseDist = Math.max(minDistance, maxDimension * .8);
 
             if (gameState.cameraMode === 'isometric') {
-                camera.position.set(centerX + baseDist - 3, baseDist * 1.2, centerY + baseDist + 2);
+                camera = orthographicCamera;
+                const orthoBaseDist = baseDist * .7;
+                camera.left = -orthoBaseDist;
+                camera.right = orthoBaseDist;
+                camera.top = orthoBaseDist;
+                camera.bottom = -orthoBaseDist;
+                console.log(`Camera ratio: W:${gridWidth}, H:${gridHeight}, r:${gridWidth/gridHeight}`)
+                // camera.position.set(100, 100, 100);
+                // camera = perspectiveCamera;
+                camera.position.set(centerX + orthoBaseDist / 5, 7, centerY + orthoBaseDist);
                 camera.lookAt(centerX, 0, centerY);
+                camera.updateProjectionMatrix();
             } else {
+                camera = perspectiveCamera;
+                // camera.position.set(centerX + 30, 30, centerY + 30);
                 camera.position.set(centerX, baseDist * 1.8, centerY);
                 camera.lookAt(centerX, 0, centerY);
             }
