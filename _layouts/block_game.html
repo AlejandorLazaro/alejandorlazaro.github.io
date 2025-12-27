@@ -321,6 +321,10 @@
 
         /* Hide on mobile/touch devices */
         @media (hover: none) and (pointer: coarse) {
+            .kbd-group {
+                display: none;
+            }
+
             .controls kbd {
                 display: none;
             }
@@ -357,16 +361,16 @@
             <canvas id="gameCanvas" width="600" height="600"></canvas>
         </div>
 
-        <div class="button-group">
-            <button class="btn" onclick="resetLevel()">🔄 Reset</button>
-            <button class="btn" onclick="toggleCamera()">📷 Camera</button>
-            <button class="btn" onclick="openPasswordModal()">🔏 Load Level</button>
-        </div>
+        <div class="kbd-group">
+            <div class="button-group">
+                <!-- <button class="btn" onclick="resetLevel()">🔄 Reset</button> -->
+                <button class="btn" onclick="toggleCamera()">📷 Camera</button>
+                <button class="btn" onclick="openPasswordModal()">🔏 Load Level</button>
+            </div>
 
-        <div class="controls">
-            Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd>
-            <kbd>D</kbd> to tip the block<br>
-            <kbd>R</kbd> to reset • <kbd>C</kbd> to toggle camera
+            <div class="controls">
+                Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> to tip the block<br><kbd>C</kbd> to toggle camera
+            </div>
         </div>
     </div>
 
@@ -498,12 +502,102 @@
                 id: 7,
                 name: "Just One",
                 layout: `
-                    0 0 0 0 0 0 1 1 1
-                    * 1 1 1 1 1 1 @ 1
-                    0 0 0 0 0 0 1 1 1
+                    0 0 0 0  0 0 0 0 1 1  1 1 0 0 0
+                    0 0 0 0  0 0 0 0 1 1  1 1 0 0 0
+                    1 1 1 0  0 0 0 0 1 0  0 1 1 1 1
+                    1 * 1 1  1 1 1 1 1 0  0 0 1 @ 1
+                    1 1 1 0  0 0 0 1 1 ha 0 0 1 1 1
+                    1 1 1 0  0 0 0 1 1 1  0 0 1 1 1
+                    0 1 1 ba 0 0 0 1 0 0  0 0 0 0 0
+                    0 0 1 1  1 1 1 1 0 0  0 0 0 0 0
                 `,
                 password: "h3av1", // 189493
             },
+            {
+                id: 8,
+                name: "Bait N Switch",
+                layout: `
+                    0 1 1 1 bEa 0 0   0 0 0 0 0
+                    0 1 @ 1 bEa 0 0   0 0 0 0 0
+                    0 1 1 1 0   0 0   0 0 0 0 0
+                    0 1 0 0 0   1 1   1 1 1 1 0
+                    0 1 0 0 0   1 1   0 0 1 1 0
+                    * 1 1 1 1   1 1   0 0 1 1 1
+                    0 0 0 0 0   1 sDa 0 0 0 0 1
+                    0 0 0 0 0   1 1   1 1 0 0 1
+                    0 0 0 0 0   1 1   1 1 1 1 1
+                    0 0 0 0 0   0 0   0 1 1 1 0
+                `,
+                password: "sb8m8", // 291709
+            },
+            {
+                id: 9,
+                name: "Two Brothers",
+                layout: `
+                    0 0 0 0 0 0 0   0 0 0 0 0 hb
+                    0 0 0 0 0 1 1   1 0 0 1 1 1
+                    0 0 0 0 0 1 ha  1 1 1 1 1 ba
+                    0 0 0 1 1 1 1   1 0 0 1 1 0
+                    0 0 0 1 @ 1 bb   0 0 0 1 1 0
+                    0 1 1 1 1 1 0   0 0 1 1 1 1
+                    1 1 * 1 0 0 0   0 0 1 1 1 1
+                    1 1 1 1 0 0 1   1 1 1 1 0 0
+                    0 0 0 0 0 1 1   1 0 0 0 0 0
+                    0 0 0 0 0 1 1   1 0 0 0 0 0
+                `,
+                password: "br0dr", // 958640
+            },
+            {
+                id: 10,
+                name: "The Duck",
+                layout: `
+                    1 1 1 f 1 1 1 1 f 1 1 1 1 0
+                    1 1 0 0 0 0 0 0 0 0 1 1 1 0
+                    1 1 0 0 0 0 0 0 0 0 0 1 1 1
+                    1 1 1 0 0 0 1 1 1 0 0 1 * 1
+                    1 1 1 f f f 1 @ 1 0 0 1 1 1
+                    1 1 1 0 0 f 1 1 1 0 0 1 0 0
+                    0 0 1 0 0 f f f f f 1 1 0 0
+                    0 0 1 1 1 f f 1 f f f 0 0 0
+                    0 0 0 1 1 f f f f f f 0 0 0
+                    0 0 0 1 1 1 0 0 1 1 0 0 0 0
+                `,
+                password: "duck2", // 448106
+            },
+            {
+                id: 11,
+                name: "The Gap",
+                layout: `
+                    0 0  0  0 0 0 0 0 1 1 1 0 0  0
+                    0 0  0  1 1 1 0 0 1 1 1 0 0  0
+                    1 ba ba 1 * 1 1 1 1 1 1 1 1  1
+                    1 bb bb 1 1 1 0 0 0 0 0 0 ha 1
+                    1 0  0  0 0 0 0 0 0 0 0 0 1  1
+                    1 0  0  0 0 0 0 0 0 0 0 0 1  1
+                    1 0  0  0 0 0 0 0 1 1 1 1 1  1
+                    1 1  1  1 1 0 0 0 1 1 1 0 0  0
+                    0 1  1  @ 1 0 0 0 1 1 1 0 0  0
+                    0 0  1  1 1 0 0 0 1 1 1 1 1  hb
+                `,
+                password: "12gap", // 210362
+            },
+            // {
+            //     id: 12,
+            //     name: "???",
+            //     layout: `
+            //         0 0  0  0 0 0 0 0 1 1 1 0 0  0
+            //         0 0  0  1 1 1 0 0 1 1 1 0 0  0
+            //         1 ba ba 1 * 1 1 1 1 1 1 1 1  1
+            //         1 bb bb 1 1 1 0 0 0 0 0 0 ha 1
+            //         1 0  0  0 0 0 0 0 0 0 0 0 1  1
+            //         1 0  0  0 0 0 0 0 0 0 0 0 1  1
+            //         1 0  0  0 0 0 0 0 1 1 1 1 1  1
+            //         1 1  1  1 1 0 0 0 1 1 1 0 0  0
+            //         0 1  1  @ 1 0 0 0 1 1 1 0 0  0
+            //         0 0  1  1 1 0 0 0 1 1 1 1 1  hb
+            //     `,
+            //     password: "12gap", // 210362
+            // },
         ];
 
         // Parse level layout text into grid data
@@ -864,6 +958,16 @@
                                 emissiveIntensity: 0.5
                             });
                         }
+                        // // TODO: Add a switch type with 2 boxes in corners, showing the separation
+                        // if (tileData.subtype === 'teleport') {
+                        //     indicatorGeometry = new THREE.BoxGeometry(.6, .2, .6);
+                        //     // indicatorGeometry = new THREE.BoxGeometry(.6, .2, .6);
+                        //     indicatorMaterial = new THREE.MeshStandardMaterial({
+                        //         color: material.color,
+                        //         emissive: material.color,
+                        //         emissiveIntensity: 0.5
+                        //     });
+                        // }
 
                         let indicator = new THREE.Mesh(indicatorGeometry, indicatorMaterial);
                         indicator.position.y = 0.25;
@@ -905,11 +1009,60 @@
                         tileData.active = !tileData.active;
                         break;
                 }
+
+                // Show glow based on the state change
+                showBridgeActivationGlow(pos.x, pos.y, tileData.active);
             });
 
             // Rebuild grid to reflect changes
             buildGrid();
         }
+
+        function showBridgeActivationGlow(x, y, isActivating) {
+            const tileSize = 1;
+            const glowColor = isActivating ? 0x00ff88 : 0xff4444; // Green for activate, red for deactivate
+
+            // Create glow geometry - a flat plane slightly above the tile
+            const glowGeometry = new THREE.PlaneGeometry(tileSize * 0.8, tileSize * 0.8);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: glowColor,
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide
+            });
+
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            glow.position.set(x * tileSize, 0.3, y * tileSize);
+            glow.rotation.x = -Math.PI / 2; // Make it horizontal
+
+            scene.add(glow);
+
+            // Animate the glow fading out
+            const startTime = Date.now();
+            const duration = 800; // ms
+
+            function animateGlow() {
+                const elapsed = Date.now() - startTime;
+                const progress = elapsed / duration;
+
+                if (progress < 1) {
+                    // Fade out and scale up slightly
+                    glow.material.opacity = 0.8 * (1 - progress);
+                    const scale = 1 + progress * 0.3;
+                    glow.scale.set(scale, scale, 1);
+
+                    requestAnimationFrame(animateGlow);
+                } else {
+                    // Remove the glow
+                    scene.remove(glow);
+                    glow.geometry.dispose();
+                    glow.material.dispose();
+                }
+            }
+
+            animateGlow();
+        }
+
 
         // Helper to get tile at position
         function getTileAt(x, y) {
@@ -1074,7 +1227,7 @@
                     // Rebuild to show broken tile
                     setTimeout(() => {
                         buildGrid();
-                        // Block will fall after grid rebuilds
+                        // animateTileFalling(x, y);
                         animateBlockFalling(x, y, orientation, 'in-place');
                     }, 500);
 
@@ -1499,6 +1652,44 @@
             fallAnimate();
         }
 
+
+        // // Animate tile falling off the grid
+        // function animateTileFalling(x, y) {
+        //     const duration = 1200;
+        //     const startTime = Date.now();
+        //     const tile = getTileAt(x, y);
+
+        //     const startPos = tile.position.clone();
+        //     const startRot = { x: tile.rotation.x, y: tile.rotation.y, z: tile.rotation.z };
+        //     const randDir = Math.random() * 2 - 1;
+        //     const startColor = tile.material.color.clone();
+        //     const endColor = new THREE.Color(0x000000);
+
+        //     function fallAnimate() {
+        //         const elapsed = Date.now() - startTime;
+        //         const progress = Math.min(elapsed / duration, 1);
+
+        //         const fallDistance = 5;
+        //         const verticalProgress = progress * progress * 2; // Accelerate downward
+
+        //         tile.position.y = startPos.y - verticalProgress * fallDistance;
+
+        //         // Tumbling rotation
+        //         tile.rotation.x = startRot.x + progress * Math.PI * 2 * randDir;
+        //         tile.rotation.z = startRot.z + progress * Math.PI * 2 * -randDir;
+
+        //         // Fade to black
+        //         const currentColor = new THREE.Color().lerpColors(startColor, endColor, progress);
+        //         tile.material.color.copy(currentColor);
+
+        //         if (progress < 1) {
+        //             requestAnimationFrame(fallAnimate);
+        //         }
+        //     }
+
+        //     fallAnimate();
+        // }
+
         function getFootprintForState(state) {
             const { x, y, orientation } = state;
             switch (orientation) {
@@ -1858,9 +2049,9 @@
                     e.preventDefault();
                     moveBlock('right');
                     break;
-                case 'r':
-                    resetLevel();
-                    break;
+                // case 'r':
+                //     resetLevel();
+                //     break;
                 case 'c':
                     toggleCamera();
                     break;
