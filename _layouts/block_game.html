@@ -570,23 +570,23 @@
                 `,
                 password: "12gap", // 210362
             },
-            // {
-            //     id: 12,
-            //     name: "???",
-            //     layout: `
-            //         0 0  0  0 0 0 0 0 1 1 1 0 0  0
-            //         0 0  0  1 1 1 0 0 1 1 1 0 0  0
-            //         1 ba ba 1 * 1 1 1 1 1 1 1 1  1
-            //         1 bb bb 1 1 1 0 0 0 0 0 0 ha 1
-            //         1 0  0  0 0 0 0 0 0 0 0 0 1  1
-            //         1 0  0  0 0 0 0 0 0 0 0 0 1  1
-            //         1 0  0  0 0 0 0 0 1 1 1 1 1  1
-            //         1 1  1  1 1 0 0 0 1 1 1 0 0  0
-            //         0 1  1  @ 1 0 0 0 1 1 1 0 0  0
-            //         0 0  1  1 1 0 0 0 1 1 1 1 1  hb
-            //     `,
-            //     password: "12gap", // 210362
-            // },
+            /* {
+                id: 12,
+                name: "The Many",
+                layout: `
+                    1 1  1 0 0 0 0 0  0  0 0 0 0   0  0
+                    1 *  1 1 1 1 1 1  1  bc 0 0 1   1  1
+                    1 1  1 0 0 0 0 bb 1  1 1 1 1   @  1
+                    1 1  1 0 0 0 0 0  0  0 0 0 hDc  hEc 1
+                    1 1  1 0 0 0 0 0  0  0 0 0 0   0  0
+                    1 1  1 0 0 0 0 0  0  0 0 0 0   0  0
+                    1 1  1 0 0 0 0 1  1  1 1 1 hEb 0  0
+                    1 1  1 1 1 1 1 1  ba 0 0 1 1   0  0
+                    1 sa 1 0 0 0 0 0  0  0 0 1 1   0  0
+                    1 1  1 0 0 0 0 0  0  0 0 1 h?  0  0  // Enables bc and disables ba (requires dual support)
+                `,
+                password: "tons5", // 210362
+            }, */
         ];
 
         // Parse level layout text into grid data
@@ -782,10 +782,8 @@
         const tileTexture = textureLoader.load('/assets/img/tile.png', () => {
             console.log('Tile texture loaded successfully');
         });
-        // const blockSideTexture = textureLoader.load('/assets/img/box_long_face.jpg', () => {
-        //     console.log('Side texture loaded successfully');
-        // });
-        // // Create materials using the loaded textures
+
+        // Create materials using the loaded textures
         const tileMaterials = [
             new THREE.MeshStandardMaterial({ color: 0x9494a4, roughness: 0.7, metalness: 0.3 }),
             new THREE.MeshStandardMaterial({ color: 0x9494a4, roughness: 0.7, metalness: 0.3 }),
@@ -827,13 +825,21 @@
             opacity: 0.6
         });
 
-        const defaultBlockColor = 0xcc562a;
-        const blockMaterial = new THREE.MeshStandardMaterial({
-            // map: blockTexture,
-            color: defaultBlockColor,
-            roughness: 0.5,
-            metalness: 0.3
+        const defaultBlockColor = 0xffffff;
+        const blockSideTexture = textureLoader.load('/assets/img/box_long_face.jpg', () => {
+            console.log('Side texture loaded successfully');
         });
+        const blockFaceTexture = textureLoader.load('/assets/img/box_short_face.jpg', () => {
+            console.log('Face texture loaded successfully');
+        });
+        const blockMaterials = [
+            new THREE.MeshStandardMaterial({ map: blockSideTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ map: blockSideTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ map: blockFaceTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }), // Front face (1x1 face)
+            new THREE.MeshStandardMaterial({ map: blockFaceTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }), // Back face (1x1 face)
+            new THREE.MeshStandardMaterial({ map: blockSideTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ map: blockSideTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }),
+        ];
 
         // Build grid with special tile support
         function buildGrid() {
@@ -1066,19 +1072,16 @@
             const blockWidth = 1.0;
             const blockHeight = 2.0;
             const geometry = new THREE.BoxGeometry(blockWidth, blockHeight, blockWidth);
-            playerBlock = new THREE.Mesh(geometry, blockMaterial);
+            playerBlock = new THREE.Mesh(geometry, blockMaterials);
             playerBlock.castShadow = true;
             playerBlock.receiveShadow = true;
 
-            // Restore original color (may be needed if the block fell and was darkened)
-            playerBlock.material.color = new THREE.Color(defaultBlockColor);
-
-            updateBlockPosition(false);
+            setBlockPosition();
             scene.add(playerBlock);
         }
 
-        // Update block position based on game state
-        function updateBlockPosition(animate = true, direction = null) {
+        // Set block position
+        function setBlockPosition() {
             const { x, y } = gameState.blockPosition;
             const tileSize = 1;
 
@@ -1100,75 +1103,16 @@
                     break;
             }
 
-            // Adjust rotation based on direction
-            //
-            //                Z+
-            //                |
-            //                |
-            //                |
-            //                ^
-            //              /   \
-            //             /     \
-            //      down  /       \  right
-            //           Y+        X+
-            //
-            //
-            switch (direction) {
-                case 'up':
-                    targetRotation.x -= Math.PI / 2;  // Rotate clockwise in the negative Y direction
-                    break;
-                case 'right':
-                    targetRotation.z += Math.PI / 2;  // Rotate clockwise in the negative X direction
-                    break;
-                case 'down':
-                    targetRotation.x += Math.PI / 2;  // Rotate clockwise in the positive Y direction
-                    break;
-                case 'left':
-                    targetRotation.z = Math.PI / 2;  // Rotate clockwise in the positive X direction
-                    break;
-            }
-
-            if (animate && playerBlock) {
-                animateBlock(targetPosition, targetRotation);
-            } else if (playerBlock) {
-                playerBlock.position.copy(targetPosition);
-                playerBlock.rotation.copy(targetRotation);
-            }
-        }
-
-        // Animate block movement
-        function animateBlock(targetPosition, targetRotation) {
-            if (!playerBlock) return;
-
-            gameState.isAnimating = true;
-            const startPosition = playerBlock.position.clone();
-            const startRotation = playerBlock.rotation.clone();
-            const duration = 400; // ms
-            const startTime = Date.now();
-
-            function animate() {
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const eased = easeInOutCubic(progress);
-
-                playerBlock.position.lerpVectors(startPosition, targetPosition, eased);
-                playerBlock.rotation.x = startRotation.x + (targetRotation.x - startRotation.x) * eased;
-                playerBlock.rotation.y = startRotation.y + (targetRotation.y - startRotation.y) * eased;
-                playerBlock.rotation.z = startRotation.z + (targetRotation.z - startRotation.z) * eased;
-
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    gameState.isAnimating = false;
-                    checkExitTile();
-                }
-            }
-
-            animate();
+            playerBlock.position.copy(targetPosition);
+            playerBlock.rotation.copy(targetRotation);
         }
 
         function easeInOutCubic(t) {
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function easeOutCubic(t) {
+            return 2 * t * t * t;
         }
 
         // Calculate block footprint
@@ -1186,6 +1130,67 @@
                 default:
                     return [{ x, y }];
             }
+        }
+
+        // Determines the direction a block should fall if it's imbalanced
+        //
+        // E.g.:   ## <- This block is imbalanced to the right,
+        //       ---     since the left cell has a tile
+        //
+        // Returns the direction to tip/fall, or null if balanced
+        function getImbalancedFallDirection(moveDirection, x, y, orientation) {
+            const footprint = getFootprintForState({ x, y, orientation });
+
+            // Check which positions are valid (have support)
+            const supportMap = footprint.map(pos => ({
+                pos,
+                hasSupport: isValidPosition(pos.x, pos.y)
+            }));
+
+            // If all positions are invalid, fall in the move direction
+            if (supportMap.every(tile => !tile.hasSupport)) {
+                return moveDirection;
+            }
+
+            // If all positions are valid, no fall
+            if (supportMap.every(tile => tile.hasSupport)) {
+                return null;
+            }
+
+            // Handle standing block (single cell footprint)
+            if (orientation === 'standing') {
+                // Standing block with no support falls in move direction
+                return moveDirection;
+            }
+
+            // Handle lying blocks (2-cell footprint)
+            // Determine which cell has support and which doesn't
+            const [cell1, cell2] = supportMap;
+
+            // For lying-x orientation (horizontal: [x,y] and [x+1,y])
+            if (orientation === 'lying-x') {
+                if (cell1.hasSupport && !cell2.hasSupport) {
+                    // Left cell supported, right cell not - fall right
+                    return 'right';
+                } else if (!cell1.hasSupport && cell2.hasSupport) {
+                    // Right cell supported, left cell not - fall left
+                    return 'left';
+                }
+            }
+
+            // For lying-y orientation (vertical: [x,y] and [x,y+1])
+            if (orientation === 'lying-y') {
+                if (cell1.hasSupport && !cell2.hasSupport) {
+                    // Top cell supported, bottom cell not - fall down
+                    return 'down';
+                } else if (!cell1.hasSupport && cell2.hasSupport) {
+                    // Bottom cell supported, top cell not - fall up
+                    return 'up';
+                }
+            }
+
+            // Fallback to move direction if logic doesn't determine a direction
+            return moveDirection;
         }
 
         // Check if position is valid
@@ -1216,8 +1221,7 @@
                     // Rebuild to show broken tile
                     setTimeout(() => {
                         buildGrid();
-                        // animateTileFalling(x, y);
-                        animateBlockFalling(x, y, orientation, 'in-place');
+                        animateBlockFalling(orientation, 'in-place');
                     }, 500);
 
                     return true; // Tile broke
@@ -1287,11 +1291,6 @@
                     break;
             }
 
-            // Validate all footprint positions
-            const testState = { x: newX, y: newY, orientation: newOrientation };
-            const footprint = getFootprintForState(testState);
-            const valid = footprint.every(pos => isValidPosition(pos.x, pos.y));
-
             // Store previous state for animation
             const prevX = gameState.blockPosition.x;
             const prevY = gameState.blockPosition.y;
@@ -1301,32 +1300,24 @@
             gameState.blockOrientation = newOrientation;
             gameState.moves++;
 
-            if (valid) {
-                // updateBlockPosition(true, direction);
-                animateBlockTippingQuaternion(prevX, prevY, prevOrientation, direction);
-                // animateBlockTippingDirectAngle(prevX, prevY, prevOrientation, direction);
+            // Calculate imbalanced direction before animation
+            const testState = { x: newX, y: newY, orientation: newOrientation };
+            const imbalancedDirection = getImbalancedFallDirection(direction, newX, newY, newOrientation);
 
-                // After animation completes, check for special tiles
-                // setTimeout(() => {
-                // Check switch activation
-                const footprint = getBlockFootprint();
-                footprint.forEach(pos => {
-                    checkSwitchActivation(pos.x, pos.y, gameState.blockOrientation);
-                });
+            // Animate tipping with callback for after completion
+            animateBlockTippingQuaternion(prevX, prevY, prevOrientation, direction, imbalancedDirection ? 200 : 350, () => {
+                // This callback runs AFTER the tipping animation completes
 
-                // Check fragile tiles (only check center tile)
-                const didBreak = checkFragileTile(gameState.blockPosition.x, gameState.blockPosition.y, gameState.blockOrientation);
-
-                // }, /** duration + **/ 1050); // Slight delay after animation
-            } else {
-                // Invalid move - animate falling off
-                animateBlockFalling(prevX, prevY, prevOrientation, direction);
-            }
+                if (imbalancedDirection) {
+                    // Invalid move - animate falling off
+                    animateBlockFalling(newOrientation, imbalancedDirection);
+                }
+            });
 
             updateDisplay();
         }
 
-        function animateBlockTippingQuaternion(prevX, prevY, prevOrientation, direction) {
+        function animateBlockTippingQuaternion(prevX, prevY, prevOrientation, direction, duration = 350, onComplete) {
             if (!playerBlock) return;
 
             const tileSize = 1;
@@ -1334,12 +1325,10 @@
             const newOrientation = gameState.blockOrientation;
 
             gameState.isAnimating = true;
-            const duration = 400;
             const startTime = Date.now();
 
             const startPos = playerBlock.position.clone();
-            const startRot = playerBlock.rotation.clone(); // Store current rotation as THREE.Vector3
-            // console.log(`StartPos: (${startPos.x}, ${startPos.y}, ${startPos.z}); StartRot: (${startRot.x}, ${startRot.y}, ${startRot.z})`);
+            const startRot = playerBlock.rotation.clone();
 
             const targetPos = new THREE.Vector3(
                 newX * tileSize,
@@ -1389,188 +1378,43 @@
             const startQuaternion = new THREE.Quaternion().setFromEuler(startRot);
             const newQuaternion = new THREE.Quaternion().multiplyQuaternions(quaternion, new THREE.Quaternion().setFromEuler(startRot));
 
-            // Normalize the start and target quaternions before interpolation
-            startQuaternion.normalize();
-            newQuaternion.normalize();
-
-            // // Check if quaternion is defined and log details
-            // if (startQuaternion) {
-            //     console.log(`Start Quaternion:
-            //     x: ${startQuaternion.x},
-            //     y: ${startQuaternion.y},
-            //     z: ${startQuaternion.z},
-            //     w: ${startQuaternion.w}`);
-
-            //     // Check if the quaternion is valid (non-zero and normalized)
-            //     console.log(`Is Quaternion Valid? ${startQuaternion.length() > 0 ? 'Yes' : 'No'}`);
-
-            //     // Logging the length to check if it is normalized
-            //     console.log(`Quaternion Length: ${startQuaternion.length()}`);
-            // } else {
-            //     console.error('Error: startQuaternion is undefined');
-            // }
-
-
-            // // Check if quaternion is defined and log details
-            // if (newQuaternion) {
-            //     console.log(`New Quaternion:
-            //     x: ${newQuaternion.x},
-            //     y: ${newQuaternion.y},
-            //     z: ${newQuaternion.z},
-            //     w: ${newQuaternion.w}`);
-
-            //     // Check if the quaternion is valid (non-zero and normalized)
-            //     console.log(`Is Quaternion Valid? ${newQuaternion.length() > 0 ? 'Yes' : 'No'}`);
-
-            //     // Logging the length to check if it is normalized
-            //     console.log(`Quaternion Length: ${newQuaternion.length()}`);
-            // } else {
-            //     console.error('Error: newQuaternion is undefined');
-            // }
-
             function animate() {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 const eased = easeInOutCubic(progress);
 
-                // Calculate new position
-                playerBlock.position.lerpVectors(startPos, targetPos, eased);
-
-                // Interpolate rotation using Euler angles in the animate function
-                let interpolatedQuaternion = new THREE.Quaternion(); // Initialize this variable
-
-                // Interpolating the rotation
-                interpolatedQuaternion.slerp(startQuaternion, newQuaternion, eased);
-
-                // // Interpolate rotation using Euler angles
-                // let interpolatedQuaternion = new THREE.Quaternion().slerpQuaternions(new THREE.Quaternion().setFromEuler(startRot), newQuaternion, eased);
-
-                // // Check if interpolatedQuaternion is defined and log details
-                // if (interpolatedQuaternion) {
-                //     console.log(`Interpolated Quaternion (after slerp):
-                //     x: ${interpolatedQuaternion.x},
-                //     y: ${interpolatedQuaternion.y},
-                //     z: ${interpolatedQuaternion.z},
-                //     w: ${interpolatedQuaternion.w}`);
-
-                //     // Check if the quaternion is valid (non-zero and normalized)
-                //     console.log(`Is Quaternion Valid? ${interpolatedQuaternion.length() > 0 ? 'Yes' : 'No'}`);
-
-                //     // Logging the length to check if it is normalized
-                //     console.log(`Quaternion Length: ${interpolatedQuaternion.length()}`);
-                // } else {
-                //     console.error('Error: interpolatedQuaternion is undefined');
-                // }
-
-                // playerBlock.rotation.setFromQuaternion(interpolatedQuaternion);  // THIS IS CAUSING FAILURES TO EVEN MOVE!!!
-
                 if (progress < 1) {
+                    // Interpolate position
+                    playerBlock.position.lerpVectors(startPos, targetPos, eased);
+
+                    // Interpolate rotation
+                    let interpolatedQuaternion = new THREE.Quaternion(); // Initialize this variable
+                    interpolatedQuaternion.slerpQuaternions(startQuaternion, newQuaternion, eased);
+                    playerBlock.rotation.setFromQuaternion(interpolatedQuaternion);
+
                     requestAnimationFrame(animate);
                 } else {
                     playerBlock.position.copy(targetPos);
                     playerBlock.rotation.setFromQuaternion(newQuaternion);
-                    // console.log(`Quaternion (after animating):
-                    // x: ${playerBlock.rotation.x},
-                    // y: ${playerBlock.rotation.y},
-                    // z: ${playerBlock.rotation.z},
-                    // w: ${playerBlock.rotation.w}`);
-
-                    // console.log(`EndPos: (${playerBlock.position.x}, ${playerBlock.position.y}, ${playerBlock.position.z}); StartRot: (${playerBlock.rotation.x}, ${playerBlock.rotation.y}, ${playerBlock.rotation.z})`);
 
                     gameState.isAnimating = false;
+
+                    // Check switch activation
+                    const footprint = getBlockFootprint();
+                    footprint.forEach(pos => {
+                        checkSwitchActivation(pos.x, pos.y, gameState.blockOrientation);
+                    });
+
+                    // Check fragile tiles (only check center tile)
+                    const didBreak = checkFragileTile(gameState.blockPosition.x, gameState.blockPosition.y, gameState.blockOrientation);
+
+                    // Check exit tile
                     checkExitTile();
-                }
-            }
 
-            animate();
-        }
-
-        // Animate block tipping with proper pivot rotation
-        function animateBlockTippingDirectAngle(prevX, prevY, prevOrientation, direction) {
-            if (!playerBlock) return;
-
-            const tileSize = 1;
-            const { x: newX, y: newY } = gameState.blockPosition;
-            const newOrientation = gameState.blockOrientation;
-
-            gameState.isAnimating = true;
-            const duration = 400;
-            const startTime = Date.now();
-
-            const startPos = playerBlock.position.clone();
-            const startRot = playerBlock.rotation.clone();
-
-            const targetPos = new THREE.Vector3(
-                newX * tileSize,
-                newOrientation === 'standing' ? 1.1 : 0.6,
-                newY * tileSize
-            );
-
-            // Adjust rotation based on direction
-            //
-            //                Z+
-            //                |
-            //                |
-            //                |
-            //                ^
-            //              /   \
-            //             /     \
-            //      down  /       \  right
-            //           Y+        X+
-            //
-            //
-
-            let x_rotation = playerBlock.rotation.x;
-            let z_rotation = playerBlock.rotation.z;
-            switch (direction) {
-                case 'up':
-                    x_rotation -= Math.PI / 2;
-                    break;
-                case 'down':
-                    x_rotation += Math.PI / 2;
-                    break;
-                case 'left':
-                    z_rotation += Math.PI / 2;
-                    break;
-                case 'right':
-                    z_rotation -= Math.PI / 2;
-                    break;
-            }
-
-            const targetRot = {
-                x: x_rotation,
-                y: playerBlock.rotation.y,
-                z: z_rotation // newOrientation === 'lying-x' ? Math.PI / 2 : 0
-            };
-
-            function animate() {
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const eased = easeInOutCubic(progress);
-
-                // Arc motion for tipping
-                const arcHeight = 0.3;
-                playerBlock.position.x = startPos.x + (targetPos.x - startPos.x) * eased;
-                playerBlock.position.y = startPos.y + (targetPos.y - startPos.y) * eased +
-                    Math.sin(eased * Math.PI) * arcHeight;
-                playerBlock.position.z = startPos.z + (targetPos.z - startPos.z) * eased;
-
-                // Interpolate rotation
-                playerBlock.rotation.x = startRot.x + (targetRot.x - startRot.x) * eased;
-                playerBlock.rotation.y = startRot.y + (targetRot.y - startRot.y) * eased;
-                playerBlock.rotation.z = startRot.z + (targetRot.z - startRot.z) * eased;
-
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    // Snap to final position
-                    playerBlock.position.copy(targetPos);
-                    playerBlock.rotation.x = targetRot.x;
-                    playerBlock.rotation.y = targetRot.y;
-                    playerBlock.rotation.z = targetRot.z;
-
-                    gameState.isAnimating = false;
-                    checkExitTile();
+                    // Call the completion callback if provided
+                    if (onComplete && typeof onComplete === 'function') {
+                        onComplete();
+                    }
                 }
             }
 
@@ -1578,51 +1422,43 @@
         }
 
         // Animate block falling off the grid
-        function animateBlockFalling(prevX, prevY, prevOrientation, direction, reset = true) {
+        function animateBlockFalling(prevOrientation, direction, reset = true) {
             if (!playerBlock) return;
 
             gameState.isAnimating = true;
-            const duration = 1200;
+            const duration = 400;
             const startTime = Date.now();
             const tileSize = 1;
 
             const startPos = playerBlock.position.clone();
-            const startRot = { x: playerBlock.rotation.x, y: playerBlock.rotation.y, z: playerBlock.rotation.z };
-            const startColor = new THREE.Color(blockMaterial.color);
-            const endColor = new THREE.Color(0x000000);
-
-            // Calculate fall direction
-            let fallDirX = 0, fallDirZ = 0;
-            switch (direction) {
-                case 'up': fallDirZ = -1; break;
-                case 'down': fallDirZ = 1; break;
-                case 'left': fallDirX = -1; break;
-                case 'right': fallDirX = 1; break;
-                case 'in-place': break;
-            }
+            const startRot = playerBlock.rotation.clone();
 
             function fallAnimate() {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-
-                // Parabolic fall with rotation
-                // TODO: Works... but fails with gimbal lock/local rotation issues without quaternions.
+                const eased = easeOutCubic(progress);
+                const rotationAngle = eased * 4 * Math.PI / 2; // Accelerates rotation
 
                 const fallDistance = 5;
-                const horizontalProgress = progress * 2; // Move faster horizontally
-                const verticalProgress = progress * progress * 2; // Accelerate downward
-
-                playerBlock.position.x = startPos.x + fallDirX * horizontalProgress * fallDistance;
+                const verticalProgress = eased * eased * 4; // Accelerate downward
                 playerBlock.position.y = startPos.y - verticalProgress * fallDistance;
-                playerBlock.position.z = startPos.z + fallDirZ * horizontalProgress * fallDistance;
 
-                // Tumbling rotation
-                playerBlock.rotation.x = startRot.x + progress * Math.PI * 2 * fallDirZ;
-                playerBlock.rotation.z = startRot.z + progress * Math.PI * 2 * -fallDirX;
+                // Create a quaternion for the new rotation
+                const quaternion = new THREE.Quaternion();
+                switch (direction) {
+                    case 'up': quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -rotationAngle); break;
+                    case 'down': quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), rotationAngle); break;
+                    case 'left': quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), rotationAngle); break;
+                    case 'right': quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -rotationAngle); break;
+                    case 'in-place': break;
+                }
 
-                // Fade to black
-                const currentColor = new THREE.Color().lerpColors(startColor, endColor, progress);
-                playerBlock.material.color.copy(currentColor);
+                // Combine with current rotation
+                const startQuaternion = new THREE.Quaternion().setFromEuler(startRot);
+                const newQuaternion = new THREE.Quaternion().multiplyQuaternions(quaternion, new THREE.Quaternion().setFromEuler(startRot));
+
+                // Update rotation
+                playerBlock.rotation.setFromQuaternion(newQuaternion);
 
                 if (progress < 1) {
                     requestAnimationFrame(fallAnimate);
@@ -1640,44 +1476,6 @@
 
             fallAnimate();
         }
-
-
-        // // Animate tile falling off the grid
-        // function animateTileFalling(x, y) {
-        //     const duration = 1200;
-        //     const startTime = Date.now();
-        //     const tile = getTileAt(x, y);
-
-        //     const startPos = tile.position.clone();
-        //     const startRot = { x: tile.rotation.x, y: tile.rotation.y, z: tile.rotation.z };
-        //     const randDir = Math.random() * 2 - 1;
-        //     const startColor = tile.material.color.clone();
-        //     const endColor = new THREE.Color(0x000000);
-
-        //     function fallAnimate() {
-        //         const elapsed = Date.now() - startTime;
-        //         const progress = Math.min(elapsed / duration, 1);
-
-        //         const fallDistance = 5;
-        //         const verticalProgress = progress * progress * 2; // Accelerate downward
-
-        //         tile.position.y = startPos.y - verticalProgress * fallDistance;
-
-        //         // Tumbling rotation
-        //         tile.rotation.x = startRot.x + progress * Math.PI * 2 * randDir;
-        //         tile.rotation.z = startRot.z + progress * Math.PI * 2 * -randDir;
-
-        //         // Fade to black
-        //         const currentColor = new THREE.Color().lerpColors(startColor, endColor, progress);
-        //         tile.material.color.copy(currentColor);
-
-        //         if (progress < 1) {
-        //             requestAnimationFrame(fallAnimate);
-        //         }
-        //     }
-
-        //     fallAnimate();
-        // }
 
         function getFootprintForState(state) {
             const { x, y, orientation } = state;
@@ -1702,7 +1500,7 @@
             if (tileData && tileData.type == 'exit') {
                 if (gameState.blockOrientation === 'standing'){
                     setTimeout(() => {
-                        animateBlockFalling(x, y, 'standing', 'in-place', reset = false);
+                        animateBlockFalling('standing', 'in-place', reset = false);
 
                         setTimeout(() => {
                             winLevel();
@@ -1796,15 +1594,11 @@
                 camera.right = orthoBaseDist;
                 camera.top = orthoBaseDist;
                 camera.bottom = -orthoBaseDist;
-                console.log(`Camera ratio: W:${gridWidth}, H:${gridHeight}, r:${gridWidth/gridHeight}`)
-                // camera.position.set(100, 100, 100);
-                // camera = perspectiveCamera;
                 camera.position.set(centerX + orthoBaseDist / 5, 7, centerY + orthoBaseDist);
                 camera.lookAt(centerX, 0, centerY);
                 camera.updateProjectionMatrix();
             } else {
                 camera = perspectiveCamera;
-                // camera.position.set(centerX + 30, 30, centerY + 30);
                 camera.position.set(centerX, baseDist * 1.8, centerY);
                 camera.lookAt(centerX, 0, centerY);
             }
