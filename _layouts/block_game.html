@@ -1672,6 +1672,7 @@
             }
 
             inputs.forEach((input, index) => {
+                // Handle input - typing replaces existing value
                 input.addEventListener('input', function() {
                     // Allow alphanumeric
                     this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
@@ -1683,6 +1684,47 @@
 
                     // Clear error state
                     this.classList.remove('error');
+                });
+
+                // Handle keydown for arrow keys and backspace
+                input.addEventListener('keydown', function(e) {
+                    // Arrow left - move to previous input
+                    if (e.key.toLowerCase() === 'arrowleft' && index > 0) {
+                        e.preventDefault();
+                        inputs[index - 1].focus();
+                        inputs[index - 1].select();
+                    }
+
+                    // Arrow right - move to next input
+                    if (e.key.toLowerCase() === 'arrowright' && index < inputs.length - 1) {
+                        e.preventDefault();
+                        inputs[index + 1].focus();
+                        inputs[index + 1].select();
+                    }
+
+                    // Backspace - clear current and move to previous
+                    if (e.key.toLowerCase() === 'backspace' && this.value === '' && index > 0) {
+                        e.preventDefault();
+                        inputs[index - 1].focus();
+                        inputs[index - 1].select();
+                    }
+
+                    // Enter key - submit
+                    if (e.key.toLowerCase() === 'enter') {
+                        e.preventDefault();
+                        submitPasscode();
+                    }
+
+                    // Escape key - close modal
+                    if (e.key.toLowerCase() === 'escape') {
+                        e.preventDefault();
+                        closePasswordModal();
+                    }
+                });
+
+                // Handle focus - select all text for easy replacement
+                input.addEventListener('focus', function() {
+                    this.select();
                 });
 
                 // Handle paste
@@ -1799,6 +1841,13 @@
 
         // Keyboard controls
         document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === "enter") {
+                if (gameState.hasWon) {
+                    nextLevel();
+                    return;
+                }
+            }
+
             if (gameState.isAnimating || gameState.isResetting || gameState.hasWon || gameState.passwordModalOpen) return;
 
             switch (e.key.toLowerCase()) {
