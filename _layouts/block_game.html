@@ -619,20 +619,71 @@
                 id: 12,
                 name: "The Many",
                 layout: `
-                    1 1  1 0 0 0 0 0  0  0 0 0 0   0  0
-                    1 *  1 1 1 1 1 1  1  bc 0 0 1   1  1
-                    1 1  1 0 0 0 0 bb 1  1 1 1 1   @  1
-                    1 1  1 0 0 0 0 0  0  0 0 0 hDc  hEc 1
-                    1 1  1 0 0 0 0 0  0  0 0 0 0   0  0
-                    1 1  1 0 0 0 0 0  0  0 0 0 0   0  0
-                    1 1  1 0 0 0 0 1  1  1 1 1 hEb 0  0
-                    1 1  1 1 1 1 1 1  ba 0 0 1 1   0  0
-                    1 sa 1 0 0 0 0 0  0  0 0 1 1   0  0
-                    1 1  1 0 0 0 0 0  0  0 0 1 h?  0  0  // Enables bc and disables ba (requires dual support)
+                    1 1  1 0 0 0 0  0  0  0 0 0 0   0  0
+                    1 *  1 1 1 1 1  1  1  bc 0 0 1   1  1
+                    1 1  1 0 0 0 0  bb 1  1 1 1 1   @  1
+                    1 1  1 0 0 0 0  0  0  0 0 0 hDc  hEc 1
+                    1 1  1 0 0 0 0  0  0  0 0 0 0   0  0
+                    1 1  1 0 0 0 0  0  0  0 0 0 0   0  0
+                    1 1  1 0 0 0 bc 1  1  1 1 1 hEb 0  0
+                    1 1  1 1 1 1 1  1  ba 0 0 1 1   0  0
+                    1 sa 1 0 0 0 0  0  0  0 0 1 1   0  0
+                    1 1  1 0 0 0 0  0  0  0 0 1 h?  0  0  // Enables bc and disables ba (requires dual support)
                 `,
-                password: "tons5", // 210362
+                password: "tons5", // 683596
             }, */
+            {
+                id: 12,
+                name: "Avoidance",
+                layout: `
+                    0 0   0   0  0 0  0 sEa 0   0  0 0 0  0  0
+                    1 1   sDb 1  0 0  0 1   0   0  0 0 0  0  0
+                    1 1   1   1  1 0  0 1   0   0  0 0 0  0  0
+                    1 sDa 1   1  1 1  1 1   ba  ba 1 1 bb bb 1
+                    1 1   1   1  1 bc 0 0   1   0  0 0 1  0  0
+                    1 1   sDb 1  0 0  0 0   1   0  0 0 1  0  0
+                    1 0   0   0  0 0  0 0   sEb 0  0 1 1  1  0
+                    1 0   0   0  0 0  0 0   0   0  1 1 @  1  0
+                    1 bb  bb  hc 0 0  0 0   0   0  1 1 1  1  0
+                `,
+                password: "dont3", // 284933
+            },
+            {
+                id: 13,
+                name: "The Snake",
+                layout: `
+                    0 * 1  1  1 1 1 1  1  1 sa  1 1 1 1
+                    0 0 0  0  0 1 1 0  0  0 0   0 0 1 1
+                    0 0 0  0  0 1 1 0  0  0 0   0 0 1 1
+                    0 0 0  0  0 0 0 0  0  0 0   0 0 1 1
+                    0 0 0  0  0 0 0 0  0  0 0   0 0 1 1
+                    1 1 1  0  0 1 1 ba ba 1 sDb 1 1 1 1
+                    1 @ 1  0  0 1 1 0  0  0 0   0 0 0 0
+                    1 1 1  0  0 1 1 0  0  0 0   0 0 0 0
+                    0 1 1  0  0 1 1 0  0  0 0   0 0 0 0
+                    0 1 bb bb 1 1 1 1  1  1 sEb 1 1 1 0
+                `,
+                password: "keepr", // 119785
+            },
+            // {
+            //     id: 15,
+            //     name: "The Camel",
+            //     layout: `
+            //         0 0 0  0 0   1 1   0 0 0   0 1 1  1
+            //         0 0 0  1 1   1 1   1 1 0   0 1 @  1
+            //         1 1 1  1 1   1 sD? 1 1 1   1 1 1  1
+            //         1 * 1  1 sD? 0 0   1 1 1   1 1 ba 0
+            //         1 1 1  0 0   0 0   0 0 1   1 1 0  0
+            //         0 1 0  0 0   0 0   0 0 0   1 0 0  0
+            //         0 1 0  0 0   0 0   0 0 0   1 0 0  0
+            //         0 1 0  0 0   0 0   0 0 bE? 1 0 0  0
+            //         0 1 1  0 0   0 0   0 0 1   1 0 0  0
+            //         0 0 h? 0 0   0 0   0 0 h?  0 0 0  0
+            //     `,
+            //     password: "1hump", // 987319 // ALSO requires enabling/disabling multiple IDs
+            // },
         ];
+
 
         // Parse level layout text into grid data
         function parseLevelLayout(layoutText) {
