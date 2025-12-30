@@ -1864,43 +1864,82 @@
         // Touch/Swipe controls
         let touchStartX = 0;
         let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
+        let touchCurrentX = 0;
+        let touchCurrentY = 0;
+        const holdInterval = 200; // Queue a move every 200ms while holding
+        let touchHoldInterval = null;
+        let lastMoveDirection = null;
 
         canvas.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
             touchStartY = e.changedTouches[0].screenY;
+            touchCurrentX = touchStartX;
+            touchCurrentY = touchStartY;
+            lastMoveDirection = null;
+        }, false);
+
+        canvas.addEventListener('touchmove', (e) => {
+            touchCurrentX = e.changedTouches[0].screenX;
+            touchCurrentY = e.changedTouches[0].screenY;
+
+            // Start continuous movement if not already started
+            if (!touchHoldInterval) {
+                const direction = getTouchDirection();
+                if (direction) {
+                    moveBlock(direction);
+                    lastMoveDirection = direction;
+
+                    // Set up interval for continuous movement
+                    touchHoldInterval = setInterval(() => {
+                        const currentDirection = getTouchDirection();
+                        if (currentDirection) {
+                            moveBlock(currentDirection);
+                            lastMoveDirection = currentDirection;
+                        }
+                    }, holdInterval);
+                }
+            }
+
         }, false);
 
         canvas.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            touchEndY = e.changedTouches[0].screenY;
-            handleSwipe();
+            // Clear the hold interval
+            if (touchHoldInterval) {
+                clearInterval(touchHoldInterval);
+                touchHoldInterval = null;
+            }
+            // If no hold happened, process as a single swipe
+            if (!lastMoveDirection) {
+                touchCurrentX = e.changedTouches[0].screenX;
+                touchCurrentY = e.changedTouches[0].screenY;
+                handleSwipe();
+            }
+
+            lastMoveDirection = null;
         }, false);
 
         function handleSwipe() {
-            const deltaX = touchEndX - touchStartX;
-            const deltaY = touchEndY - touchStartY;
+            const direction = getTouchDirection();
+            if (direction) {
+                moveBlock(direction);
+            }
+        }
+
+        function getTouchDirection() {
+            const deltaX = touchCurrentX - touchStartX;
+            const deltaY = touchCurrentY - touchStartY;
             const minSwipeDistance = 30;
 
             if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
-                return;
+                return null;
             }
 
             if (Math.abs(deltaX) > Math.abs(deltaY)) {
                 // Horizontal swipe
-                if (deltaX > 0) {
-                    moveBlock('right');
-                } else {
-                    moveBlock('left');
-                }
+                return deltaX > 0 ? 'right' : 'left';
             } else {
                 // Vertical swipe
-                if (deltaY > 0) {
-                    moveBlock('down');
-                } else {
-                    moveBlock('up');
-                }
+                return deltaY > 0 ? 'down' : 'up';
             }
         }
 
