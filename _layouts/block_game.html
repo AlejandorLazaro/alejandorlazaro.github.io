@@ -26,6 +26,62 @@
             touch-action: none;
         }
 
+        .fullscreen-btn {
+            position: absolute; /* TODO: Check if this is correct or should be relative */
+            top: 2%;
+            right: 2%;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
+        .fullscreen-btn img {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+
+        .fullscreen-btn:hover img {
+            opacity: 1;
+        }
+
+        #canvasContainer.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+            max-height: none !important;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #canvasContainer.fullscreen #gameCanvas {
+            max-width: none !important;
+            max-height: none !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
         .page-wrapper {
             display: flex;
             flex-direction: column;
@@ -72,7 +128,7 @@
                 inset 0 0 20px rgba(0, 0, 0, 0.3);
             touch-action: none;
             width: 100%;
-            max-width: 500px;
+            /* max-width: 500px; */
         }
 
         /* Desktop: constrain size differently */
@@ -95,9 +151,17 @@
                 gap: 15px;
             }
 
+            .fullscreen-btn {
+                right: 4%;
+            }
+
             .easter-egg-note {
                 font-size: 0.85em;
                 padding: 12px;
+            }
+
+            .attributions {
+                font-size: 0.8em;
             }
         }
 
@@ -147,7 +211,7 @@
             border-radius: 15px;
             text-align: center;
             border: 2px solid rgba(0, 255, 136, 0.5);
-            z-index: 1000;
+            z-index: 10000;
             transition: transform 0.3s ease;
         }
 
@@ -373,6 +437,12 @@
         .easter-egg-note a:hover {
             color: #00ff88;
         }
+
+        .attributions {
+            font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -389,11 +459,18 @@
             </div>
 
             <div id="canvasContainer" style="position: relative;">
+                <button class="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">
+                    <img src="/assets/img/expand_arrow_32.png" alt="Fullscreen">
+                </button>
                 <canvas id="gameCanvas"></canvas>
+                <div class="win-message" id="winMessage">
+                    <h2>🎉 Level Complete! 🎉</h2>
+                    <p>Moves: <span id="finalMoves">0</span></p>
+                    <button onclick="nextLevel()">Next Level</button>
+                </div>
             </div>
 
             <div class="button-group">
-                <!-- <button class="btn" onclick="resetLevel()">🔄 Reset</button> -->
                 <button class="btn" onclick="toggleCamera()">📷 Toggle Camera</button>
                 <button class="btn" onclick="openPasswordModal()">🔏 Load Level</button>
             </div>
@@ -403,14 +480,12 @@
             </div>
         </div>
 
-        <div class="win-message" id="winMessage">
-            <h2>🎉 Level Complete! 🎉</h2>
-            <p>Moves: <span id="finalMoves">0</span></p>
-            <button onclick="nextLevel()">Next Level</button>
-        </div>
-
         <div class="easter-egg-note">
             🎮 Easter egg found! <a href="/">Back to portfolio</a>
+        </div>
+
+        <div class="attributions">
+            Uicons by <a href="https://www.flaticon.com/uicons">Flaticon</a>
         </div>
     </div>
 
@@ -876,6 +951,10 @@
         let gridTiles = [];
         let playerBlock = null;
         let exitTile = null;
+
+        // Fullscreen state
+        let isFullscreen = false;
+        let preFullscreenSize = { width: 0, height: 0 };
 
         // Load textures for the different faces
         const tileTexture = textureLoader.load('/assets/img/tile.png', () => {
@@ -2030,7 +2109,7 @@
                     toggleCamera();
                     break;
                 case 'l':
-                    openPasswordModal();
+                    if (!isFullscreen) openPasswordModal();
                     break;
             }
         });
@@ -2046,6 +2125,120 @@
             }
 
             renderer.render(scene, camera);
+        }
+
+        function toggleFullscreen() {
+            const container = document.getElementById('canvasContainer');
+
+            if (!isFullscreen) {
+                enterFullscreen(container);
+            } else {
+                exitFullscreen(container);
+            }
+        }
+
+        function enterFullscreen(container) {
+            isFullscreen = true;
+
+            // Store current canvas size and aspect ratio
+            preFullscreenSize = {
+                width: canvas.width,
+                height: canvas.height,
+                aspect: canvas.width / canvas.height
+            };
+
+            // Add fullscreen class
+            container.classList.add('fullscreen');
+
+            // Switch to compress icon
+            const icon = container.querySelector('.fullscreen-btn img');
+            if (icon) {
+                icon.src = '/assets/img/compress_arrow_32.png';
+                icon.title = 'Exit Fullscreen';
+            }
+
+            // Request fullscreen API (optional, for true fullscreen)
+            if (container.requestFullscreen) {
+                container.requestFullscreen().catch(err => {
+                    console.log('Fullscreen request failed:', err);
+                });
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            } else if (container.msRequestFullscreen) {
+                container.msRequestFullscreen();
+            }
+
+            // Resize canvas to fill screen while maintaining aspect ratio
+            resizeFullscreenCanvas();
+        }
+
+        function exitFullscreen(container) {
+            isFullscreen = false;
+
+            // Remove fullscreen class
+            container.classList.remove('fullscreen');
+
+            // Switch back to expand icon
+            const icon = container.querySelector('.fullscreen-btn img');
+            if (icon) {
+                icon.src = '/assets/img/expand_arrow_32.png';
+                icon.title = 'Toggle Fullscreen';
+            }
+            // Exit fullscreen API
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(err => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+
+            // Restore previous size
+            resizeWindow();
+        }
+
+        function resizeFullscreenCanvas() {
+            if (!isFullscreen) return;
+
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const targetAspect = preFullscreenSize.aspect;
+
+            let width, height;
+
+            // Calculate size to fit screen while maintaining aspect ratio
+            if (screenWidth / screenHeight > targetAspect) {
+                // Screen is wider than canvas aspect ratio
+                height = screenHeight * 0.95;
+                width = height * targetAspect;
+            } else {
+                // Screen is taller than canvas aspect ratio
+                width = screenWidth * 0.95;
+                height = width / targetAspect;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+
+        // Listen for fullscreen change events
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+        function handleFullscreenChange() {
+            const container = document.getElementById('canvasContainer');
+            const isCurrentlyFullscreen = document.fullscreenElement === container ||
+                                        document.webkitFullscreenElement === container ||
+                                        document.msFullscreenElement === container;
+
+            if (!isCurrentlyFullscreen && isFullscreen) {
+                // User exited fullscreen via ESC key or browser UI
+                exitFullscreen(container);
+            }
         }
 
         function resizeWindow() {
