@@ -26,7 +26,16 @@
             touch-action: none;
         }
 
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px 0;
+        }
+
         .game-container {
+            flex-shrink: 0;
             text-align: center;
             padding: 20px;
             background: rgba(255, 255, 255, 0.05);
@@ -34,7 +43,7 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            max-height: 90vh;
+            max-width: 90vw;
         }
 
         .game-title {
@@ -61,10 +70,35 @@
             box-shadow:
                 0 0 20px rgba(0, 255, 136, 0.2),
                 inset 0 0 20px rgba(0, 0, 0, 0.3);
-            max-width: 30vw;
-            max-height: 50vh;
-            height: auto;
             touch-action: none;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* Desktop: constrain size differently */
+        @media (min-width: 768px) {
+            #gameCanvas {
+                max-width: 450px;
+                max-height: 425px;
+            }
+        }
+
+        /* Mobile: prioritize width */
+        @media (max-width: 767px) {
+            #gameCanvas {
+                max-width: 75vw;
+                aspect-ratio: 1; /* Maintains consistent proportions */
+            }
+
+            .page-wrapper {
+                padding: 15px 0 30px 0;
+                gap: 15px;
+            }
+
+            .easter-egg-note {
+                font-size: 0.85em;
+                padding: 12px;
+            }
         }
 
         .game-info {
@@ -311,8 +345,9 @@
         /* Hide on mobile/touch devices */
         @media (hover: none) and (pointer: coarse) {
             .controls {
-                content: "Swipe to move the block"
+                content: none;
             }
+        }
 
         .loading {
             color: rgba(255, 255, 255, 0.7);
@@ -321,13 +356,13 @@
         }
 
         .easter-egg-note {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            /* position: absolute;
+            bottom: 20px; */
             font-size: clamp(0.7rem, 2vw, 0.8rem);
+            padding: 15px;
             color: rgba(255, 255, 255, 0.4);
             text-align: center;
+            margin: 0 20px;
         }
 
         .easter-egg-note a {
@@ -342,39 +377,41 @@
 </head>
 
 <body>
-    <div class="game-container">
-        <h1 class="game-title"><u>B</u>LOCK PUZZLE 3D</h1>
-        <p class="game-subtitle">🧱 Roll the block to the exit hole</p>
+    <div class="page-wrapper">
+        <div class="game-container">
+            <h1 class="game-title"><u>B</u>LOCK PUZZLE 3D</h1>
+            <p class="game-subtitle">🧱 Roll the block to the exit hole</p>
 
-        <div class="game-info">
-            <div class="info-item">LVL: <span id="levelDisplay">1</span></div>
-            <div class="info-item">MOVE: <span id="moveDisplay">0</span></div>
-            <div class="pass-item">PASS: <span id="passcodeDisplay">0</span></div>
+            <div class="game-info">
+                <div class="info-item">LVL: <span id="levelDisplay">1</span></div>
+                <div class="info-item">MOVE: <span id="moveDisplay">0</span></div>
+                <div class="pass-item">PASS: <span id="passcodeDisplay">0</span></div>
+            </div>
+
+            <div id="canvasContainer" style="position: relative;">
+                <canvas id="gameCanvas"></canvas>
+            </div>
+
+            <div class="button-group">
+                <!-- <button class="btn" onclick="resetLevel()">🔄 Reset</button> -->
+                <button class="btn" onclick="toggleCamera()">📷 Toggle Camera</button>
+                <button class="btn" onclick="openPasswordModal()">🔏 Load Level</button>
+            </div>
+
+            <div class="controls">
+                Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> to tip the block
+            </div>
         </div>
 
-        <div id="canvasContainer" style="position: relative;">
-            <canvas id="gameCanvas" width="600" height="600"></canvas>
+        <div class="win-message" id="winMessage">
+            <h2>🎉 Level Complete! 🎉</h2>
+            <p>Moves: <span id="finalMoves">0</span></p>
+            <button onclick="nextLevel()">Next Level</button>
         </div>
 
-        <div class="button-group">
-            <!-- <button class="btn" onclick="resetLevel()">🔄 Reset</button> -->
-            <button class="btn" onclick="toggleCamera()">📷 Toggle Camera</button>
-            <button class="btn" onclick="openPasswordModal()">🔏 Load Level</button>
+        <div class="easter-egg-note">
+            🎮 Easter egg found! <a href="/">Back to portfolio</a>
         </div>
-
-        <div class="controls">
-            Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> to tip the block
-        </div>
-    </div>
-
-    <div class="win-message" id="winMessage">
-        <h2>🎉 Level Complete! 🎉</h2>
-        <p>Moves: <span id="finalMoves">0</span></p>
-        <button onclick="nextLevel()">Next Level</button>
-    </div>
-
-    <div class="easter-egg-note">
-        🎮 Easter egg found! <a href="/">Back to portfolio</a>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -1613,12 +1650,13 @@
                 camera.bottom = -orthoBaseDist;
                 camera.position.set(centerX + orthoBaseDist / 5, 7, centerY + orthoBaseDist);
                 camera.lookAt(centerX, 0, centerY);
-                camera.updateProjectionMatrix();
             } else {
                 camera = perspectiveCamera;
                 camera.position.set(centerX, baseDist * 1.8, centerY);
                 camera.lookAt(centerX, 0, centerY);
             }
+            camera.aspect = 1;
+            camera.updateProjectionMatrix();
         }
 
         // Open password modal
@@ -1920,23 +1958,44 @@
             renderer.render(scene, camera);
         }
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
+        function resizeWindow() {
             const container = document.getElementById('canvasContainer');
-            const maxWidth = Math.min(window.innerWidth * 0.9, 600);
-            const maxHeight = Math.min(window.innerHeight * 0.6, 600);
-            const size = Math.min(maxWidth, maxHeight);
+            const isMobile = window.innerWidth < 768;
 
-            canvas.width = size;
-            canvas.height = size;
-            renderer.setSize(size, size);
-            camera.aspect = 1;
+            let width, height;
+
+            if (isMobile) {
+                // Mobile: portrait orientation, taller canvas
+                width = Math.min(window.innerWidth * 0.9, 500);
+                height = width * 1.25; // 3:4 aspect ratio
+                height = Math.min(height, window.innerHeight * 0.5);
+                // Adjust width if height was constrained
+                width = height * .8;
+            } else {
+                // Desktop: more square, constrained size
+                const maxSize = Math.min(
+                    window.innerWidth * 0.4,
+                    window.innerHeight * 0.7,
+                    600
+                );
+                width = maxSize * 1.33;
+                height = maxSize;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
             camera.updateProjectionMatrix();
-        });
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', resizeWindow);
 
         // Initialize game
         function init() {
             resetLevel();
+            resizeWindow();
             updateCamera();
             animate();
         }
