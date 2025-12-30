@@ -128,7 +128,7 @@
                 inset 0 0 20px rgba(0, 0, 0, 0.3);
             touch-action: none;
             width: 100%;
-            /* max-width: 500px; */
+            max-width: 500px;
         }
 
         /* Desktop: constrain size differently */
@@ -146,13 +146,8 @@
                 aspect-ratio: 1; /* Maintains consistent proportions */
             }
 
-            .page-wrapper {
-                padding: 15px 0 30px 0;
-                gap: 15px;
-            }
-
             .fullscreen-btn {
-                right: 4%;
+                display: none;
             }
 
             .easter-egg-note {
@@ -741,7 +736,7 @@
                 password: "keepr", // 119785
             },
             // {
-            //     id: 15,
+            //     id: 14,
             //     name: "The Camel",
             //     layout: `
             //         0 0 0  0 0   1 1   0 0 0   0 1 1  1
@@ -758,7 +753,6 @@
             //     password: "1hump", // 987319 // ALSO requires enabling/disabling multiple IDs
             // },
         ];
-
 
         // Parse level layout text into grid data
         function parseLevelLayout(layoutText) {
