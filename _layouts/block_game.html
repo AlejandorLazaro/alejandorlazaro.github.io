@@ -28,20 +28,19 @@
 
         .game-container {
             text-align: center;
-            padding: 15px;
+            padding: 20px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            max-width: 90vw;
             max-height: 90vh;
         }
 
         .game-title {
             font-size: clamp(1.5rem, 4vw, 2.2rem);
             font-weight: bold;
-            margin-bottom: 3px;
+            margin-bottom: 10px;
             background: linear-gradient(45deg, #00ff88, #00ccff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -62,22 +61,19 @@
             box-shadow:
                 0 0 20px rgba(0, 255, 136, 0.2),
                 inset 0 0 20px rgba(0, 0, 0, 0.3);
-            max-width: 90vw;
-            max-height: 60vh;
-            display: block;
-            margin: 0 auto;
+            max-width: 30vw;
+            max-height: 50vh;
+            height: auto;
             touch-action: none;
         }
 
         .game-info {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             align-items: center;
-            margin: 10px 0;
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            margin: 20px 0;
+            font-size: clamp(1rem, 3vw, 1.2rem);
             font-weight: bold;
-            flex-wrap: wrap;
-            gap: 15px;
         }
 
         .info-item {
@@ -85,8 +81,13 @@
             text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
         }
 
+        .pass-item {
+            color: #00ccff;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+        }
+
         .controls {
-            margin-top: 10px;
+            margin-top: 20px;
             font-size: clamp(0.7rem, 2vw, 0.85rem);
             color: rgba(255, 255, 255, 0.6);
             line-height: 1.6;
@@ -318,18 +319,37 @@
             font-size: 1.2rem;
             padding: 20px;
         }
+
+        .easter-egg-note {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+        }
+
+        .easter-egg-note a {
+            color: rgba(0, 255, 136, 0.6);
+            text-decoration: none;
+        }
+
+        .easter-egg-note a:hover {
+            color: #00ff88;
+        }
     </style>
 </head>
 
 <body>
     <div class="game-container">
-        <h1 class="game-title">BLOCK PUZZLE 3D</h1>
-        <p class="game-subtitle">Roll the block to the exit hole</p>
+        <h1 class="game-title"><u>B</u>LOCK PUZZLE 3D</h1>
+        <p class="game-subtitle">🧱 Roll the block to the exit hole</p>
 
         <div class="game-info">
             <div class="info-item">LVL: <span id="levelDisplay">1</span></div>
             <div class="info-item">MOVE: <span id="moveDisplay">0</span></div>
-            <div class="info-item">PASS: <span id="passcodeDisplay">0</span></div>
+            <div class="pass-item">PASS: <span id="passcodeDisplay">0</span></div>
         </div>
 
         <div id="canvasContainer" style="position: relative;">
@@ -338,12 +358,12 @@
 
         <div class="button-group">
             <!-- <button class="btn" onclick="resetLevel()">🔄 Reset</button> -->
-            <button class="btn" onclick="toggleCamera()">📷 Camera</button>
+            <button class="btn" onclick="toggleCamera()">📷 Toggle Camera</button>
             <button class="btn" onclick="openPasswordModal()">🔏 Load Level</button>
         </div>
 
         <div class="controls">
-            Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> to tip the block<br><kbd>C</kbd> to toggle camera
+            Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> to tip the block
         </div>
     </div>
 
@@ -351,6 +371,10 @@
         <h2>🎉 Level Complete! 🎉</h2>
         <p>Moves: <span id="finalMoves">0</span></p>
         <button onclick="nextLevel()">Next Level</button>
+    </div>
+
+    <div class="easter-egg-note">
+        🎮 Easter egg found! <a href="/">Back to portfolio</a>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -715,7 +739,14 @@
         // Three.js setup
         const canvas = document.getElementById('gameCanvas');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a0a);
+
+        // Load in textures
+        const textureLoader = new THREE.TextureLoader();
+
+        const bgTexture = textureLoader.load('/assets/img/background.jpg');
+        bgTexture.colorSpace = THREE.SRGBColorSpace;
+        scene.background = bgTexture;
+        /* scene.background = new THREE.Color(0x0a0a0a); */
 
         const aspect = canvas.innerWidth / canvas.innerHeight
         const orthographicCamera = new THREE.OrthographicCamera();
@@ -757,10 +788,6 @@
         let gridTiles = [];
         let playerBlock = null;
         let exitTile = null;
-
-        // TODO: Textures are expensive when randomly rotating the block; it freezes the game
-        // Load in textures for the game objects
-        const textureLoader = new THREE.TextureLoader();
 
         // Load textures for the different faces
         const tileTexture = textureLoader.load('/assets/img/tile.png', () => {
@@ -1871,11 +1898,11 @@
                     e.preventDefault();
                     moveBlock('right');
                     break;
-                // case 'r':
-                //     resetLevel();
-                //     break;
                 case 'c':
                     toggleCamera();
+                    break;
+                case 'l':
+                    openPasswordModal();
                     break;
             }
         });
