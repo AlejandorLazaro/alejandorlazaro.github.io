@@ -26,8 +26,42 @@
             touch-action: none;
         }
 
+        .camera-btn {
+            position: absolute;
+            top: 2%;
+            left: 2%;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
+        .camera-btn img {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+
+        .camera-btn:hover img {
+            opacity: 1;
+        }
+
         .fullscreen-btn {
-            position: absolute; /* TODO: Check if this is correct or should be relative */
+            position: absolute;
             top: 2%;
             right: 2%;
             background: rgba(0, 0, 0, 0.5);
@@ -144,10 +178,6 @@
             #gameCanvas {
                 max-width: 75vw;
                 aspect-ratio: 1; /* Maintains consistent proportions */
-            }
-
-            .fullscreen-btn {
-                display: none;
             }
 
             .easter-egg-note {
@@ -406,6 +436,10 @@
             .controls {
                 display: none;
             }
+
+            .fullscreen-btn {
+                display: none;
+            }
         }
 
         .loading {
@@ -454,6 +488,9 @@
             </div>
 
             <div id="canvasContainer" style="position: relative;">
+                <button class="camera-btn" onclick="toggleCamera()" title="Toggle Camera">
+                    <img src="/assets/img/camera_top_down.png" alt="Toggle Camera">
+                </button>
                 <button class="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">
                     <img src="/assets/img/expand_arrow_32.png" alt="Fullscreen">
                 </button>
@@ -466,7 +503,7 @@
             </div>
 
             <div class="button-group">
-                <button class="btn" onclick="toggleCamera()">📷 Toggle Camera</button>
+                <!-- <button class="btn" onclick="toggleCamera()">📷 Toggle Camera</button> -->
                 <button class="btn" onclick="openPasswordModal()">🔏 Load Level</button>
             </div>
 
@@ -1857,6 +1894,18 @@
         function toggleCamera() {
             gameState.cameraMode = gameState.cameraMode === 'isometric' ? 'top' : 'isometric';
             updateCamera();
+
+            const container = document.getElementById('canvasContainer');
+            // Switch icon
+            const icon = container.querySelector('.camera-btn img');
+            if (icon) {
+                if (gameState.cameraMode === 'isometric') {
+                    icon.src = '/assets/img/camera_top_down.png';
+                }
+                else {
+                    icon.src = '/assets/img/camera_angled.png';
+                }
+            }
         }
 
         function updateCamera() {
