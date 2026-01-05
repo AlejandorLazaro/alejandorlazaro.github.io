@@ -67,7 +67,7 @@ title: Alejandro L. Ramirez - Game Producer
         <h2>Recent Role</h2>
         <div class="project">
             <div class="project-title">Producer/Dev Tools/QA</div>
-            <div class="project-subtitle">Stray Kite Studios LLC • October 2024 - August 2025</div>
+            <div class="project-subtitle">Stray Kite Studios LLC • October 2024 - November 2025</div>
             <div class="project-desc">
                 <strong>Production:</strong> Jira administration, scrum/meeting management, project estimation via Google Sheet dashboards, and roadmap development.
                 <br><br>
