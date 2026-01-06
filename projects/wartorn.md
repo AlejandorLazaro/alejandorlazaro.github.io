@@ -26,7 +26,7 @@ title: Wartorn - Game Production
                     <div class="meta-item"><strong>Developer:</strong> Stray Kite Studios</div>
                     <div class="meta-item"><strong>Role:</strong> Producer</div>
                     <div class="meta-item"><strong>Platform:</strong> PC (Steam & Epic)</div>
-                    <div class="meta-item"><strong>Timeline:</strong> October 2024 - August 2025</div>
+                    <div class="meta-item"><strong>Timeline:</strong> October 2024 - November 2025</div>
                     <div class="meta-item"><strong>Genre:</strong> Single-player, squad-based RTS roguelite</div>
                     <div class="meta-item"><strong>Stores:</strong> <a href="https://store.steampowered.com/app/1296660/Wartorn/" target="_blank">Steam</a> / <a href="https://store.epicgames.com/en-US/p/wartorn-e12425" target="_blank">Epic</a></div>
                 </div>
