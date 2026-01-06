@@ -524,10 +524,35 @@
     <script>
         const ISDEBUG = false;
 
-        // Game state
+        // localStorage support check
+        let storageSupported = false;
+        try {
+            localStorage.setItem('blockTest', 'test');
+            localStorage.removeItem('blockTest');
+            storageSupported = true;
+        } catch (e) {
+            // storageWarningElement.style.display = 'block';
+        }
+
+        // Persistent game data structure
+        let persistentData = {
+            gamesPlayed: 0,
+            highestLevel: 1,
+            startingMovesForCurrentLevel: 0,
+            firstPlayDate: null,
+            lastPlayDate: null,
+            totalPlayTime: 0,
+            blockData: {
+                highestLevel: 1,
+                startingMovesForCurrentLevel: 0,
+            }
+        };
+
+        // Starting game state
         const gameState = {
             level: 1,
-            moves: 0,
+            startingMovesForCurrentLevel: 0,
+            currentMoves: 0,
             blockPosition: { x: 0, y: 0 },
             blockOrientation: 'standing', // 'standing', 'lying-x', 'lying-y'
             isAnimating: false,
@@ -737,7 +762,7 @@
                     1 1  1 0 0 0 0  0  0  0  0 1 hDaEc 0   0
                 `,
                 password: "tons5", // 683596
-            },
+            },  // TODO: Fix this later
             {
                 id: 14,
                 name: "Avoidance",
@@ -1621,7 +1646,7 @@
 
             gameState.blockPosition = { x: newX, y: newY };
             gameState.blockOrientation = newOrientation;
-            gameState.moves++;
+            gameState.currentMoves++;
 
             // Calculate imbalanced direction before animation
             const testState = { x: newX, y: newY, orientation: newOrientation };
@@ -1846,14 +1871,17 @@
             }
 
             gameState.hasWon = true;
-            document.getElementById('finalMoves').textContent = gameState.moves;
+            document.getElementById('finalMoves').textContent = gameState.currentMoves;
             document.getElementById('winMessage').classList.add('show');
+
+            gameState.level++;
+            gameState.startingMovesForCurrentLevel = gameState.currentMoves;
+            savePersistentData();
         }
 
         // Next level
         function nextLevel() {
             document.getElementById('winMessage').classList.remove('show');
-            gameState.level++;
 
             if (gameState.level <= levelDefinitions.length) {
                 currentLevel = loadLevel(levelDefinitions[gameState.level - 1]);
@@ -1871,7 +1899,7 @@
             currentLevel = loadLevel(levelDefinitions[gameState.level - 1]);
             gameState.blockPosition = { ...currentLevel.start };
             gameState.blockOrientation = 'standing';
-            gameState.moves = 0;
+            gameState.currentMoves = gameState.startingMovesForCurrentLevel;
             gameState.isAnimating = false;
             gameState.isResetting = false;
             gameState.hasWon = false;
@@ -1885,7 +1913,7 @@
         // Update display
         function updateDisplay() {
             document.getElementById('levelDisplay').textContent = gameState.level;
-            document.getElementById('moveDisplay').textContent = gameState.moves;
+            document.getElementById('moveDisplay').textContent = gameState.currentMoves;
             document.getElementById('passcodeDisplay').textContent = levelDefinitions[gameState.level - 1].password.toUpperCase() || '-----';
         }
 
@@ -2426,15 +2454,72 @@
         // Handle window resize
         window.addEventListener('resize', resizeWindow);
 
+        // Data persistence functions
+        function loadPersistentData() {
+            if (!storageSupported) return;
+
+            try {
+                const saved = localStorage.getItem('blockGameData');
+                if (saved) {
+                    const loadedData = JSON.parse(saved);
+                    persistentData = { ...persistentData, ...loadedData };
+
+                    if (!persistentData.blockData) {
+                        persistentData.blockData = {
+                            highestLevel: 1,
+                            startingMovesForCurrentLevel: 0,
+                        };
+                    }
+
+                    console.log(`Block Data on load: level: ${persistentData.blockData.highestLevel}, moves for cur level: ${persistentData.blockData.startingMovesForCurrentLevel}`);
+                    gameState.level = persistentData.blockData.highestLevel;
+                    gameState.startingMovesForCurrentLevel = persistentData.blockData.startingMovesForCurrentLevel;
+                    gameState.currentMoves = persistentData.blockData.startingMovesForCurrentLevel;
+                }
+
+                if (!persistentData.firstPlayDate) {
+                    persistentData.firstPlayDate = new Date().toISOString();
+                }
+                persistentData.lastPlayDate = new Date().toISOString();
+            } catch (e) {
+                console.error('Error loading persistent data:', e);
+            }
+        }
+
+        function savePersistentData() {
+            if (!storageSupported) return;
+
+            try {
+                persistentData.blockData.highestLevel = Math.max(gameState.level, persistentData.blockData.highestLevel);
+                persistentData.blockData.startingMovesForCurrentLevel = gameState.startingMovesForCurrentLevel;
+                console.log(`Block Data on save: level: ${persistentData.blockData.highestLevel}, moves for cur level: ${persistentData.blockData.startingMovesForCurrentLevel}`);
+                persistentData.lastPlayDate = new Date().toISOString();
+                localStorage.setItem('blockGameData', JSON.stringify(persistentData));
+            } catch (e) {
+                console.error('Error saving persistent data:', e);
+            }
+        }
+
         // Initialize game
-        function init() {
+        function initializeGame() {
+            loadPersistentData();
             resetLevel();
             resizeWindow();
             updateCamera();
             animate();
         }
 
-        init();
+        // Start the game
+        let gameInterval;
+        window.addEventListener('load', () => {
+            initializeGame();
+        });
+
+        // Save data on page unload
+        window.addEventListener('beforeunload', () => {
+            persistentData.totalPlayTime += Math.floor((Date.now() - sessionStartTime) / 1000);
+            savePersistentData();
+        });
     </script>
 </body>
 
