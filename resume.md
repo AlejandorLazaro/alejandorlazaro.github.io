@@ -87,7 +87,7 @@ title: Alejandro L. Ramirez - Resume
                     <strong>Recent Role:</strong> iOS Automation Software Engineer at Apple Inc.<br>
                     <strong>Background:</strong> Full-stack development, Automation, and Developer Tools<br>
                     <strong>Education:</strong> M.S. Interactive Technology (SMU), B.S. Computer Science (LeTourneau)<br>
-                    <strong>Core Skills:</strong> Python, C++, Test Automation, CI/CD<br>
+                    <strong>Core Skills:</strong> Swift, Python, C++, Test Automation, CI/CD<br>
                     <strong>Specialties:</strong> Developer Tools, Test Framework Design, Process Automation
                 </div>
             </div>

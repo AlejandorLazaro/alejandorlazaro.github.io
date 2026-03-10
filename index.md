@@ -92,7 +92,7 @@ title: Alejandro L. Ramirez - Game Producer
             <div class="project-desc">
                 <strong>Production:</strong> Jira, Monday.com, Excel Certified
                 <br>
-                <strong>Programming:</strong> Python, C++, JavaScript, Java, C#, MySQL
+                <strong>Programming:</strong> Swift, Python, C++
                 <br>
                 <strong>Version Control:</strong> Perforce, Git ("Don't cherry-pick! Rebase/partial merge!")
             </div>
