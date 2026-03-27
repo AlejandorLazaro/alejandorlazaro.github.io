@@ -16,7 +16,7 @@ Alvaro Trigo's cool fullPage.js stuff: https://alvarotrigo.com/fullPage/docs/#in
 
 Neato blog for website fun: https://codeburst.io/how-to-create-a-dynamic-website-in-30-minutes-with-fullpage-js-7e91b70dcdee
 
-### SVG Creation: 
+### SVG Creation:
 * Online vector maker: https://vectr.com
 * To compress it to 2KB: https://pixelied.com
 
@@ -27,3 +27,9 @@ Neato blog for website fun: https://codeburst.io/how-to-create-a-dynamic-website
 
 Future:
 * "ALEJANDRO" 63px in Playfair Display SC with "Ramirez" 59px in Mrs Saint Delafield - Regular underneath it, tilted at 344
+
+### App Stuff For Google AdMob
+
+Publisher ID: pub-5957326524639413
+
+(Needs to be in the [`ad-apps.txt`](https://support.google.com/admob/answer/9363762?sjid=7936703855567840522-NC#step1&zippy=%2Cview-an-example-app-adstxt-file) file for Google to approve and deliver ads to your app )
