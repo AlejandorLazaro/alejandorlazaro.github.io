@@ -103,4 +103,10 @@ title: Swapblocku Terms of Service
             For questions about these Terms of Service, please contact me at alejandro.ramirez.4693@gmail.com.
         </div>
     </div>
+
+    <div class="footer">
+        <p><small>© 2026 Alejandro Ramirez. All rights reserved.</small></p>
+        <p><small><a href="/projects/swapblocku/privacy_policy">Privacy Policy</a> • <a href="/projects/swapblocku/terms_of_service">Terms of Service</a></small></p>
+        <p><small>Apple, iPhone, and the Apple Logo are registered trademarks of Apple Inc.</small></p>
+    </div>
 </div>

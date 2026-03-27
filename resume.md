@@ -23,10 +23,10 @@ title: Alejandro L. Ramirez - Resume
         <!-- Resume Type Selector -->
         <div class="resume-selector" style="margin-bottom: 2rem;">
             <div style="text-align: center; margin-bottom: 1.5rem;">
-                <button id="gamedevBtn" class="resume-type-btn active" onclick="switchResume('gamedev')">
+                <button id="gamedevBtn" class="glassy_style_button active" onclick="switchResume('gamedev')">
                     🎮 Game Development
                 </button>
-                <button id="softwareBtn" class="resume-type-btn" onclick="switchResume('software')">
+                <button id="softwareBtn" class="glassy_style_button" onclick="switchResume('software')">
                     💻 Software Engineering
                 </button>
             </div>

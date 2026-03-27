@@ -55,15 +55,15 @@ title: Swapblocku Support
                 <div class="carousel-container">
                     <div class="carousel-slides">
                         <div class="carousel-slide">
-                            <img src="/assets/images/image1.jpg" alt="Image 1">
+                            <img src="/assets/img/projects/swapblocku/swapblocku_screenshot_01.png" alt="Image 1">
                             <div class="slide-caption">Caption for Image 1</div>
                         </div>
                         <div class="carousel-slide">
-                            <img src="/assets/images/image2.jpg" alt="Image 2">
+                            <img src="/assets/img/projects/swapblocku/swapblocku_screenshot_02.png" alt="Image 2">
                             <div class="slide-caption">Caption for Image 2</div>
                         </div>
                         <div class="carousel-slide">
-                            <img src="/assets/images/image3.jpg" alt="Image 3">
+                            <img src="/assets/img/projects/swapblocku/swapblocku_screenshot_03.png" alt="Image 3">
                             <div class="slide-caption">Caption for Image 3</div>
                         </div>
                     </div>
@@ -94,9 +94,15 @@ title: Swapblocku Support
                 <input type="text" id="email" name="email" class="contact-input"><br>
                 <label for="message">Message:</label><br>
                 <textarea id="message" name="message" class="contact-textarea"></textarea><br>
-                <button type="submit" class="resume-type-btn">Send</button>
+                <button type="submit" class="glassy_style_button">Send</button>
             </form>
         </div>
+    </div>
+
+    <div class="footer">
+        <p><small>© 2026 Alejandro Ramirez. All rights reserved.</small></p>
+        <p><small><a href="/projects/swapblocku/privacy_policy">Privacy Policy</a> • <a href="/projects/swapblocku/terms_of_service">Terms of Service</a></small></p>
+        <p><small>Apple, iPhone, and the Apple Logo are registered trademarks of Apple Inc.</small></p>
     </div>
 </div>
 
@@ -138,7 +144,7 @@ title: Swapblocku Support
         background: rgba(255, 255, 255, 0.3);
     }
 
-    .resume-type-btn {
+    .glassy_style_button {
         background: rgba(255, 255, 255, 0.2);
         border: 2px solid rgba(103, 126, 234, 0.3);
         color: #2c3e50;
@@ -152,14 +158,14 @@ title: Swapblocku Support
         backdrop-filter: blur(10px);
     }
 
-    .resume-type-btn:hover {
+    .glassy_style_button:hover {
         background: rgba(103, 126, 234, 0.2);
         border-color: rgba(103, 126, 234, 0.5);
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
 
-    .resume-type-btn:active {
+    .glassy_style_button:active {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-color: #667eea;
         color: white;
