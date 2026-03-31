@@ -3,6 +3,29 @@ layout: glassy
 title: Swapblocku Terms of Service
 ---
 
+<script>
+const cursors = [
+  {url: '/assets/img/projects/swapblocku/domino_yellow32.png', x: 32, y: 32},
+  {url: '/assets/img/projects/swapblocku/l_mino_blue32.png', x: 32, y: 32},
+  {url: '/assets/img/projects/swapblocku/l_mino_red32.png', x: 32, y: 32}
+];
+
+function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function applyCursor(obj){
+  // obj: {url, x, y}
+  // include fallback 'auto' (or 'pointer' etc.)
+  document.documentElement.style.cursor = `url("${obj.url}") ${obj.x} ${obj.y}, auto`;
+}
+
+// random on page load
+applyCursor(pickRandom(cursors));
+
+const intervalMs = 10000; // change every 10s
+
+setInterval(() => applyCursor(pickRandom(cursors)), intervalMs);
+</script>
+
 <div class="hero">
     {% if site.swapblocku_logo and site.swapblocku_logo != "" %}
         <img src="{{ site.swapblocku_logo | relative_url }}" alt="Logo"/>

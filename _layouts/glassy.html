@@ -1489,6 +1489,7 @@
                     <li class="menu-submenu">
                         <span class="submenu-title">Projects</span>
                         <ul class="submenu-items">
+                            <li><a href="/projects/swapblocku/about.html" onclick="toggleMenu()">Swapblocku</a></li>
                             <li><a href="/projects/wartorn.html" onclick="toggleMenu()">Wartorn</a></li>
                             <li><a href="/projects/asuryas_embers.html" onclick="toggleMenu()">Asurya's Embers</a></li>
                             <li><a href="/projects/seafeud.html" onclick="toggleMenu()">SeaFeud</a></li>
@@ -1659,12 +1660,14 @@
             'B': () => navigateToPage('/block_game.html'),
 
             // Project shortcuts
+            's': () => navigateToPage('/projects/swapblocku/about.html'),
+            'S': () => navigateToPage('/projects/swapblocku/about.html'),
             'w': () => navigateToPage('/projects/wartorn.html'),
             'W': () => navigateToPage('/projects/wartorn.html'),
             'e': () => navigateToPage('/projects/asuryas_embers.html'),
             'E': () => navigateToPage('/projects/asuryas_embers.html'),
-            's': () => navigateToPage('/projects/seafeud.html'),
-            'S': () => navigateToPage('/projects/seafeud.html'),
+            'f': () => navigateToPage('/projects/seafeud.html'),
+            'F': () => navigateToPage('/projects/seafeud.html'),
 
             // Utility shortcuts
             '?': () => toggleKeyboardHelp(),
@@ -1682,9 +1685,10 @@
                 'Esc': 'Close menu/dialogs'
             },
             'Projects': {
+                'S': '<u>S</u>wapblocku',
                 'W': '<u>W</u>artorn',
                 'E': 'Asurya\'s <u>E</u>mbers',
-                'S': '<u>S</u>eaFeud'
+                'F': 'Sea<u>F</u>eud'
             },
             'Help': {
                 '?': 'Show this help',
@@ -1887,9 +1891,10 @@
                 '/': 'H',
                 '/about.html': 'A',
                 '/resume.html': 'R',
+                '/projects/swapblocku/about.html': 'S',
                 '/projects/wartorn.html': 'W',
                 '/projects/asuryas_embers.html': 'E',
-                '/projects/seafeud.html': 'S'
+                '/projects/seafeud.html': 'F'
             };
 
             menuItems.forEach(item => {

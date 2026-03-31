@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin Shift</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 10px;
+            touch-action: none;
+        }
+
+        .camera-btn {
+            position: absolute;
+            top: 2%;
+            left: 2%;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
+        .camera-btn img {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+
+        .camera-btn:hover img {
+            opacity: 1;
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            top: 2%;
+            right: 2%;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
+        .fullscreen-btn img {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+
+        .fullscreen-btn:hover img {
+            opacity: 1;
+        }
+
+        #canvasContainer.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+            max-height: none !important;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #canvasContainer.fullscreen #gameCanvas {
+            max-width: none !important;
+            max-height: none !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px 0;
+        }
+
+        .game-container {
+            flex-shrink: 0;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 90vw;
+        }
+
+        .game-title {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+        }
+
+        #gameCanvas {
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow:
+                0 0 20px rgba(0, 255, 136, 0.2),
+                inset 0 0 20px rgba(0, 0, 0, 0.3);
+            touch-action: none;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* Desktop: constrain size differently */
+        @media (min-width: 768px) {
+            #gameCanvas {
+                max-width: 450px;
+                max-height: 425px;
+            }
+        }
+
+        /* Mobile: prioritize width */
+        @media (max-width: 767px) {
+            #gameCanvas {
+                max-width: 75vw;
+                aspect-ratio: 1; /* Maintains consistent proportions */
+            }
+
+            .easter-egg-note {
+                font-size: 0.85em;
+                padding: 12px;
+            }
+
+            .attributions {
+                font-size: 0.8em;
+            }
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            font-weight: bold;
+        }
+
+        .info-item {
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .pass-item {
+            color: #00ccff;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+        }
+
+        .controls {
+            margin-top: 20px;
+            font-size: clamp(0.7rem, 2vw, 0.85rem);
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+
+        .controls kbd {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: inherit;
+            font-size: 0.85em;
+            margin: 0 2px;
+        }
+
+        .win-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            z-index: 10000;
+            transition: transform 0.3s ease;
+        }
+
+        .win-message.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .win-message h2 {
+            color: #00ff88;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .win-message button {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .win-message button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .passcode-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+        }
+
+        .passcode-modal.show {
+            display: flex;
+        }
+
+        .passcode-content {
+            background: rgba(26, 26, 46, 0.95);
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .passcode-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .passcode-input-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .passcode-input {
+            width: 50px;
+            height: 60px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 8px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+        }
+
+        .passcode-input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .passcode-input.error {
+            border-color: #ff4444;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .passcode-message {
+            color: #ff4444;
+            font-size: 0.9rem;
+            min-height: 20px;
+            margin-top: 10px;
+        }
+
+        .passcode-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .passcode-btn {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .passcode-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .passcode-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .level-select-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .level-select-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        /* Hide on mobile/touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .controls {
+                display: none;
+            }
+
+            .fullscreen-btn {
+                display: none;
+            }
+        }
+
+        .loading {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            padding: 20px;
+        }
+
+        .easter-egg-note {
+            /* position: absolute;
+            bottom: 20px; */
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            padding: 15px;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+            margin: 0 20px;
+        }
+
+        .easter-egg-note a {
+            color: rgba(0, 255, 136, 0.6);
+            text-decoration: none;
+        }
+
+        .easter-egg-note a:hover {
+            color: #00ff88;
+        }
+
+        .attributions {
+            font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <div class="game-container">
+            <h1 class="game-title"><u>B</u>LOCK PUZZLE 3D</h1>
+            <p class="game-subtitle">🧱 Roll the block to the exit hole</p>
+
+            <div class="game-info">
+                <div class="info-item">LVL: <span id="levelDisplay">1</span></div>
+                <div class="info-item">MOVE: <span id="moveDisplay">0</span></div>
+                <div class="pass-item">PASS: <span id="passcodeDisplay">0</span></div>
+            </div>
+
+            <div id="canvasContainer" style="position: relative;">
+                <button class="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">
+                    <img src="/assets/img/expand_arrow_32.png" alt="Fullscreen">
+                </button>
+                <canvas id="gameCanvas"></canvas>
+                <div class="win-message" id="winMessage">
+                    <h2>🎉 Level Complete! 🎉</h2>
+                    <p>Moves: <span id="finalMoves">0</span></p>
+                    <button onclick="nextLevel()">Next Level</button>
+                </div>
+            </div>
+
+            <div class="controls">
+                Use <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> to move. Space to shoot.
+            </div>
+        </div>
+
+        <div class="easter-egg-note">
+            🎮 Easter egg found! <a href="/">Back to portfolio</a>
+        </div>
+
+        <div class="attributions">
+            Uicons by <a href="https://www.flaticon.com/uicons">Flaticon</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const ISDEBUG = false;
+
+        // Game state
+        const gameState = {
+            level: 1,
+            moves: 0,
+            blockPosition: { x: 0, y: 0 },
+            blockOrientation: 'standing', // 'standing', 'lying-x', 'lying-y'
+            isAnimating: false,
+            isResetting: false,
+            cameraMode: 'isometric' // 'isometric' or 'top'
+        };
+
+        // New level format using text representation
+        const levelDefinitions = [
+            {
+                id: 1,
+                name: "Tutorial",
+                layout: `
+                    * 1 1 1 0
+                    1 1 1 1 0
+                    0 0 1 1 1
+                    0 0 1 @ 1
+                    0 0 1 1 1
+                `,
+                password: "12345",
+            },
+            {
+                id: 2,
+                name: "Simplex",
+                layout: `
+                    1 1 1 0 0 0 0 0 0 0
+                    1 * 1 1 1 1 0 0 0 0
+                    1 1 1 1 1 1 1 1 1 0
+                    0 1 1 1 1 1 1 1 1 1
+                    0 0 0 0 0 1 1 @ 1 1
+                    0 0 0 0 0 0 1 1 1 0
+                `,
+                password: "l3vl2",
+            },
+            {
+                id: 3,
+                name: "Bridges",
+                layout: `
+                    0 0 0    0 0  0  1 1 1   1  0  0  1 1 1
+                    1 * 1    1 0  0  1 1 hb  1  0  0  1 @ 1
+                    1 1 sa   1 0  0  1 1 1   1  0  0  1 1 1
+                    1 1 1    1 0  0  1 1 1   1  0  0  1 1 1
+                    1 1 1    1 ba ba 1 1 1   1  bb bb 1 1 1
+                    1 1 1    1 0  0  1 1 1   1  0  0  0 0 0
+                `,
+                password: "2brdg",
+            },
+            {
+                id: 4,
+                name: "Sections",
+                layout: `
+                    0 0 0 0 0 0 1 1 1 1 1 1 1 0 0
+                    1 1 1 1 0 0 1 1 1 0 0 1 1 0 0
+                    1 1 1 1 1 1 1 1 1 0 0 1 1 1 1
+                    1 * 1 1 0 0 0 0 0 0 0 1 1 @ 1
+                    1 1 1 1 0 0 0 0 0 0 0 1 1 1 1
+                    0 0 0 0 0 0 0 0 0 0 0 0 1 1 1
+                `,
+                password: "53cts",
+            },
+            {
+                id: 5,
+                name: "Delicate",
+                layout: `
+                    0 0 0 f f f f f f f 0 0 0 0
+                    0 0 0 f f f f f f f 0 0 0 0
+                    1 1 1 1 0 0 0 0 0 1 1 1 0 0
+                    1 1 1 0 0 0 0 0 0 0 1 1 0 0
+                    1 1 1 0 0 0 0 0 0 0 1 1 0 0
+                    1 * 1 0 0 1 1 1 1 f f f f f
+                    1 1 1 0 0 1 1 1 1 f f f f f
+                    0 0 0 0 0 1 @ 1 0 0 f f 1 f
+                    0 0 0 0 0 1 1 1 0 0 f f f f
+                `,
+                password: "delc8",
+            },
+            {
+                id: 6,
+                name: "Switches",
+                layout: `
+                    0 0 0 0   0 0   0   0 0   0   1 1 1 1 1
+                    0 1 1 1   1 bEa bEa 1 sa  1   1 1 1 * 1
+                    0 1 1 1   1 0   0   0 0   0   0 0 1 1 1
+                    0 1 1 sEc 1 0   0   0 0   0   0 0 0 0 0
+                    0 1 1 1   1 0   0   0 0   0   0 0 0 0 0
+                    0 0 0 1   1 1   sDc 1 bEb bEb 1 1 1 0 0
+                    0 0 0 0   0 0   0   0 0   0   1 1 1 1 sc
+                    1 1 1 0   0 0   0   0 0   0   1 1 1 1 1
+                    1 @ 1 1   1 bEc bEc 1 1   1   1 1 1 0 0
+                    1 1 1 1   0 0   0   0 0   0   0 0 0 0 0
+                `,
+                password: "sw1tc",
+            },
+            {
+                id: 7,
+                name: "Turnabout",
+                layout: `
+                    0 0 0 0 0 1 1 1 1 1 1 0 0 0 0
+                    0 0 0 0 0 1 0 0 1 1 1 0 0 0 0
+                    0 0 0 0 0 1 0 0 1 1 1 1 1 0 0
+                    * 1 1 1 1 1 0 0 0 0 0 1 1 1 1
+                    0 0 0 0 1 1 1 0 0 0 0 1 1 @ 1
+                    0 0 0 0 1 1 1 0 0 0 0 0 1 1 1
+                    0 0 0 0 0 0 1 0 0 1 1 0 0 0 0
+                    0 0 0 0 0 0 1 1 1 1 1 0 0 0 0
+                    0 0 0 0 0 0 1 1 1 1 1 0 0 0 0
+                    0 0 0 0 0 0 0 1 1 1 0 0 0 0 0
+                `,
+                password: "turn2",
+            },
+            {
+                id: 8,
+                name: "Just One",
+                layout: `
+                    0 0 0 0  0 0 0 0 1 1  1 1 0 0 0
+                    0 0 0 0  0 0 0 0 1 1  1 1 0 0 0
+                    1 1 1 0  0 0 0 0 1 0  0 1 1 1 1
+                    1 * 1 1  1 1 1 1 1 0  0 0 1 @ 1
+                    1 1 1 0  0 0 0 1 1 ha 0 0 1 1 1
+                    1 1 1 0  0 0 0 1 1 1  0 0 1 1 1
+                    0 1 1 ba 0 0 0 1 0 0  0 0 0 0 0
+                    0 0 1 1  1 1 1 1 0 0  0 0 0 0 0
+                `,
+                password: "h3av1", // 189493
+            },
+            {
+                id: 9,
+                name: "Bait N Switch",
+                layout: `
+                    0 1 1 1 bEa 0 0   0 0 0 0 0
+                    0 1 @ 1 bEa 0 0   0 0 0 0 0
+                    0 1 1 1 0   0 0   0 0 0 0 0
+                    0 1 0 0 0   1 1   1 1 1 1 0
+                    0 1 0 0 0   1 1   0 0 1 1 0
+                    * 1 1 1 1   1 1   0 0 1 1 1
+                    0 0 0 0 0   1 sDa 0 0 0 0 1
+                    0 0 0 0 0   1 1   1 1 0 0 1
+                    0 0 0 0 0   1 1   1 1 1 1 1
+                    0 0 0 0 0   0 0   0 1 1 1 0
+                `,
+                password: "sb8m8", // 291709
+            },
+            {
+                id: 10,
+                name: "Two Brothers",
+                layout: `
+                    0 0 0 0 0 0 0   0 0 0 0 0 hb
+                    0 0 0 0 0 1 1   1 0 0 1 1 1
+                    0 0 0 0 0 1 ha  1 1 1 1 1 ba
+                    0 0 0 1 1 1 1   1 0 0 1 1 0
+                    0 0 0 1 @ 1 bb   0 0 0 1 1 0
+                    0 1 1 1 1 1 0   0 0 1 1 1 1
+                    1 1 * 1 0 0 0   0 0 1 1 1 1
+                    1 1 1 1 0 0 1   1 1 1 1 0 0
+                    0 0 0 0 0 1 1   1 0 0 0 0 0
+                    0 0 0 0 0 1 1   1 0 0 0 0 0
+                `,
+                password: "br0dr", // 958640
+            },
+            {
+                id: 11,
+                name: "The Duck",
+                layout: `
+                    1 1 1 f 1 1 1 1 f 1 1 1 1 0
+                    1 1 0 0 0 0 0 0 0 0 1 1 1 0
+                    1 1 0 0 0 0 0 0 0 0 0 1 1 1
+                    1 1 1 0 0 0 1 1 1 0 0 1 * 1
+                    1 1 1 f f f 1 @ 1 0 0 1 1 1
+                    1 1 1 0 0 f 1 1 1 0 0 1 0 0
+                    0 0 1 0 0 f f f f f 1 1 0 0
+                    0 0 1 1 1 f f 1 f f f 0 0 0
+                    0 0 0 1 1 f f f f f f 0 0 0
+                    0 0 0 1 1 1 0 0 1 1 0 0 0 0
+                `,
+                password: "duck2", // 448106
+            },
+            {
+                id: 12,
+                name: "The Gap",
+                layout: `
+                    0 0  0  0 0 0 0 0 1 1 1 0 0  0
+                    0 0  0  1 1 1 0 0 1 1 1 0 0  0
+                    1 ba ba 1 * 1 1 1 1 1 1 1 1  1
+                    1 bb bb 1 1 1 0 0 0 0 0 0 ha 1
+                    1 0  0  0 0 0 0 0 0 0 0 0 1  1
+                    1 0  0  0 0 0 0 0 0 0 0 0 1  1
+                    1 0  0  0 0 0 0 0 1 1 1 1 1  1
+                    1 1  1  1 1 0 0 0 1 1 1 0 0  0
+                    0 1  1  @ 1 0 0 0 1 1 1 0 0  0
+                    0 0  1  1 1 0 0 0 1 1 1 1 1  hb
+                `,
+                password: "12gap", // 210362
+            },
+             {
+                id: 13,
+                name: "The Many",
+                layout: `
+                    1 1  1 0 0 0 0  0  0  0  0 0 0     0   0
+                    1 *  1 1 1 1 1  1  1  bc 0 0 1     1   1
+                    1 1  1 0 0 0 0  bb 1  1  1 1 1     @   1
+                    1 1  1 0 0 0 0  0  0  0  0 0 hDc   hEc 1
+                    1 1  1 0 0 0 0  0  0  0  0 0 0     0   0
+                    1 1  1 0 0 0 0  0  0  0  0 0 0     0   0
+                    1 1  1 0 0 0 bc 1  1  1  1 1 hEb   0   0
+                    1 1  1 1 1 1 1  1  ba 0  0 1 1     0   0
+                    1 sa 1 0 0 0 0  0  0  0  0 1 1     0   0
+                    1 1  1 0 0 0 0  0  0  0  0 1 hDaEc 0   0  // Enables bc and disables ba (requires dual support)
+                `,
+                password: "tons5", // 683596
+            },
+            {
+                id: 14,
+                name: "Avoidance",
+                layout: `
+                    0 0   0   0  0 0  0 sEa 0   0  0 0 0  0  0
+                    1 1   sDb 1  0 0  0 1   0   0  0 0 0  0  0
+                    1 1   1   1  1 0  0 1   0   0  0 0 0  0  0
+                    1 sDa 1   1  1 1  1 1   ba  ba 1 1 bb bb 1
+                    1 1   1   1  1 bc 0 0   1   0  0 0 1  0  0
+                    1 1   sDb 1  0 0  0 0   1   0  0 0 1  0  0
+                    1 0   0   0  0 0  0 0   sEb 0  0 1 1  1  0
+                    1 0   0   0  0 0  0 0   0   0  1 1 @  1  0
+                    1 bb  bb  hc 0 0  0 0   0   0  1 1 1  1  0
+                `,
+                password: "dont3", // 284933
+            },
+            {
+                id: 15,
+                name: "The Snake",
+                layout: `
+                    0 * 1  1  1 1 1 1  1  1 sa  1 1 1 1
+                    0 0 0  0  0 1 1 0  0  0 0   0 0 1 1
+                    0 0 0  0  0 1 1 0  0  0 0   0 0 1 1
+                    0 0 0  0  0 0 0 0  0  0 0   0 0 1 1
+                    0 0 0  0  0 0 0 0  0  0 0   0 0 1 1
+                    1 1 1  0  0 1 1 ba ba 1 sDb 1 1 1 1
+                    1 @ 1  0  0 1 1 0  0  0 0   0 0 0 0
+                    1 1 1  0  0 1 1 0  0  0 0   0 0 0 0
+                    0 1 1  0  0 1 1 0  0  0 0   0 0 0 0
+                    0 1 bb bb 1 1 1 1  1  1 sEb 1 1 1 0
+                `,
+                password: "keepr", // 119785
+            },
+            {
+                id: 16,
+                name: "The Camel",
+                layout: `
+                    0 0 0  0 0     1 1     0 0 0   0 1 1  1
+                    0 0 0  1 1     1 1     1 1 0   0 1 @  1
+                    1 1 1  1 1     1 sDaDb 1 1 1   1 1 1  1
+                    1 * 1  1 sDaDb 0 0     1 1 1   1 1 ba 0
+                    1 1 1  0 0     0 0     0 0 1   1 1 0  0
+                    0 1 0  0 0     0 0     0 0 0   1 0 0  0
+                    0 1 0  0 0     0 0     0 0 0   1 0 0  0
+                    0 1 bb 0 0     0 0     0 0 bEc 1 0 0  0
+                    0 1 1  0 0     0 0     0 0 1   1 0 0  0
+                    0 0 ha 0 0     0 0     0 0 hb  0 0 0  0
+                `,
+                password: "1hump", // 987319 // next (has TP): 293486, 088198
+            },
+            {
+                id: 17,
+                name: "The Lever",
+                layout: `
+                    0 0 1   1 0    0   0 0  0     0  0 0 0 0
+                    0 0 1   1 1    0   0 0  0     0  0 0 0 0
+                    0 0 1   1 sad  0   0 0  0     0  1 1 1 bd
+                    0 0 0   1 1    1   1 bc 0     0  1 @ 1 bd
+                    0 0 0   0 0    0   1 1  ba    ba 1 1 1 0
+                    0 1 1   0 0    0   1 1  0     0  0 0 0 0
+                    1 1 hEa 1 bEb  bEb 1 1  0     0  0 0 0 0
+                    1 * bEe 0 0    0   1 1  0     0  0 1 1 1
+                    1 1 bEe 0 0    0   1 1  sDbEc 1  1 1 1 1
+                    0 0 0   0 0    0   0 0  0     0  0 1 1 1
+                `,
+                password: "l3v3r", // 250453 // next (has TP): 426329
+            },
+            {
+                id: 18,
+                name: "Long Tail",
+                layout: `
+                    1 1 1 0 0 0 0   1 1 1   1 1 1   1     1
+                    1 1 1 1 1 1 1   1 1 1   1 0 0   1     1
+                    1 1 1 0 0 0 0   1 1 0   0 0 0   1     1
+                    0 0 0 0 0 0 0   0 0 0   0 0 1   hDaDb 1
+                    0 0 0 0 0 0 0   0 0 0   0 0 1   1     0
+                    1 1 1 0 0 f f   f f 1   0 0 sDa sDb   0
+                    1 @ 1 f f f f   f f f   0 0 1   1     1
+                    1 1 1 f f f f   f f f   f f 1   1     1
+                    0 0 0 0 0 f f   f f f   f f 1   1     1
+                    0 0 0 0 0 0 bEa 1 1 bEb 0 0 0   0     0
+                `,
+                password: "9tail", // 660141 // next (has TP): 769721
+            },
+            {
+                id: 19,
+                name: "The Spider",
+                layout: `
+                    0     0  sEbDc bEa bEa 1  0 0 0 1 bb  bb  hEe       0  0
+                    0     0  0     0   0   1  0 0 0 1 0   0   0         0  0
+                    0     0  0     0   0   1  1 1 1 1 0   0   0         0  0
+                    hDgEi bc bc    1   1   1  1 * 1 1 1   1   bd        bd hEh
+                    0     0  0     0   0   1  1 1 1 1 0   0   0         0  0
+                    0     0  0     0   0   be 1 0 0 1 0   0   0         0  0
+                    0     0  0     0   0   be 1 0 0 1 bEf bEf sEC       0  0
+                    1     1  1     0   0   1  1 0 0 1 0   0   0         0  0
+                    1     @  1     bi  bi  1  0 0 0 1 0   0   0         0  0
+                    1     1  1     bh  0   1  1 0 0 1 bEg bEg sDaDbEdDf 0  0
+                `,
+                password: "crawly", // 691859
+            },
+        ];
+
+        function parseLevelLayout(layoutText) {
+            const lines = layoutText.trim().split('\n').map(line => line.trim());
+            const grid = [];
+            const bridges = {}; // Store bridge tile info by ID
+            const switches = {}; // Store switch info by ID
+            let start = { x: 1, y: 1 };
+
+            lines.forEach((line, y) => {
+                const tiles = line.split(/\s+/);
+                const row = [];
+
+                tiles.forEach((tile, x) => {
+                    const parsed = parseTile(tile, x, y);
+                    row.push(parsed);
+
+                    if (parsed.type === 'start') {
+                        start = { x: x, y: y };
+                    }
+
+                    // Track bridges and switches for linking
+                    if (parsed.type === 'bridge') {
+                        if (!bridges[parsed.id]) bridges[parsed.id] = [];
+                        bridges[parsed.id].push({ x, y });
+                    }
+                    if (parsed.type === 'switch') {
+                        if (!switches[parsed.id]) switches[parsed.id] = [];
+                        switches[parsed.id].push({ x, y, targets: parsed.targets, subtype: parsed.subtype });
+                    }
+                });
+
+                grid.push(row);
+            });
+
+            return { grid, bridges, switches, start };
+        }
+
+        function parseTile(tileStr, x, y) {
+            tileStr = tileStr.trim();
+
+            // Player start (always a plain tile)
+            if (tileStr === '*') {
+                return { type: 'start', value: 1 };
+            }
+
+            // Empty/hole
+            if (tileStr === '0') {
+                return { type: 'empty', value: 0 };
+            }
+
+            // Plain tile
+            if (tileStr === '1') {
+                return { type: 'normal', value: 1 };
+            }
+
+            // Exit
+            if (tileStr === '@') {
+                return { type: 'exit', value: 2 };
+            }
+
+            // Fragile tile
+            if (tileStr === 'f') {
+                return { type: 'fragile', value: 3 };
+            }
+
+            // Bridge tile (e.g., "ba", "bEb", "bDc")
+            if (tileStr.startsWith('b')) {
+                let active_status = false; // default
+                let id = tileStr.substring(1);
+
+                if (id.startsWith('E')) {
+                    active_status = true;
+                    id = id.substring(1);
+                } else if (id.startsWith('D')) {
+                    active_status = false;
+                    id = id.substring(1);
+                }
+
+                return { type: 'bridge', value: 4, id, active: active_status };
+            }
+
+            // Simple switch (e.g., "sa", "sEa", "sDa", "sEab", "sEaDbc")
+            if (tileStr.startsWith('s')) {
+                return parseSwitchTargets(tileStr.substring(1), 'simple', 5);
+            }
+
+            // Heavy switch (requires standing, e.g., "ha", "hEa", "hDa", "hEab", "hEaDbc")
+            if (tileStr.startsWith('h')) {
+                return parseSwitchTargets(tileStr.substring(1), 'heavy', 6);
+            }
+
+            // Teleport switch (e.g., "ta", "tEab")
+            if (tileStr.startsWith('t')) {
+                return parseSwitchTargets(tileStr.substring(1), 'teleport', 7);
+            }
+
+            // Default to normal tile
+            return { type: 'normal', value: 1 };
+        }
+
+        // Parse switch targets with individual modifiers
+        // Examples: "a" -> [{id: 'a', mode: 'toggle'}]
+        //           "Ea" -> [{id: 'a', mode: 'enable'}]
+        //           "Eab" -> [{id: 'a', mode: 'enable'}, {id: 'b', mode: 'toggle'}]
+        //           "EaDbc" -> [{id: 'a', mode: 'enable'}, {id: 'b', mode: 'disable'}, {id: 'c', mode: 'toggle'}]
+        function parseSwitchTargets(targetStr, subtype, value) {
+            const targets = [];
+            let currentMode = 'toggle'; // default mode
+            let i = 0;
+
+            while (i < targetStr.length) {
+                const char = targetStr[i];
+
+                // Check for mode modifier
+                if (char === 'E') {
+                    currentMode = 'enable';
+                    i++;
+                    continue;
+                } else if (char === 'D') {
+                    currentMode = 'disable';
+                    i++;
+                    continue;
+                }
+
+                // Must be an ID (a-z)
+                if (char >= 'a' && char <= 'z') {
+                    targets.push({
+                        id: char,
+                        mode: currentMode
+                    });
+                    // Reset mode to toggle after each ID
+                    currentMode = 'toggle';
+                    i++;
+                } else {
+                    // Invalid character, skip
+                    i++;
+                }
+            }
+
+            // Use first target ID as the primary ID for tracking
+            // const primaryId = targets.length > 0 ? targets[0].id : 'unknown';
+
+            return {
+                type: 'switch',
+                subtype,
+                value,
+                // id: primaryId, // Keep for backward compatibility
+                targets // Array of {id, mode} objects
+            };
+        }
+
+        // Convert parsed level to usable format
+        function loadLevel(levelDef) {
+            const parsed = parseLevelLayout(levelDef.layout);
+
+            return {
+                id: levelDef.id,
+                name: levelDef.name,
+                grid: parsed.grid,
+                bridges: parsed.bridges,
+                switches: parsed.switches,
+                start: parsed.start
+            };
+        }
+
+        let currentLevel = loadLevel(levelDefinitions[0]);
+
+        // Three.js setup
+        const canvas = document.getElementById('gameCanvas');
+        const scene = new THREE.Scene();
+
+        // Load in textures
+        const textureLoader = new THREE.TextureLoader();
+
+        const bgTexture = textureLoader.load('/assets/img/background.jpg');
+        bgTexture.colorSpace = THREE.SRGBColorSpace;
+        scene.background = bgTexture;
+        /* scene.background = new THREE.Color(0x0a0a0a); */
+
+        const aspect = canvas.innerWidth / canvas.innerHeight
+        const orthographicCamera = new THREE.OrthographicCamera();
+        const perspectiveCamera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(canvas.width, canvas.height);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        // (debug) grid
+        if (ISDEBUG === true) {
+            const geometry = new THREE.PlaneGeometry( 100, 100, 100, 100 );
+            const material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
+            const grid = new THREE.Mesh( geometry, material );
+            grid.rotation.order = 'YXZ';
+            grid.rotation.y = - Math.PI / 2;
+            grid.rotation.x = - Math.PI / 2;
+            scene.add(grid);
+        }
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(9.5, 12, 2.5);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.shadow.camera.near = 0.5;
+        directionalLight.shadow.camera.far = 50;
+        directionalLight.shadow.camera.left = -10;
+        directionalLight.shadow.camera.right = 10;
+        directionalLight.shadow.camera.top = 10;
+        directionalLight.shadow.camera.bottom = -10;
+        scene.add(directionalLight);
+
+        // Game objects
+        let gridTiles = [];
+        let playerBlock = null;
+        let exitTile = null;
+
+        // Fullscreen state
+        let isFullscreen = false;
+        let preFullscreenSize = { width: 0, height: 0 };
+
+        // Load textures for the different faces
+        const tileTexture = textureLoader.load('/assets/img/tile.png', () => {
+            console.log('Tile texture loaded successfully');
+        });
+
+        // Create materials using the loaded textures
+        const tileMaterials = [
+            new THREE.MeshStandardMaterial({ color: 0x9494a4, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0x9494a4, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ map: tileTexture, color: 0xDED3CC }), // Front face (1x1 face)
+            new THREE.MeshStandardMaterial({ color: 0x727282, roughness: 0.7, metalness: 0.3 }), // Back face (1x1 face)
+            new THREE.MeshStandardMaterial({ color: 0x727282, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0x727282, roughness: 0.7, metalness: 0.3 }),
+        ];
+
+        // Materials
+        const tileMaterial = new THREE.MeshStandardMaterial({
+            color: 0x2a2a3a,
+            roughness: 0.7,
+            metalness: 0.3
+        });
+
+
+        // Load textures for the different faces
+        const fragileTileTexture = textureLoader.load('/assets/img/fragile_tile.png', () => {
+            console.log('Fragile tile texture loaded successfully');
+        });
+
+        const fragileTileMaterial = new THREE.MeshStandardMaterial({
+            color: 0xcc562a,
+            roughness: 0.7,
+            metalness: 0.3
+        });
+
+        const fragileTileMaterials = [
+            new THREE.MeshStandardMaterial({ color: 0xcc562a, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0xcc562a, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ map: fragileTileTexture, color: 0xcc562a }), // Front face (1x1 face)
+            new THREE.MeshStandardMaterial({ color: 0xcc562a, roughness: 0.7, metalness: 0.3 }), // Back face (1x1 face)
+            new THREE.MeshStandardMaterial({ color: 0xcc562a, roughness: 0.7, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ color: 0xcc562a, roughness: 0.7, metalness: 0.3 }),
+        ];
+
+        const exitHoleMaterial = new THREE.MeshStandardMaterial({
+            transparent: true,
+            opacity: 0
+        });
+        const exitHoleGlowMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00ff88,
+            transparent: true,
+            opacity: 0.6
+        });
+
+        const defaultBlockColor = 0xffffff;
+        const blockSideTexture = textureLoader.load('/assets/img/box_long_face.jpg', () => {
+            console.log('Side texture loaded successfully');
+        });
+        const blockFaceTexture = textureLoader.load('/assets/img/box_short_face.jpg', () => {
+            console.log('Face texture loaded successfully');
+        });
+        const blockMaterials = [
+            new THREE.MeshStandardMaterial({ map: blockSideTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ map: blockSideTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ map: blockFaceTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }), // Front face (1x1 face)
+            new THREE.MeshStandardMaterial({ map: blockFaceTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }), // Back face (1x1 face)
+            new THREE.MeshStandardMaterial({ map: blockSideTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }),
+            new THREE.MeshStandardMaterial({ map: blockSideTexture, color: defaultBlockColor, roughness: 0.5, metalness: 0.3 }),
+        ];
+
+        // Build grid with special tile support
+        function buildGrid() {
+            // Clear existing grid
+            gridTiles.forEach(tile => scene.remove(tile));
+            gridTiles = [];
+            if (exitTile) scene.remove(exitTile);
+
+            const grid = currentLevel.grid;
+            const tileSize = 1;
+            const tileHeight = 0.2;
+            const spacing = gameState.showGridSpacing ? 0.05 : 0;
+            const adjustedSize = tileSize - (spacing * 2);
+
+            for (let y = 0; y < grid.length; y++) {
+                for (let x = 0; x < grid[y].length; x++) {
+                    const tileData = grid[y][x];
+
+                    if (tileData.type === 'empty') continue;
+
+                    const geometry = new THREE.BoxGeometry(adjustedSize, tileHeight, adjustedSize);
+                    let material;
+
+                    // Choose material based on tile type
+                    switch(tileData.type) {
+                        case 'exit':
+                            material = exitHoleMaterial.clone();
+                            break;
+
+                        case 'fragile':
+                            material = fragileTileMaterials;
+                            break;
+
+                        case 'bridge':
+                            material = new THREE.MeshStandardMaterial({
+                                color: tileData.active ? 0x4169E1 : 0x1a1a2e,
+                                roughness: 0.6,
+                                metalness: 0.4,
+                                transparent: !tileData.active,
+                                opacity: tileData.active ? 0.8 : 0.3
+                            });
+                            break;
+
+                        case 'switch':
+                            let switchColor;
+                            switch(tileData.subtype) {
+                                case 'simple':
+                                    switchColor = 0xFFD700; // Gold
+                                    break;
+                                case 'heavy':
+                                    switchColor = 0xFF4500; // Orange-red
+                                    break;
+                                case 'teleport':
+                                    switchColor = 0xFF00FF; // Magenta
+                                    break;
+                                default:
+                                    switchColor = 0xFFD700;
+                            }
+                            material = new THREE.MeshStandardMaterial({
+                                color: switchColor,
+                                emissive: switchColor,
+                                emissiveIntensity: 0.2,
+                                roughness: 0.5,
+                                metalness: 0.5
+                            });
+                            break;
+
+                        default: // normal tile
+                            material = tileMaterials//.clone();
+                    }
+
+                    const tile = new THREE.Mesh(geometry, material);
+                    tile.position.set(x * tileSize, 0, y * tileSize);
+                    tile.castShadow = false;
+                    tile.receiveShadow = true;
+
+                    // Store tile metadata
+                    tile.userData = {
+                        gridX: x,
+                        gridY: y,
+                        tileData: tileData
+                    };
+
+                    scene.add(tile);
+                    gridTiles.push(tile);
+
+                    if (tileData.type === 'exit') {
+                        exitTile = tile;
+                        currentLevel.exit = { x, y };
+
+                        // Add glow effect
+                        const glowGeometry = new THREE.BoxGeometry(adjustedSize * 0.9, 0.05, adjustedSize * 0.9);
+                        const glow = new THREE.Mesh(glowGeometry, exitHoleGlowMaterial);
+                        glow.position.y = -0.3;
+                        tile.add(glow);
+                    }
+
+                    // Add visual indicator for switches
+                    if (tileData.type === 'switch') {
+                        let indicatorGeometry = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 16);
+                        let indicatorMaterial = new THREE.MeshStandardMaterial({
+                            color: material.color,
+                            emissive: material.color,
+                            emissiveIntensity: 0.5
+                        });
+                        if (tileData.subtype === 'heavy') {
+                            indicatorGeometry = new THREE.BoxGeometry(.6, .2, .6);
+                            indicatorMaterial = new THREE.MeshStandardMaterial({
+                                color: material.color,
+                                emissive: material.color,
+                                emissiveIntensity: 0.5
+                            });
+                        }
+                        // // TODO: Add a switch type with 2 boxes in corners, showing the separation
+                        // if (tileData.subtype === 'teleport') {
+                        //     indicatorGeometry = new THREE.BoxGeometry(.6, .2, .6);
+                        //     // indicatorGeometry = new THREE.BoxGeometry(.6, .2, .6);
+                        //     indicatorMaterial = new THREE.MeshStandardMaterial({
+                        //         color: material.color,
+                        //         emissive: material.color,
+                        //         emissiveIntensity: 0.5
+                        //     });
+                        // }
+
+                        let indicator = new THREE.Mesh(indicatorGeometry, indicatorMaterial);
+                        indicator.position.y = 0.25;
+                        tile.add(indicator);
+                    }
+                }
+            }
+        }
+
+        function checkSwitchActivation(x, y, orientation) {
+            const tileData = getTileAt(x, y);
+
+            if (!tileData || tileData.type !== 'switch') return;
+
+            // Heavy switches require standing
+            if (tileData.subtype === 'heavy' && orientation !== 'standing') return;
+
+            // Activate switch with all its targets
+            activateSwitchMultiple(tileData.targets);
+        }
+
+        function activateSwitchMultiple(targets) {
+            if (!targets || targets.length === 0) return;
+
+            // Process each target
+            targets.forEach(target => {
+                const bridgeTiles = currentLevel.bridges[target.id];
+                if (!bridgeTiles) return;
+
+                bridgeTiles.forEach(pos => {
+                    const tileData = currentLevel.grid[pos.y][pos.x];
+
+                    switch(target.mode) {
+                        case 'enable':
+                            tileData.active = true;
+                            break;
+                        case 'disable':
+                            tileData.active = false;
+                            break;
+                        case 'toggle':
+                            tileData.active = !tileData.active;
+                            break;
+                    }
+
+                    // Show glow based on the state change
+                    showBridgeActivationGlow(pos.x, pos.y, tileData.active);
+                });
+            });
+
+            // Rebuild grid to reflect changes
+            buildGrid();
+        }
+
+        function activateSwitch(switchId, mode) {
+            if (!currentLevel.bridges[switchId]) return;
+
+            const bridgeTiles = currentLevel.bridges[switchId];
+
+            bridgeTiles.forEach(pos => {
+                const tileData = currentLevel.grid[pos.y][pos.x];
+
+                switch(mode) {
+                    case 'enable':
+                        tileData.active = true;
+                        break;
+                    case 'disable':
+                        tileData.active = false;
+                        break;
+                    case 'toggle':
+                        tileData.active = !tileData.active;
+                        break;
+                }
+
+                // Show glow based on the state change
+                showBridgeActivationGlow(pos.x, pos.y, tileData.active);
+            });
+
+            // Rebuild grid to reflect changes
+            buildGrid();
+        }
+
+        function showBridgeActivationGlow(x, y, isActivating) {
+            const tileSize = 1;
+            const glowColor = isActivating ? 0x00ff88 : 0xff4444; // Green for activate, red for deactivate
+
+            // Create glow geometry - a flat plane slightly above the tile
+            const glowGeometry = new THREE.PlaneGeometry(tileSize * 0.8, tileSize * 0.8);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: glowColor,
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide
+            });
+
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            glow.position.set(x * tileSize, 0.3, y * tileSize);
+            glow.rotation.x = -Math.PI / 2; // Make it horizontal
+
+            scene.add(glow);
+
+            // Animate the glow fading out
+            const startTime = Date.now();
+            const duration = 800; // ms
+
+            function animateGlow() {
+                const elapsed = Date.now() - startTime;
+                const progress = elapsed / duration;
+
+                if (progress < 1) {
+                    // Fade out and scale up slightly
+                    glow.material.opacity = 0.8 * (1 - progress);
+                    const scale = 1 + progress * 0.3;
+                    glow.scale.set(scale, scale, 1);
+
+                    requestAnimationFrame(animateGlow);
+                } else {
+                    // Remove the glow
+                    scene.remove(glow);
+                    glow.geometry.dispose();
+                    glow.material.dispose();
+                }
+            }
+
+            animateGlow();
+        }
+
+
+        // Helper to get tile at position
+        function getTileAt(x, y) {
+            if (!currentLevel.grid[y] || !currentLevel.grid[y][x]) return null;
+            return currentLevel.grid[y][x];
+        }
+
+        // Create player block
+        function createPlayerBlock() {
+            if (playerBlock) scene.remove(playerBlock);
+
+            const blockWidth = 1.0;
+            const blockHeight = 2.0;
+            const geometry = new THREE.BoxGeometry(blockWidth, blockHeight, blockWidth);
+            playerBlock = new THREE.Mesh(geometry, blockMaterials);
+            playerBlock.castShadow = true;
+            playerBlock.receiveShadow = true;
+
+            setBlockPosition();
+            scene.add(playerBlock);
+        }
+
+        // Set block position
+        function setBlockPosition() {
+            const { x, y } = gameState.blockPosition;
+            const tileSize = 1;
+
+            let targetPosition = new THREE.Vector3(x * tileSize, 0, y * tileSize);
+            let targetRotation = new THREE.Euler(0, 0, 0);
+
+            // Adjust height based on orientation
+            switch (gameState.blockOrientation) {
+                case 'standing':
+                    targetPosition.y = 1.1; // Half of 2.0 (block height) + 0.1 (tile height)
+                    break;
+                case 'lying-x':
+                    targetPosition.y = 0.6; // Half of 1.0 (block width) + 0.1
+                    // targetRotation.z = -Math.PI / 2;
+                    break;
+                case 'lying-y':
+                    targetPosition.y = 0.6;
+                    // targetRotation.x = Math.PI / 2;
+                    break;
+            }
+
+            playerBlock.position.copy(targetPosition);
+            playerBlock.rotation.copy(targetRotation);
+        }
+
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function easeOutCubic(t) {
+            return 2 * t * t * t;
+        }
+
+        // Calculate block footprint
+        function getBlockFootprint() {
+            const { x, y } = gameState.blockPosition;
+            const orientation = gameState.blockOrientation;
+
+            switch (orientation) {
+                case 'standing':
+                    return [{ x, y }];
+                case 'lying-x':
+                    return [{ x, y }, { x: x + 1, y }];
+                case 'lying-y':
+                    return [{ x, y }, { x, y: y + 1 }];
+                default:
+                    return [{ x, y }];
+            }
+        }
+
+        // Determines the direction a block should fall if it's imbalanced
+        //
+        // E.g.:   ## <- This block is imbalanced to the right,
+        //       ---     since the left cell has a tile
+        //
+        // Returns the direction to tip/fall, or null if balanced
+        function getImbalancedFallDirection(moveDirection, x, y, orientation) {
+            const footprint = getFootprintForState({ x, y, orientation });
+
+            // Check which positions are valid (have support)
+            const supportMap = footprint.map(pos => ({
+                pos,
+                hasSupport: isValidPosition(pos.x, pos.y)
+            }));
+
+            // If all positions are invalid, fall in the move direction
+            if (supportMap.every(tile => !tile.hasSupport)) {
+                return moveDirection;
+            }
+
+            // If all positions are valid, no fall
+            if (supportMap.every(tile => tile.hasSupport)) {
+                return null;
+            }
+
+            // Handle standing block (single cell footprint)
+            if (orientation === 'standing') {
+                // Standing block with no support falls in move direction
+                return moveDirection;
+            }
+
+            // Handle lying blocks (2-cell footprint)
+            // Determine which cell has support and which doesn't
+            const [cell1, cell2] = supportMap;
+
+            // For lying-x orientation (horizontal: [x,y] and [x+1,y])
+            if (orientation === 'lying-x') {
+                if (cell1.hasSupport && !cell2.hasSupport) {
+                    // Left cell supported, right cell not - fall right
+                    return 'right';
+                } else if (!cell1.hasSupport && cell2.hasSupport) {
+                    // Right cell supported, left cell not - fall left
+                    return 'left';
+                }
+            }
+
+            // For lying-y orientation (vertical: [x,y] and [x,y+1])
+            if (orientation === 'lying-y') {
+                if (cell1.hasSupport && !cell2.hasSupport) {
+                    // Top cell supported, bottom cell not - fall down
+                    return 'down';
+                } else if (!cell1.hasSupport && cell2.hasSupport) {
+                    // Bottom cell supported, top cell not - fall up
+                    return 'up';
+                }
+            }
+
+            // Fallback to move direction if logic doesn't determine a direction
+            return moveDirection;
+        }
+
+        // Check if position is valid
+        function isValidPosition(x, y) {
+            const tileData = getTileAt(x, y);
+            if (!tileData) return false;
+
+            // Empty tiles are invalid
+            if (tileData.type === 'empty') return false;
+
+            // Inactive bridges are invalid
+            if (tileData.type === 'bridge' && !tileData.active) return false;
+
+            return true;
+        }
+
+        // Check fragile tile breaking
+        function checkFragileTile(x, y, orientation) {
+            const tileData = getTileAt(x, y);
+
+            if (tileData && tileData.type === 'fragile') {
+                // Fragile tiles break if standing on them
+                if (orientation === 'standing') {
+                    // Make tile disappear
+                    tileData.type = 'empty';
+                    tileData.value = 0;
+
+                    // Rebuild to show broken tile
+                    setTimeout(() => {
+                        buildGrid();
+                        animateBlockFalling(orientation, 'in-place');
+                    }, 500);
+
+                    return true; // Tile broke
+                }
+            }
+
+            return false; // Tile didn't break
+        }
+
+        // Move block
+        function moveBlock(direction, shouldTip = true) {
+            if (gameState.isAnimating || gameState.isResetting || gameState.hasWon) return;
+
+            const { x, y } = gameState.blockPosition;
+            const orientation = gameState.blockOrientation;
+            let newX = x, newY = y, newOrientation = orientation;
+
+            // Calculate new position and orientation based on tipping
+            switch (direction) {
+                case 'up':
+                    if (!shouldTip) newY = y - 1; newOrientation = orientation; break;
+                    if (orientation === 'standing') {
+                        newY = y - 2;
+                        newOrientation = 'lying-y';
+                    } else if (orientation === 'lying-y') {
+                        newY = y - 1;
+                        newOrientation = 'standing';
+                    } else if (orientation === 'lying-x') {
+                        newY = y - 1;
+                        newOrientation = 'lying-x';
+                    }
+                    break;
+                case 'down':
+                    if (!shouldTip) newY = y + 1; newOrientation = orientation; break;
+                    if (orientation === 'standing') {
+                        newY = y + 1;
+                        newOrientation = 'lying-y';
+                    } else if (orientation === 'lying-y') {
+                        newY = y + 2;
+                        newOrientation = 'standing';
+                    } else if (orientation === 'lying-x') {
+                        newY = y + 1;
+                        newOrientation = 'lying-x';
+                    }
+                    break;
+                case 'left':
+                    if (!shouldTip) newX = x - 1; newOrientation = orientation; break;
+                    if (orientation === 'standing') {
+                        newX = x - 2;
+                        newOrientation = 'lying-x';
+                    } else if (orientation === 'lying-x') {
+                        newX = x - 1;
+                        newOrientation = 'standing';
+                    } else if (orientation === 'lying-y') {
+                        newX = x - 1;
+                        newOrientation = 'lying-y';
+                    }
+                    break;
+                case 'right':
+                    if (!shouldTip) newX = x + 1; newOrientation = orientation; break;
+                    if (orientation === 'standing') {
+                        newX = x + 1;
+                        newOrientation = 'lying-x';
+                    } else if (orientation === 'lying-x') {
+                        newX = x + 2;
+                        newOrientation = 'standing';
+                    } else if (orientation === 'lying-y') {
+                        newX = x + 1;
+                        newOrientation = 'lying-y';
+                    }
+                    break;
+            }
+
+            // Store previous state for animation
+            const prevX = gameState.blockPosition.x;
+            const prevY = gameState.blockPosition.y;
+            const prevOrientation = gameState.blockOrientation;
+
+            gameState.blockPosition = { x: newX, y: newY };
+            gameState.blockOrientation = newOrientation;
+            gameState.moves++;
+
+            // Calculate imbalanced direction before animation
+            const testState = { x: newX, y: newY, orientation: newOrientation };
+            const imbalancedDirection = getImbalancedFallDirection(direction, newX, newY, newOrientation);
+
+            // Animate tipping with callback for after completion
+            if (!shouldTip) {
+                animateBlockMoving(onComplete = () => {
+                    // This callback runs AFTER the moving animation completes
+
+                    if (imbalancedDirection) {
+                        // Invalid move - animate falling off
+                        animateBlockFalling(newOrientation, imbalancedDirection);
+                    }
+                });
+            } else {
+                animateBlockTippingQuaternion(prevX, prevY, prevOrientation, direction, imbalancedDirection ? 200 : 350, () => {
+                    // This callback runs AFTER the tipping animation completes
+
+                    if (imbalancedDirection) {
+                        // Invalid move - animate falling off
+                        animateBlockFalling(newOrientation, imbalancedDirection);
+                    }
+                });
+            }
+
+            updateDisplay();
+        }
+
+        function animateBlockMoving(duration = 350, onComplete) {
+            if (!playerBlock) return;
+
+            const tileSize = 1;
+            const { x: newX, y: newY } = gameState.blockPosition;
+            const newOrientation = gameState.blockOrientation;
+
+            gameState.isAnimating = true;
+            const startTime = Date.now();
+
+            const startPos = playerBlock.position.clone();
+
+            const targetPos = new THREE.Vector3(
+                newX * tileSize,
+                newOrientation === 'standing' ? 1.1 : 0.6,
+                newY * tileSize
+            );
+
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = easeInOutCubic(progress);
+
+                if (progress < 1) {
+                    // Interpolate position
+                    playerBlock.position.lerpVectors(startPos, targetPos, eased);
+
+                    requestAnimationFrame(animate);
+                } else {
+                    playerBlock.position.copy(targetPos);
+
+                    gameState.isAnimating = false;
+
+                    // Check switch activation
+                    const footprint = getBlockFootprint();
+                    footprint.forEach(pos => {
+                        checkSwitchActivation(pos.x, pos.y, gameState.blockOrientation);
+                    });
+
+                    // Check fragile tiles (only check center tile)
+                    const didBreak = checkFragileTile(gameState.blockPosition.x, gameState.blockPosition.y, gameState.blockOrientation);
+
+                    // Check exit tile
+                    checkExitTile();
+
+                    // Call the completion callback if provided
+                    if (onComplete && typeof onComplete === 'function') {
+                        onComplete();
+                    }
+                }
+            }
+
+            animate();
+        }
+
+        function animateBlockTippingQuaternion(prevX, prevY, prevOrientation, direction, duration = 350, onComplete) {
+            if (!playerBlock) return;
+
+            const tileSize = 1;
+            const { x: newX, y: newY } = gameState.blockPosition;
+            const newOrientation = gameState.blockOrientation;
+
+            gameState.isAnimating = true;
+            const startTime = Date.now();
+
+            const startPos = playerBlock.position.clone();
+            const startRot = playerBlock.rotation.clone();
+
+            const targetPos = new THREE.Vector3(
+                newX * tileSize,
+                newOrientation === 'standing' ? 1.1 : 0.6,
+                newY * tileSize
+            );
+
+            // Create a quaternion for the new rotation
+            const quaternion = new THREE.Quaternion();
+
+            switch (direction) {
+                case 'up':
+                    quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
+                    if (newOrientation == 'lying-y') {
+                        targetPos.z += .5;
+                    } else if (newOrientation == 'lying-x') {
+                        targetPos.x += .5;
+                    }
+                    break;
+                case 'down':
+                    quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+                    if (newOrientation == 'lying-y') {
+                        targetPos.z += .5;
+                    } else if (newOrientation == 'lying-x') {
+                        targetPos.x += .5;
+                    }
+                    break;
+                case 'left':
+                    quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
+                    if (newOrientation == 'lying-x') {
+                        targetPos.x += .5;
+                    } else if (newOrientation == 'lying-y') {
+                        targetPos.z += .5;
+                    }
+                    break;
+                case 'right':
+                    quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -Math.PI / 2);
+                    if (newOrientation == 'lying-x') {
+                        targetPos.x += .5;
+                    } else if (newOrientation == 'lying-y') {
+                        targetPos.z += .5;
+                    }
+                    break;
+            }
+
+            // Combine with current rotation
+            const startQuaternion = new THREE.Quaternion().setFromEuler(startRot);
+            const newQuaternion = new THREE.Quaternion().multiplyQuaternions(quaternion, new THREE.Quaternion().setFromEuler(startRot));
+
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = easeInOutCubic(progress);
+
+                if (progress < 1) {
+                    // Interpolate position
+                    playerBlock.position.lerpVectors(startPos, targetPos, eased);
+
+                    // Interpolate rotation
+                    let interpolatedQuaternion = new THREE.Quaternion(); // Initialize this variable
+                    interpolatedQuaternion.slerpQuaternions(startQuaternion, newQuaternion, eased);
+                    playerBlock.rotation.setFromQuaternion(interpolatedQuaternion);
+
+                    requestAnimationFrame(animate);
+                } else {
+                    playerBlock.position.copy(targetPos);
+                    playerBlock.rotation.setFromQuaternion(newQuaternion);
+
+                    gameState.isAnimating = false;
+
+                    // Check switch activation
+                    const footprint = getBlockFootprint();
+                    footprint.forEach(pos => {
+                        checkSwitchActivation(pos.x, pos.y, gameState.blockOrientation);
+                    });
+
+                    // Check fragile tiles (only check center tile)
+                    const didBreak = checkFragileTile(gameState.blockPosition.x, gameState.blockPosition.y, gameState.blockOrientation);
+
+                    // Check exit tile
+                    checkExitTile();
+
+                    // Call the completion callback if provided
+                    if (onComplete && typeof onComplete === 'function') {
+                        onComplete();
+                    }
+                }
+            }
+
+            animate();
+        }
+
+        // Animate block falling off the grid
+        function animateBlockFalling(prevOrientation, direction, reset = true) {
+            if (!playerBlock) return;
+
+            gameState.isAnimating = true;
+            const duration = 400;
+            const startTime = Date.now();
+            const tileSize = 1;
+
+            const startPos = playerBlock.position.clone();
+            const startRot = playerBlock.rotation.clone();
+
+            function fallAnimate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = easeOutCubic(progress);
+                const rotationAngle = eased * 4 * Math.PI / 2; // Accelerates rotation
+
+                const fallDistance = 5;
+                const verticalProgress = eased * eased * 4; // Accelerate downward
+                playerBlock.position.y = startPos.y - verticalProgress * fallDistance;
+
+                // Create a quaternion for the new rotation
+                const quaternion = new THREE.Quaternion();
+                switch (direction) {
+                    case 'up': quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -rotationAngle); break;
+                    case 'down': quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), rotationAngle); break;
+                    case 'left': quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), rotationAngle); break;
+                    case 'right': quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -rotationAngle); break;
+                    case 'in-place': break;
+                }
+
+                // Combine with current rotation
+                const startQuaternion = new THREE.Quaternion().setFromEuler(startRot);
+                const newQuaternion = new THREE.Quaternion().multiplyQuaternions(quaternion, new THREE.Quaternion().setFromEuler(startRot));
+
+                // Update rotation
+                playerBlock.rotation.setFromQuaternion(newQuaternion);
+
+                if (progress < 1) {
+                    requestAnimationFrame(fallAnimate);
+                } else {
+                    gameState.isAnimating = false;
+                    gameState.isResetting = true;
+                    // Reset level after falling
+                    setTimeout(() => {
+                        if (reset) {
+                            resetLevel();
+                        }
+                    }, 500);
+                }
+            }
+
+            fallAnimate();
+        }
+
+        function getFootprintForState(state) {
+            const { x, y, orientation } = state;
+            switch (orientation) {
+                case 'standing':
+                    return [{ x, y }];
+                case 'lying-x':
+                    return [{ x, y }, { x: x + 1, y }];
+                case 'lying-y':
+                    return [{ x, y }, { x, y: y + 1 }];
+                default:
+                    return [{ x, y }];
+            }
+        }
+
+        // Check win condition
+        function checkExitTile() {
+            const { x, y } = gameState.blockPosition;
+            const tileData = getTileAt(x, y);
+            const exit = currentLevel.exit;
+
+            if (tileData && tileData.type == 'exit') {
+                if (gameState.blockOrientation === 'standing'){
+                    setTimeout(() => {
+                        animateBlockFalling('standing', 'in-place', reset = false);
+
+                        setTimeout(() => {
+                            winLevel();
+                        }, 100);
+                    }, 100);
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // Win level
+        function winLevel() {
+            if (gameState.isAnimating) {
+                // Wait for animation to finish
+                setTimeout(winLevel, 100);
+                return;
+            }
+
+            gameState.hasWon = true;
+            document.getElementById('finalMoves').textContent = gameState.moves;
+            document.getElementById('winMessage').classList.add('show');
+        }
+
+        // Next level
+        function nextLevel() {
+            document.getElementById('winMessage').classList.remove('show');
+            gameState.level++;
+
+            if (gameState.level <= levelDefinitions.length) {
+                currentLevel = loadLevel(levelDefinitions[gameState.level - 1]);
+                resetLevel();
+            } else {
+                alert('Congratulations! You completed all levels and finished the game!');
+                gameState.level = 1;
+                currentLevel = loadLevel(levelDefinitions[gameState.level - 1]);
+                resetLevel();
+            }
+        }
+
+        // Reset level
+        function resetLevel() {
+            currentLevel = loadLevel(levelDefinitions[gameState.level - 1]);
+            gameState.blockPosition = { ...currentLevel.start };
+            gameState.blockOrientation = 'standing';
+            gameState.moves = 0;
+            gameState.isAnimating = false;
+            gameState.isResetting = false;
+            gameState.hasWon = false;
+
+            buildGrid();
+            createPlayerBlock();
+            updateCamera();
+            updateDisplay();
+        }
+
+        // Update display
+        function updateDisplay() {
+            document.getElementById('levelDisplay').textContent = gameState.level;
+            document.getElementById('moveDisplay').textContent = gameState.moves;
+            document.getElementById('passcodeDisplay').textContent = levelDefinitions[gameState.level - 1].password.toUpperCase() || '-----';
+        }
+
+        // Toggle camera
+        function toggleCamera() {
+            gameState.cameraMode = gameState.cameraMode === 'isometric' ? 'top' : 'isometric';
+            updateCamera();
+
+            const container = document.getElementById('canvasContainer');
+            // Switch icon
+            const icon = container.querySelector('.camera-btn img');
+            if (icon) {
+                if (gameState.cameraMode === 'isometric') {
+                    icon.src = '/assets/img/camera_top_down.png';
+                }
+                else {
+                    icon.src = '/assets/img/camera_angled.png';
+                }
+            }
+        }
+
+        function updateCamera() {
+            const grid = currentLevel.grid;
+            const gridWidth = grid[0].length;
+            const gridHeight = grid.length;
+
+            // Calculate grid bounds
+            const centerX = (gridWidth - 1) / 2;
+            const centerY = (gridHeight - 1) / 2;
+
+            // Calculate distance needed to fit the entire grid
+            // Use a minimum distance for small grids, scale up for larger ones
+            const maxDimension = Math.max(gridWidth, gridHeight);
+            const minDistance = 6; // Minimum distance for small grids
+            const baseDist = Math.max(minDistance, maxDimension * .8);
+
+            if (gameState.cameraMode === 'isometric') {
+                camera = orthographicCamera;
+                const orthoBaseDist = baseDist * .7;
+                camera.left = -orthoBaseDist;
+                camera.right = orthoBaseDist;
+                camera.top = orthoBaseDist;
+                camera.bottom = -orthoBaseDist;
+                camera.position.set(centerX + orthoBaseDist / 5, 7, centerY + orthoBaseDist);
+                camera.lookAt(centerX, 0, centerY);
+            } else {
+                camera = perspectiveCamera;
+
+                // const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.set(0, 1.6, 0); // Eye height for 2x1 block
+                camera.add(playerBlock);
+                // camera.position.set(centerX, baseDist * 1.8, centerY);
+                // camera.lookAt(centerX, 0, centerY);
+            }
+            camera.aspect = 1;
+            camera.updateProjectionMatrix();
+        }
+
+        // Touch/Swipe controls
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchCurrentX = 0;
+        let touchCurrentY = 0;
+        const holdInterval = 200; // Queue a move every 200ms while holding
+        let touchHoldInterval = null;
+        let lastMoveDirection = null;
+
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+            touchCurrentX = touchStartX;
+            touchCurrentY = touchStartY;
+            lastMoveDirection = null;
+        }, false);
+
+        canvas.addEventListener('touchmove', (e) => {
+            touchCurrentX = e.changedTouches[0].screenX;
+            touchCurrentY = e.changedTouches[0].screenY;
+
+            // Start continuous movement if not already started
+            if (!touchHoldInterval) {
+                const direction = getTouchDirection();
+                if (direction) {
+                    moveBlock(direction, false);
+                    lastMoveDirection = direction;
+
+                    // Set up interval for continuous movement
+                    touchHoldInterval = setInterval(() => {
+                        const currentDirection = getTouchDirection();
+                        if (currentDirection) {
+                            moveBlock(currentDirection, false);
+                            lastMoveDirection = currentDirection;
+                        }
+                    }, holdInterval);
+                }
+            }
+
+        }, false);
+
+        canvas.addEventListener('touchend', (e) => {
+            // Clear the hold interval
+            if (touchHoldInterval) {
+                clearInterval(touchHoldInterval);
+                touchHoldInterval = null;
+            }
+            // If no hold happened, process as a single swipe
+            if (!lastMoveDirection) {
+                touchCurrentX = e.changedTouches[0].screenX;
+                touchCurrentY = e.changedTouches[0].screenY;
+                handleSwipe();
+            }
+
+            lastMoveDirection = null;
+        }, false);
+
+        function handleSwipe() {
+            const direction = getTouchDirection();
+            if (direction) {
+                moveBlock(direction, false);
+            }
+        }
+
+        function getTouchDirection() {
+            const deltaX = touchCurrentX - touchStartX;
+            const deltaY = touchCurrentY - touchStartY;
+            const minSwipeDistance = 30;
+
+            if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+                return null;
+            }
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Horizontal swipe
+                return deltaX > 0 ? 'right' : 'left';
+            } else {
+                // Vertical swipe
+                return deltaY > 0 ? 'down' : 'up';
+            }
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === "enter") {
+                if (gameState.hasWon) {
+                    nextLevel();
+                    return;
+                }
+            }
+
+            if (gameState.isAnimating || gameState.isResetting || gameState.hasWon) return;
+
+            switch (e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'w':
+                    e.preventDefault();
+                    moveBlock('up', false);
+                    break;
+                case 'arrowdown':
+                case 's':
+                    e.preventDefault();
+                    moveBlock('down', false);
+                    break;
+                case 'arrowleft':
+                case 'a':
+                    e.preventDefault();
+                    moveBlock('left', false);
+                    break;
+                case 'arrowright':
+                case 'd':
+                    e.preventDefault();
+                    moveBlock('right', false);
+                    break;
+                case 'c':
+                    toggleCamera();
+                    break;
+            }
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Pulse exit tile
+            if (exitTile && exitTile.children[0]) {
+                const time = Date.now() * 0.002;
+                exitTile.children[0].material.opacity = 0.2 + Math.sin(time) * 0.1;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function toggleFullscreen() {
+            const container = document.getElementById('canvasContainer');
+
+            if (!isFullscreen) {
+                enterFullscreen(container);
+            } else {
+                exitFullscreen(container);
+            }
+        }
+
+        function enterFullscreen(container) {
+            isFullscreen = true;
+
+            // Store current canvas size and aspect ratio
+            preFullscreenSize = {
+                width: canvas.width,
+                height: canvas.height,
+                aspect: canvas.width / canvas.height
+            };
+
+            // Add fullscreen class
+            container.classList.add('fullscreen');
+
+            // Switch to compress icon
+            const icon = container.querySelector('.fullscreen-btn img');
+            if (icon) {
+                icon.src = '/assets/img/compress_arrow_32.png';
+                icon.title = 'Exit Fullscreen';
+            }
+
+            // Request fullscreen API (optional, for true fullscreen)
+            if (container.requestFullscreen) {
+                container.requestFullscreen().catch(err => {
+                    console.log('Fullscreen request failed:', err);
+                });
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            } else if (container.msRequestFullscreen) {
+                container.msRequestFullscreen();
+            }
+
+            // Resize canvas to fill screen while maintaining aspect ratio
+            resizeFullscreenCanvas();
+        }
+
+        function exitFullscreen(container) {
+            isFullscreen = false;
+
+            // Remove fullscreen class
+            container.classList.remove('fullscreen');
+
+            // Switch back to expand icon
+            const icon = container.querySelector('.fullscreen-btn img');
+            if (icon) {
+                icon.src = '/assets/img/expand_arrow_32.png';
+                icon.title = 'Toggle Fullscreen';
+            }
+            // Exit fullscreen API
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(err => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+
+            // Restore previous size
+            resizeWindow();
+        }
+
+        function resizeFullscreenCanvas() {
+            if (!isFullscreen) return;
+
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const targetAspect = preFullscreenSize.aspect;
+
+            let width, height;
+
+            // Calculate size to fit screen while maintaining aspect ratio
+            if (screenWidth / screenHeight > targetAspect) {
+                // Screen is wider than canvas aspect ratio
+                height = screenHeight * 0.95;
+                width = height * targetAspect;
+            } else {
+                // Screen is taller than canvas aspect ratio
+                width = screenWidth * 0.95;
+                height = width / targetAspect;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+
+        // Listen for fullscreen change events
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+        function handleFullscreenChange() {
+            const container = document.getElementById('canvasContainer');
+            const isCurrentlyFullscreen = document.fullscreenElement === container ||
+                                        document.webkitFullscreenElement === container ||
+                                        document.msFullscreenElement === container;
+
+            if (!isCurrentlyFullscreen && isFullscreen) {
+                // User exited fullscreen via ESC key or browser UI
+                exitFullscreen(container);
+            }
+        }
+
+        function resizeWindow() {
+            const container = document.getElementById('canvasContainer');
+            const isMobile = window.innerWidth < 768;
+
+            let width, height;
+
+            if (isMobile) {
+                // Mobile: portrait orientation, taller canvas
+                width = Math.min(window.innerWidth * 0.9, 500);
+                height = width * 1.25; // 3:4 aspect ratio
+                height = Math.min(height, window.innerHeight * 0.5);
+                // Adjust width if height was constrained
+                width = height * .8;
+            } else {
+                // Desktop: more square, constrained size
+                const maxSize = Math.min(
+                    window.innerWidth * 0.4,
+                    window.innerHeight * 0.7,
+                    600
+                );
+                width = maxSize * 1.33;
+                height = maxSize;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', resizeWindow);
+
+        // Initialize game
+        function init() {
+            resetLevel();
+            resizeWindow();
+            updateCamera();
+            animate();
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

@@ -22,6 +22,19 @@ title: Alejandro L. Ramirez - Game Producer
 
         <div class="project">
             <div class="project-title">
+                <a href="/projects/swapblocku/about.html" span class="highlight">Swapblocku</a>
+            </div>
+            <a href="/projects/swapblocku/about.html">
+                <img src="/assets/img/projects/swapblocku/swapblocku_titlecard.png" alt="Swapblocku Page" class="project-image" />
+            </a>
+            <div class="project-desc">
+                <strong>Role & Developer: Independent</strong><br>
+                An iOS app that adds a new twist to a classic sudoku block puzzle game
+            </div>
+        </div>
+
+        <div class="project">
+            <div class="project-title">
                 <a href="/projects/wartorn.html" span class="highlight">Wartorn</a>
             </div>
             <a href="/projects/wartorn.html">
