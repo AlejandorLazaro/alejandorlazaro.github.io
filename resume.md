@@ -72,7 +72,7 @@ title: Alejandro L. Ramirez - Resume
                 <div class="project-title">Game Development Highlights</div>
                 <div class="project-desc">
                     <strong>Recent Role:</strong> Producer/Dev Tools/QA at Stray Kite Studios<br>
-                    <strong>Shipped Titles:</strong> Wartorn, Asurya's Embers, SeaFeud<br>
+                    <strong>Shipped Titles:</strong> Swapblocku, Wartorn, Asurya's Embers, SeaFeud<br>
                     <strong>Education:</strong> M.S. Interactive Technology (SMU), B.S. Computer Science (LeTourneau)<br>
                     <strong>Core Skills:</strong> Game Production, Games User Testing, QA Automation, Team Leadership<br>
                     <strong>Specialties:</strong> Developer Tools, Gameplay Programming, Production Pipeline
