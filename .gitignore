@@ -17,3 +17,5 @@ _site
 
 # Environments
 ENV
+
+_plugins

@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon-96x96.png">
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Alien Minds">
+
+    <!-- Theme color for browser chrome -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="msapplication-navbutton-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#667eea">
+
+    <!-- Android Chrome -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Alien Minds">
+
+    <!-- Windows Phone -->
+    <meta name="msapplication-starturl" content="/">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-TileImage" content="/assets/img/ms-icon-144x144.png">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Alien Minds | Alejandro L. Ramirez</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Alien Minds" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Hi, I’m Alejandro Ramirez, a Game Producer from Houston, TX." />
+<meta property="og:description" content="Hi, I’m Alejandro Ramirez, a Game Producer from Houston, TX." />
+<link rel="canonical" href="http://localhost:4000/alien_minds.html" />
+<meta property="og:url" content="http://localhost:4000/alien_minds.html" />
+<meta property="og:site_name" content="Alejandro L. Ramirez" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Alien Minds" />
+<script type="application/ld+json">
+{"description":"Hi, I’m Alejandro Ramirez, a Game Producer from Houston, TX.","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/assets/img/portrait_animated_linear_256.gif"}},"@type":"WebPage","headline":"Alien Minds","url":"http://localhost:4000/alien_minds.html","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Background particle system */
+        #bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .nav-menu {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+
+        .hamburger-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            gap: 4px;
+        }
+
+        .hamburger-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .hamburger-line {
+            width: 20px;
+            height: 2px;
+            background: #667eea;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .nav-menu.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .nav-menu.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .menu-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .menu-overlay.active .menu-content {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(103, 126, 234, 0.2);
+        }
+
+        .menu-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(103, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .menu-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-items > li {
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-items a {
+            display: block;
+            padding: 0.8rem 1rem;
+            color: #2c3e50;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .menu-items a:hover {
+            background: rgba(103, 126, 234, 0.1);
+            color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .menu-submenu {
+            margin-bottom: 1rem;
+        }
+
+        .submenu-title {
+            display: block;
+            padding: 0.8rem 1rem;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid rgba(103, 126, 234, 0.2);
+            margin-bottom: 0.5rem;
+        }
+
+        .submenu-items {
+            list-style: none;
+            padding-left: 1rem;
+            margin: 0;
+        }
+
+        .submenu-items li {
+            margin-bottom: 0.3rem;
+        }
+
+        .submenu-items a {
+            padding: 0.6rem 1rem;
+            font-size: 0.95rem;
+            color: #7f8c8d;
+        }
+
+        .submenu-items a:hover {
+            color: #667eea;
+            background: rgba(103, 126, 234, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                top: 1rem;
+                right: 1rem;
+            }
+
+            .menu-content {
+                min-width: 280px;
+                margin: 1rem;
+                max-width: calc(100vw - 2rem);
+            }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        kbd {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            color: #495057;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 0.85em;
+            font-weight: 600;
+            padding: 2px 6px;
+            text-align: center;
+            min-width: 20px;
+            display: inline-block;
+        }
+
+        .menu-shortcut {
+            margin-left: auto;
+            opacity: 0.7;
+            font-size: 0.75em;
+        }
+
+        .menu-items a, .submenu-items a {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .keyboard-help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .keyboard-help-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .keyboard-help-overlay {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .keyboard-help-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .keyboard-help-modal.active .keyboard-help-content {
+            transform: scale(1);
+        }
+
+        .keyboard-help-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid rgba(103, 126, 234, 0.2);
+        }
+
+        .keyboard-help-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.5rem;
+        }
+
+        .keyboard-help-body {
+            padding: 1.5rem 2rem;
+        }
+
+        .keyboard-help-footer {
+            padding: 1rem 2rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(103, 126, 234, 0.1);
+        }
+
+        .shortcut-category {
+            margin-bottom: 2rem;
+        }
+
+        .shortcut-category h4 {
+            color: #667eea;
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(103, 126, 234, 0.2);
+        }
+
+        .shortcut-list {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 1rem;
+            background: rgba(103, 126, 234, 0.05);
+            border-radius: 8px;
+        }
+
+        .keyboard-indicator {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 1500;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .keyboard-hint {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .keyboard-hint kbd {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            margin: 0 4px;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tsparticles/2.12.0/tsparticles.bundle.min.js"></script>
+  </head>
+  <body>
+    <div id="bg-particles"></div>
+
+    <nav class="nav-menu">
+        <div class="hamburger-btn" onclick="toggleMenu()">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </div>
+
+        <div class="menu-overlay" id="menuOverlay">
+            <div class="menu-content">
+                <div class="menu-header">
+                    <h3><u>M</u>enu</h3>
+                    <button class="close-btn" onclick="toggleMenu()">×</button>
+                </div>
+
+                <ul class="menu-items">
+                    <li><a href="/" onclick="toggleMenu()">Home</a></li>
+
+                    <li class="menu-submenu">
+                        <span class="submenu-title">Projects</span>
+                        <ul class="submenu-items">
+                            <li><a href="/projects/swapblocku/about.html" onclick="toggleMenu()">Swapblocku</a></li>
+                            <li><a href="/projects/wartorn.html" onclick="toggleMenu()">Wartorn</a></li>
+                            <li><a href="/projects/asuryas_embers.html" onclick="toggleMenu()">Asurya's Embers</a></li>
+                            <li><a href="/projects/seafeud.html" onclick="toggleMenu()">SeaFeud</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a href="/about.html" onclick="toggleMenu()">About</a></li>
+                    <li><a href="/resume.html" onclick="toggleMenu()">Resume</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+      <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+        color: #ffffff;
+        font-family: 'Courier New', monospace;
+        min-height: 100vh;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 15px;
+    }
+    .game-container {
+        text-align: center; padding: 25px;
+        background: rgba(255, 255, 255, 0.05); border-radius: 15px;
+        backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        width: 100%; max-width: 480px; margin: 0 auto; position: relative;
+    }
+    .player-identity-bar {
+        background: rgba(0, 204, 255, 0.1); border: 1px solid rgba(0, 204, 255, 0.3);
+        border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; color: #00ccff;
+        display: inline-block; margin-bottom: 15px; letter-spacing: 1px;
+    }
+    .game-title {
+        font-size: clamp(1.5rem, 5vw, 2.2rem); font-weight: bold; margin-bottom: 5px;
+        background: linear-gradient(45deg, #a855f7, #00ccff);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .game-subtitle { font-size: clamp(0.8rem, 2vw, 1rem); color: rgba(255, 255, 255, 0.7); margin-bottom: 25px; }
+    .styled-input, .styled-select {
+        width: 100%; padding: 12px 15px; margin: 8px 0 16px 0; font-size: 1rem;
+        font-family: 'Courier New', monospace; text-align: center; background: rgba(0, 0, 0, 0.4);
+        border: 2px solid rgba(0, 204, 255, 0.3); border-radius: 8px; color: #00ccff; outline: none;
+    }
+    .action-btn {
+        width: 100%; background: linear-gradient(45deg, #00ff88, #00ccff); color: #000;
+        border: none; padding: 14px 20px; border-radius: 8px; font-family: 'Courier New', monospace;
+        font-weight: bold; font-size: 1rem; cursor: pointer; margin: 6px 0; transition: all 0.3s ease;
+    }
+    .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); }
+    .btn-danger { background: linear-gradient(45deg, #ff4444, #ff0055); color: #fff; }
+    .badge-code { display: inline-block; font-size: 1.8rem; letter-spacing: 4px; color: #00ff88; background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); padding: 6px 16px; border-radius: 8px; margin: 10px 0; }
+    .player-tag { display: inline-block; padding: 8px 14px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; margin: 4px; font-size: 0.9rem; color: #00ccff; }
+    .card-box { background: rgba(0, 0, 0, 0.5); border: 2px solid rgba(168, 85, 247, 0.5); border-radius: 12px; padding: 20px; margin: 20px 0; }
+    .prompt-text { color: #ffdd00; font-size: clamp(1.1rem, 3.5vw, 1.4rem); line-height: 1.5; }
+    .warning-text { color: #ffaa00; font-size: 0.85rem; margin-top: 10px; }
+    .divider { border: 0; height: 1px; background: rgba(255, 255, 255, 0.15); margin: 20px 0; }
+</style>
+
+<div class="game-container">
+    <div id="player-identity-bar" class="player-identity-bar" style="display: none;">
+        OPERATIVE: <strong id="player-display-name">---</strong>
+    </div>
+
+    <h1 class="game-title">IMPOSTER <u>P</u>ROTOCOL</h1>
+    <p class="game-subtitle">👾 Alien Detection Network 👾</p>
+
+    <!-- 1. JOIN / CREATE -->
+    <div id="view-join">
+        <input id="input-name" class="styled-input" type="text" placeholder="ENTER YOUR NAME" maxlength="15" />
+        <button class="action-btn" onclick="createRoom()">Create New Lobby</button>
+        <hr class="divider" />
+        <input id="input-code" class="styled-input" type="text" placeholder="4-LETTER ROOM CODE" maxlength="4" style="text-transform: uppercase;" />
+        <button class="action-btn" onclick="joinRoom()">Join Lobby</button>
+    </div>
+
+    <!-- 2. LOBBY -->
+    <div id="view-lobby" style="display: none;">
+        <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">ROOM CODE</p>
+        <div class="badge-code" id="display-room-code">----</div>
+        <div id="lobby-players" style="margin-bottom: 20px;"></div>
+
+        <div id="vip-controls" style="display: none;">
+            <div style="margin-bottom: 12px; text-align: left;">
+                <label style="color: #00ccff; font-size: 0.85rem; display: block; margin-bottom: 4px;">ALIENS IN GAME:</label>
+                <select id="select-num-aliens" class="styled-select" onchange="updateGameSettingsAuto()">
+                    <option value="1" selected>1 Alien (3-5+ players)</option>
+                    <option value="2">2 Aliens (6+ players)</option>
+                    <option value="3">3 Aliens (9+ players)</option>
+                </select>
+
+                <label style="color: #00ccff; font-size: 0.85rem; display: block; margin-bottom: 4px; margin-top: 10px;">PROMPTS PER SESSION:</label>
+                <select id="select-max-prompts" class="styled-select">
+                    <!-- Populated dynamically based on alien count -->
+                </select>
+                <p id="settings-hint" style="color: rgba(255,255,255,0.6); font-size: 0.75rem; margin-top: 4px; text-align: center;"></p>
+            </div>
+            <button class="action-btn" onclick="startGame()">Start Protocol</button>
+        </div>
+    </div>
+
+    <!-- 3. ROLE REVEAL -->
+    <div id="view-role-reveal" style="display: none;">
+        <div class="card-box">
+            <div id="role-title" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;"></div>
+            <p id="role-instructions" style="color: rgba(255,255,255,0.9); font-size: 0.95rem; line-height: 1.5;"></p>
+            <p class="warning-text">🔒 Keep your screen hidden! This role persists for all prompts.</p>
+        </div>
+        <button class="action-btn" onclick="revealPrompt()">View First Prompt</button>
+    </div>
+
+    <!-- 4. PLAYING -->
+    <div id="view-playing" style="display: none;">
+        <p id="prompt-step-header" style="color: #00ccff; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 8px;">PROMPT 1 / 3</p>
+        <div class="card-box">
+            <div id="prompt-text" class="prompt-text">Decrypting transmission...</div>
+        </div>
+        <button class="action-btn" onclick="completePromptTask()">✓ Mark Task Complete</button>
+    </div>
+
+    <!-- 5. TASK WAIT SCREEN -->
+    <div id="view-task-waiting" style="display: none;">
+        <h2 style="color: #00ccff; margin-bottom: 10px;">⏳ TASK TRANSMITTED</h2>
+        <div class="card-box">
+            <p style="color: #ffdd00; font-size: 1.1rem; margin-bottom: 10px;">Waiting for remaining operatives...</p>
+            <p id="task-progress-text" style="color: #00ff88; font-size: 1.3rem; font-weight: bold;">0 / 0 Ready</p>
+        </div>
+
+        <button id="btn-proceed-discussion" class="action-btn" onclick="proceedToDiscussion()" style="display: none; margin-top: 15px;">
+            Proceed to Discussion 🗣️
+        </button>
+
+        <p class="warning-text">Remain silent until discussion begins.</p>
+    </div>
+
+    <!-- 6. DISCUSSION VIEW -->
+    <div id="view-discussion" style="display: none;">
+        <h2 style="color: #00ccff; margin-bottom: 10px;">🗣️ DISCUSS RESULTS</h2>
+        <div class="card-box">
+            <p id="discussion-prompt-indicator" style="color: #ffdd00; font-size: 1.1rem; margin-bottom: 10px;">Compare your answers!</p>
+            <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; line-height: 1.5;">Does anyone's answer stem from an unusual or alien interpretation?</p>
+        </div>
+
+        <div id="discussion-actions">
+            <button id="btn-ready-next" class="action-btn" onclick="markReadyNextPrompt()">
+                ✋ Ready for Next Prompt (<span id="ready-prompt-count">0/0</span>)
+            </button>
+            <button class="action-btn btn-danger" onclick="triggerEmergencyMeeting()">
+                🚨 Call Emergency Meeting
+            </button>
+        </div>
+    </div>
+
+    <!-- 7. MEETING / VOTING -->
+    <div id="view-meeting" style="display: none;">
+        <h2 style="color: #ff4444; margin-bottom: 10px;">EMERGENCY MEETING</h2>
+        <p style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 15px;">
+            Identify and vote out the Alien Imposter!
+        </p>
+        <div id="vote-list"></div>
+    </div>
+
+    <!-- 8. VOTE RESULTS VIEW -->
+    <div id="view-vote-results" style="display: none; text-align: center;">
+        <h2 style="color: #00ccff; margin-bottom: 10px;">📊 EJECTION RESULTS</h2>
+        <div class="card-box">
+            <p style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">The airlock has opened...</p>
+            <h1 id="results-ejected-name" style="color: #ffdd00; font-size: 2rem; margin: 15px 0;">Operative Name</h1>
+            <div id="results-role-badge" style="font-size: 1.3rem; font-weight: bold; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                Was an ALIEN! 👽
+            </div>
+        </div>
+        <button id="btn-continue-game" class="action-btn" onclick="continueAfterResults()">
+            Continue Protocol ➔
+        </button>
+    </div>
+
+    <!-- 9. GAME OVER WIN / LOSE VIEW -->
+    <div id="view-game-over" style="display: none; text-align: center;">
+        <h1 id="game-over-title" style="font-size: 2.5rem; margin-bottom: 10px;">HUMANS WIN 🚀</h1>
+        <p id="game-over-subtitle" style="color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;">All alien infiltrators have been neutralized.</p>
+
+        <div class="card-box">
+            <h3 style="color: #00ccff; margin-bottom: 10px;">TRUE ROLES REVEALED</h3>
+            <div id="game-over-roster" style="text-align: left; line-height: 2;">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <button class="action-btn" onclick="location.reload()">Return to Lobby</button>
+    </div>
+
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const SUPABASE_CONFIG = {
+        url: 'https://uszyhanhloxahbkvgwzk.supabase.co',
+        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzenloYW5obG94YWhia3Znd3prIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NTIzODUsImV4cCI6MjEwMDMyODM4NX0.a793J_suN8NORjBrW1obHVr4iiMe2mXfscTh9okb5ws',
+        functionsUrl: 'https://uszyhanhloxahbkvgwzk.supabase.co/functions/v1/start-round'
+    };
+
+    const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+    let currentRoom = null;
+    let currentPlayer = null;
+    let isVip = false;
+    let cachedSecret = null;
+    let hasVoted = false;
+    let hasSeenRoleThisSession = false;
+    let isAdvancingPrompt = false;
+
+    async function ensureUserSession() {
+        let { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            const { data, error } = await supabase.auth.signInAnonymously();
+            if (error) return alert("Auth Error: " + error.message);
+            user = data.user;
+        }
+        return user;
+    }
+
+    function updatePlayerBadge(name) {
+        document.getElementById('player-display-name').innerText = name.toUpperCase();
+        document.getElementById('player-identity-bar').style.display = 'inline-block';
+    }
+
+    window.createRoom = async function() {
+        const name = document.getElementById('input-name').value.trim();
+        if (!name) return alert("Please enter your name.");
+
+        const user = await ensureUserSession();
+        if (!user) return;
+
+        const roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+
+        const { data: room, error: rErr } = await supabase.from('rooms')
+            .insert({ room_code: roomCode, status: 'waiting' }).select().single();
+        if (rErr) return alert("Room error: " + rErr.message);
+
+        const { data: player, error: pErr } = await supabase.from('players')
+            .upsert({ room_id: room.id, user_id: user.id, name }, { onConflict: 'room_id, user_id' })
+            .select().single();
+        if (pErr) return alert("Player error: " + pErr.message);
+
+        await supabase.from('rooms').update({ vip_player_id: player.id }).eq('id', room.id);
+
+        currentRoom = room; currentPlayer = player; isVip = true;
+        updatePlayerBadge(name); showLobby();
+    };
+
+    window.joinRoom = async function() {
+        const name = document.getElementById('input-name').value.trim();
+        const code = document.getElementById('input-code').value.trim().toUpperCase();
+        if (!name || !code) return alert("Enter both name and room code.");
+
+        const user = await ensureUserSession();
+        if (!user) return;
+
+        const { data: room, error: rErr } = await supabase.from('rooms').select('*').eq('room_code', code).single();
+        if (rErr || !room) return alert("Room not found.");
+
+        const { data: player, error: pErr } = await supabase.from('players')
+            .upsert({ room_id: room.id, user_id: user.id, name }, { onConflict: 'room_id, user_id' })
+            .select().single();
+        if (pErr) return alert("Player join error: " + pErr.message);
+
+        currentRoom = room; currentPlayer = player; isVip = (room.vip_player_id === player.id);
+        updatePlayerBadge(name); showLobby();
+    };
+
+    function showLobby() {
+        switchView('view-lobby');
+        document.getElementById('display-room-code').innerText = currentRoom.room_code;
+        if (isVip) document.getElementById('vip-controls').style.display = 'block';
+
+        subscribeToUpdates();
+        fetchPlayers();
+    }
+
+    async function fetchPlayers() {
+        if (!currentRoom?.id) return;
+
+        const { data: players, error } = await supabase.from('players')
+            .select('id, name, task_completed, ready_next_prompt, is_eliminated')
+            .eq('room_id', currentRoom.id);
+
+        if (error) {
+            console.warn("fetchPlayers primary query failed, using fallback:", error.message);
+            const { data: fallbackPlayers } = await supabase.from('players')
+                .select('id, name, task_completed')
+                .eq('room_id', currentRoom.id);
+
+            if (fallbackPlayers) updateTaskProgressUI(fallbackPlayers);
+            return;
+        }
+
+        if (players) {
+            updateTaskProgressUI(players);
+            updateGameSettingsAuto(players.length);
+        }
+    }
+    window.fetchPlayers = fetchPlayers;
+
+    function updateTaskProgressUI(players) {
+        const me = players.find(p => p.id === currentPlayer?.id);
+        if (me) currentPlayer = { ...currentPlayer, ...me };
+
+        const activePlayers = players.filter(p => p.is_eliminated !== true);
+
+        const lobbyPlayersEl = document.getElementById('lobby-players');
+        if (lobbyPlayersEl) {
+            lobbyPlayersEl.innerHTML = activePlayers
+                .map(p => `<span class="player-tag">● ${p.name}</span>`).join('');
+        }
+
+        const completedCount = activePlayers.filter(p => p.task_completed).length;
+        const taskProgressEl = document.getElementById('task-progress-text');
+        if (taskProgressEl) {
+            taskProgressEl.innerText = `${completedCount} / ${activePlayers.length} Ready`;
+        }
+
+        const readyNextCount = activePlayers.filter(p => p.ready_next_prompt).length;
+        const readyCountEl = document.getElementById('ready-prompt-count');
+        if (readyCountEl) readyCountEl.innerText = `${readyNextCount}/${activePlayers.length}`;
+
+        const btnReady = document.getElementById('btn-ready-next');
+        if (btnReady) {
+            if ((currentRoom?.current_prompt_num || 1) >= (currentRoom?.max_prompts || 3)) {
+                btnReady.style.display = 'none';
+            } else {
+                btnReady.style.display = 'block';
+                if (currentPlayer?.ready_next_prompt) {
+                    btnReady.innerText = `✓ Ready! Waiting for team (${readyNextCount}/${activePlayers.length})`;
+                    btnReady.className = 'action-btn btn-secondary';
+                    btnReady.disabled = true;
+                } else {
+                    btnReady.innerText = `✋ Ready for Next Prompt (${readyNextCount}/${activePlayers.length})`;
+                    btnReady.className = 'action-btn';
+                    btnReady.disabled = false;
+                }
+            }
+        }
+
+        // Only the VIP host triggers the auto-advance logic to avoid redundant/competing requests
+        if (
+            isVip &&
+            currentRoom?.status === 'discussion' &&
+            activePlayers.length > 0 &&
+            readyNextCount === activePlayers.length &&
+            !isAdvancingPrompt
+        ) {
+            if ((currentRoom.current_prompt_num || 1) < (currentRoom.max_prompts || 3)) {
+                advanceNextPrompt();
+            }
+        }
+    }
+
+    function subscribeToUpdates() {
+        supabase.channel(`room:${currentRoom.id}`)
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rooms', filter: `id=eq.${currentRoom.id}` },
+                payload => handleRoomStateChange(payload.new)
+            )
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'players', filter: `room_id=eq.${currentRoom.id}` },
+                () => fetchPlayers()
+            )
+            .subscribe();
+    }
+
+    async function handleRoomStateChange(room) {
+        currentRoom = room;
+
+        if (room.status === 'vote_results') {
+            renderVoteResults(room);
+            switchView('view-vote-results');
+        } else if (room.status === 'game_over') {
+            renderGameOver(room);
+            switchView('view-game-over');
+        } else if (room.status === 'playing') {
+            isAdvancingPrompt = false;
+            hasVoted = false;
+
+            if (currentPlayer) {
+                // 1. Reset client-side tracking immediately
+                currentPlayer.ready_next_prompt = false;
+                currentPlayer.task_completed = false;
+
+                // 2. Each client explicitly resets their OWN database row.
+                // This bypasses RLS policies that block the VIP's batch update.
+                await supabase.from('players')
+                    .update({ ready_next_prompt: false, task_completed: false })
+                    .eq('id', currentPlayer.id);
+            }
+
+            // Fetch players AFTER the reset is confirmed
+            fetchPlayers();
+
+            const { data } = await supabase.from('player_secrets')
+                .select('current_prompt, role')
+                .eq('player_id', currentPlayer.id)
+                .maybeSingle();
+
+            cachedSecret = data;
+
+            if ((room.current_prompt_num || 1) === 1 && !hasSeenRoleThisSession) {
+                hasSeenRoleThisSession = true;
+                setupRoleReveal(data);
+                switchView('view-role-reveal');
+            } else {
+                revealPrompt();
+            }
+
+        } else if (room.status === 'discussion') {
+            fetchPlayers();
+            switchView('view-discussion');
+
+            const indicator = document.getElementById('discussion-prompt-indicator');
+            if (indicator) {
+                indicator.innerText = `Prompt ${room.current_prompt_num || 1} of ${room.max_prompts || 3} Discussion`;
+            }
+
+        } else if (room.status === 'emergency_meeting') {
+            switchView('view-meeting');
+            renderVotingList();
+        }
+    }
+
+    function setupRoleReveal(secret) {
+        const roleTitleEl = document.getElementById('role-title');
+        const roleDescEl = document.getElementById('role-instructions');
+
+        if (secret?.role === 'alien') {
+            roleTitleEl.innerText = "👽 ALIEN IMPOSTER"; roleTitleEl.style.color = "#ff0055";
+            roleDescEl.innerText = "You received a corrupted transmission. Act natural, execute tasks convincingly, and stay undiscovered through all prompts!";
+        } else {
+            roleTitleEl.innerText = "🛡️ HUMAN OPERATIVE"; roleTitleEl.style.color = "#00ff88";
+            roleDescEl.innerText = "Execute your prompt tasks and observe anyone whose behavior seems unusual.";
+        }
+    }
+
+    window.revealPrompt = function() {
+        document.getElementById('prompt-step-header').innerText = `PROMPT ${currentRoom.current_prompt_num || 1} / ${currentRoom.max_prompts || 3}`;
+        document.getElementById('prompt-text').innerText = cachedSecret?.current_prompt || "No prompt received.";
+        switchView('view-playing');
+    };
+
+    window.completePromptTask = async function() {
+        switchView('view-task-waiting');
+
+        if (currentPlayer) {
+            currentPlayer.task_completed = true;
+        }
+
+        const { error } = await supabase.from('players')
+            .update({ task_completed: true })
+            .eq('id', currentPlayer.id);
+
+        if (error) console.error("Error marking task completed:", error);
+
+        fetchPlayers();
+    };
+
+    window.markReadyNextPrompt = async function() {
+        if (currentPlayer?.ready_next_prompt) return;
+
+        currentPlayer.ready_next_prompt = true;
+
+        const btnReady = document.getElementById('btn-ready-next');
+        if (btnReady) {
+            btnReady.innerText = `✓ Ready! Waiting for team...`;
+            btnReady.disabled = true;
+            btnReady.className = 'action-btn btn-secondary';
+        }
+
+        await supabase.from('players')
+            .update({ ready_next_prompt: true })
+            .eq('id', currentPlayer.id);
+
+        fetchPlayers();
+    };
+
+    window.proceedToDiscussion = async function() {
+        await supabase.from('rooms').update({ status: 'discussion' }).eq('id', currentRoom.id);
+    };
+
+    window.startGame = async function() {
+        hasSeenRoleThisSession = false;
+        const maxPrompts = parseInt(document.getElementById('select-max-prompts')?.value || '3', 10);
+
+        const { count, error: countError } = await supabase.from('players')
+            .select('*', { count: 'exact', head: true }).eq('room_id', currentRoom.id);
+
+        if (countError) return alert("Error checking player count: " + countError.message);
+        if (count < 3) return alert(`⚠️ Need at least 3 operatives to start! Currently in lobby: ${count}`);
+
+        const { error } = await supabase.functions.invoke('start-round', {
+            body: { roomId: currentRoom.id, action: 'start_game', maxPrompts }
+        });
+        if (error) alert("Failed to start game: " + error.message);
+    };
+
+    window.advanceNextPrompt = async function() {
+        if (!isVip || isAdvancingPrompt) return;
+        isAdvancingPrompt = true;
+
+        try {
+            // DB resets are now handled securely by each client in handleRoomStateChange
+            const { error } = await supabase.functions.invoke('start-round', {
+                body: { roomId: currentRoom.id, action: 'next_prompt' }
+            });
+
+            if (error) {
+                console.error("Failed to advance prompt:", error);
+                isAdvancingPrompt = false;
+            }
+        } catch (err) {
+            console.error("Error advancing prompt:", err);
+            isAdvancingPrompt = false;
+        }
+    };
+
+    window.triggerEmergencyMeeting = async function() {
+        await supabase.from('rooms').update({ status: 'emergency_meeting' }).eq('id', currentRoom.id);
+    };
+
+    async function renderVotingList() {
+        const { data: players } = await supabase.from('players')
+                    .select('id, name')
+                    .eq('room_id', currentRoom.id)
+                    .or('is_eliminated.eq.false,is_eliminated.is.null');
+
+        const voteListEl = document.getElementById('vote-list');
+
+        if (!players) return;
+
+        voteListEl.innerHTML = players.map(p => {
+            const isSelf = p.id === currentPlayer.id;
+            return `
+                <button class="${isSelf ? 'action-btn btn-secondary' : 'action-btn'}" onclick="castVote('${p.id}')" ${hasVoted ? 'disabled' : ''}>
+                    ${isSelf ? `Vote ${p.name} (YOU)` : `Vote ${p.name}`}
+                </button>
+            `;
+        }).join('') + `
+            <button class="action-btn btn-secondary" style="margin-top: 12px;" onclick="castVote('skip')" ${hasVoted ? 'disabled' : ''}>
+                Skip Vote
+            </button>
+        `;
+    }
+
+    window.castVote = async function(targetPlayerId) {
+        if (hasVoted) return;
+        hasVoted = true;
+
+        const { error } = await supabase.from('votes').insert({
+            room_id: currentRoom.id, voter_id: currentPlayer.id, suspect_id: targetPlayerId === 'skip' ? null : targetPlayerId
+        });
+
+        if (error) { alert("Failed to submit vote: " + error.message); hasVoted = false; return; }
+
+        document.getElementById('vote-list').innerHTML = `
+            <p style="color: #00ff88; margin-top: 15px;">✓ Vote transmitted. Tallying results...</p>
+        `;
+
+        evaluateVotesAndWinner();
+    };
+
+    function renderVoteResults(room) {
+        const nameEl = document.getElementById('results-ejected-name');
+        const badgeEl = document.getElementById('results-role-badge');
+        const btnContinue = document.getElementById('btn-continue-game');
+
+        if (!room.last_ejected_name || room.last_ejected_name === "No One") {
+            nameEl.innerText = "No One Was Ejected";
+            badgeEl.innerText = "🤝 Tie or Majority Skipped";
+            badgeEl.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+            badgeEl.style.color = "#ffffff";
+        } else {
+            nameEl.innerText = room.last_ejected_name;
+            if (room.last_ejected_role === 'alien') {
+                badgeEl.innerText = "Was an ALIEN! 👽";
+                badgeEl.style.backgroundColor = "rgba(255, 0, 85, 0.2)";
+                badgeEl.style.color = "#ff0055";
+            } else {
+                badgeEl.innerText = "Was HUMAN! 🧑‍🚀";
+                badgeEl.style.backgroundColor = "rgba(0, 204, 255, 0.2)";
+                badgeEl.style.color = "#00ccff";
+            }
+        }
+
+        if (btnContinue) {
+            btnContinue.style.display = isVip ? 'block' : 'none';
+        }
+    }
+
+    window.continueAfterResults = async function() {
+        if (!isVip) return;
+        await supabase.from('votes').delete().eq('room_id', currentRoom.id);
+        await supabase.from('rooms')
+            .update({ status: 'playing' })
+            .eq('id', currentRoom.id);
+    };
+
+    async function evaluateVotesAndWinner() {
+        const { data: votes } = await supabase.from('votes').select('suspect_id').eq('room_id', currentRoom.id);
+        const { count: playerCount } = await supabase.from('players')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('room_id', currentRoom.id)
+                    .or('is_eliminated.eq.false,is_eliminated.is.null');
+        if (!votes || votes.length < playerCount) return;
+
+        const tally = {};
+        votes.forEach(v => {
+            if (v.suspect_id) tally[v.suspect_id] = (tally[v.suspect_id] || 0) + 1;
+        });
+
+        let highestVotes = 0;
+        let ejectedPlayerId = null;
+        let isTie = false;
+
+        for (const [suspectId, count] of Object.entries(tally)) {
+            if (count > highestVotes) {
+                highestVotes = count;
+                ejectedPlayerId = suspectId;
+                isTie = false;
+            } else if (count === highestVotes && count > 0) {
+                isTie = true;
+            }
+        }
+
+        let ejectedName = "No One";
+        let ejectedRole = "human";
+
+        if (ejectedPlayerId && !isTie) {
+            const { data: ejectedP } = await supabase.from('players').select('name').eq('id', ejectedPlayerId).single();
+            const { data: ejectedSec } = await supabase.from('player_secrets').select('role').eq('player_id', ejectedPlayerId).single();
+            if (ejectedP) ejectedName = ejectedP.name;
+            if (ejectedSec) ejectedRole = ejectedSec.role;
+
+            await supabase.from('players').update({ is_eliminated: true }).eq('id', ejectedPlayerId);
+        }
+
+        const { data: remainingSecrets } = await supabase.from('player_secrets')
+            .select('player_id, role')
+            .eq('room_id', currentRoom.id);
+
+        const { data: activePlayers } = await supabase.from('players')
+            .select('id, is_eliminated')
+            .eq('room_id', currentRoom.id)
+            .or('is_eliminated.eq.false,is_eliminated.is.null');
+
+        const activePlayerIds = new Set(activePlayers?.map(p => p.id) || []);
+        const activeAliens = remainingSecrets?.filter(s => s.role === 'alien' && activePlayerIds.has(s.player_id)) || [];
+
+        if (activeAliens.length === 0) {
+            await supabase.from('rooms').update({
+                status: 'game_over',
+                winner: 'humans',
+                last_ejected_name: ejectedName,
+                last_ejected_role: ejectedRole
+            }).eq('id', currentRoom.id);
+        } else if (activeAliens.length >= (activePlayers?.length || 0) - activeAliens.length) {
+            await supabase.from('rooms').update({
+                status: 'game_over',
+                winner: 'aliens',
+                last_ejected_name: ejectedName,
+                last_ejected_role: ejectedRole
+            }).eq('id', currentRoom.id);
+        } else {
+            await supabase.from('rooms').update({
+                status: 'vote_results',
+                last_ejected_name: ejectedName,
+                last_ejected_role: ejectedRole
+            }).eq('id', currentRoom.id);
+        }
+    }
+
+    async function renderGameOver(room) {
+        switchView('view-game-over');
+        const titleEl = document.getElementById('game-over-title');
+        const detailEl = document.getElementById('game-over-subtitle');
+
+        if (room.winner === 'humans') {
+            if (titleEl) { titleEl.innerText = "HUMANS WIN 🚀"; titleEl.style.color = "#00ff88"; }
+            if (detailEl) detailEl.innerText = "All alien infiltrators have been neutralized.";
+        } else {
+            if (titleEl) { titleEl.innerText = "ALIENS WIN 👽"; titleEl.style.color = "#ff0055"; }
+            if (detailEl) detailEl.innerText = "The alien imposter successfully infiltrated the crew.";
+        }
+
+        const rosterEl = document.getElementById('game-over-roster');
+        if (rosterEl) {
+            const { data: players } = await supabase.from('players').select('id, name').eq('room_id', room.id);
+            const { data: secrets } = await supabase.from('player_secrets').select('player_id, role').eq('room_id', room.id);
+
+            if (players && secrets) {
+                const secretMap = new Map(secrets.map(s => [s.player_id, s.role]));
+                rosterEl.innerHTML = players.map(p => {
+                    const role = secretMap.get(p.id) || 'human';
+                    const isAlien = role === 'alien';
+                    const badge = isAlien ? '👽 ALIEN' : '🧑‍🚀 HUMAN';
+                    const color = isAlien ? '#ff0055' : '#00ccff';
+                    return `<div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span>${p.name}</span>
+                        <span style="color: ${color}; font-weight: bold;">${badge}</span>
+                    </div>`;
+                }).join('');
+            }
+        }
+    }
+
+    function switchView(viewId) {
+        ['view-join', 'view-lobby', 'view-role-reveal', 'view-playing', 'view-task-waiting', 'view-discussion', 'view-meeting', 'view-vote-results', 'view-game-over']
+            .forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = (id === viewId) ? 'block' : 'none';
+            });
+    }
+
+    function updateGameSettingsAuto(playerCount = 3) {
+        const numAliensSelect = document.getElementById('select-num-aliens');
+        const maxPromptsSelect = document.getElementById('select-max-prompts');
+        const hintEl = document.getElementById('settings-hint');
+        if (!numAliensSelect || !maxPromptsSelect) return;
+
+        let recommendedAliens = Math.max(1, Math.floor(playerCount / 4));
+        const maxAllowedAliens = Math.max(1, Math.floor((playerCount - 1) / 2));
+        const selectedAliens = Math.min(parseInt(numAliensSelect.value || recommendedAliens, 10), maxAllowedAliens);
+
+        numAliensSelect.value = selectedAliens;
+
+        const minPrompts = selectedAliens + 1;
+        const currentPrompts = parseInt(maxPromptsSelect.value || "3", 10);
+        const targetPrompts = Math.max(currentPrompts, minPrompts);
+
+        maxPromptsSelect.innerHTML = '';
+        [2, 3, 5, 7, 10].forEach(p => {
+            if (p >= minPrompts) {
+                const opt = document.createElement('option');
+                opt.value = p;
+                opt.innerText = `${p} Prompts`;
+                if (p === targetPrompts) opt.selected = true;
+                maxPromptsSelect.appendChild(opt);
+            }
+        });
+
+        if (hintEl) {
+            hintEl.innerText = `${playerCount} Operatives: ${selectedAliens} Alien(s) requires min ${minPrompts} prompts.`;
+        }
+    }
+    window.updateGameSettingsAuto = updateGameSettingsAuto;
+</script>
+
+      <div class="footer">
+        <p>This project is maintained by <a href="https://github.com/AlejandorLazaro">AlejandorLazaro</a></p>
+        <p><small>Ready to create the next great gaming experience together.</small></p>
+      </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const navMenu = document.querySelector('.nav-menu');
+            const menuOverlay = document.getElementById('menuOverlay');
+
+            navMenu.classList.toggle('active');
+            menuOverlay.classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuOverlay = document.getElementById('menuOverlay');
+
+            menuOverlay.addEventListener('click', function(e) {
+                if (e.target === menuOverlay) {
+                    toggleMenu();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && menuOverlay.classList.contains('active')) {
+                    toggleMenu();
+                }
+            });
+
+            initKeyboardShortcuts();
+            enhanceMenuWithShortcuts();
+            initBackgroundParticles();
+        });
+
+        const keyboardShortcuts = {
+            'm': () => toggleMenu(),
+            'M': () => toggleMenu(),
+            'Escape': () => closeMenu(),
+            'h': () => navigateToPage('/'),
+            'H': () => navigateToPage('/'),
+            'a': () => navigateToPage('/about.html'),
+            'A': () => navigateToPage('/about.html'),
+            'r': () => navigateToPage('/resume.html'),
+            'R': () => navigateToPage('/resume.html'),
+            's': () => navigateToPage('/projects/swapblocku/about.html'),
+            'S': () => navigateToPage('/projects/swapblocku/about.html'),
+            'w': () => navigateToPage('/projects/wartorn.html'),
+            'W': () => navigateToPage('/projects/wartorn.html'),
+            'e': () => navigateToPage('/projects/asuryas_embers.html'),
+            'E': () => navigateToPage('/projects/asuryas_embers.html'),
+            'f': () => navigateToPage('/projects/seafeud.html'),
+            'F': () => navigateToPage('/projects/seafeud.html'),
+            '?': () => toggleKeyboardHelp(),
+            'k': () => toggleKeyboardHelp(),
+            'K': () => toggleKeyboardHelp(),
+        };
+
+        const keyboardHelpContent = {
+            'Navigation': {
+                'M': 'Toggle <u>m</u>enu',
+                'H': '<u>H</u>ome page',
+                'A': '<u>A</u>bout page',
+                'R': '<u>R</u>esume page',
+                'Esc': 'Close menu/dialogs'
+            },
+            'Projects': {
+                'S': '<u>S</u>wapblocku',
+                'W': '<u>W</u>artorn',
+                'E': 'Asurya\'s <u>E</u>mbers',
+                'F': 'Sea<u>F</u>eud'
+            },
+            'Help': {
+                '?': 'Show this help',
+                'K': 'Show this help'
+            }
+        };
+
+        function navigateToPage(url) {
+            const menuOverlay = document.getElementById('menuOverlay');
+            if (menuOverlay && menuOverlay.classList.contains('active')) {
+                toggleMenu();
+            }
+            setTimeout(() => {
+                window.location.href = url;
+            }, 100);
+        }
+
+        function closeMenu() {
+            const menuOverlay = document.getElementById('menuOverlay');
+            const helpModal = document.getElementById('keyboardHelpModal');
+
+            if (helpModal && helpModal.classList.contains('active')) {
+                hideKeyboardHelp();
+            } else if (menuOverlay && menuOverlay.classList.contains('active')) {
+                toggleMenu();
+            }
+        }
+
+        function toggleKeyboardHelp() {
+            let modal = document.getElementById('keyboardHelpModal');
+            if (modal) {
+                hideKeyboardHelp();
+            } else {
+                showKeyboardHelp();
+            }
+        }
+
+        function showKeyboardHelp() {
+            let modal = document.getElementById('keyboardHelpModal');
+            if (!modal) {
+                modal = createKeyboardHelpModal();
+                document.body.appendChild(modal);
+            }
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideKeyboardHelp() {
+            const modal = document.getElementById('keyboardHelpModal');
+            if (modal) {
+                document.body.style.overflow = '';
+                modal.remove();
+            }
+        }
+
+        function createKeyboardHelpModal() {
+            const modal = document.createElement('div');
+            modal.id = 'keyboardHelpModal';
+            modal.className = 'keyboard-help-modal';
+
+            let helpHTML = `
+                <div class="keyboard-help-overlay">
+                    <div class="keyboard-help-content">
+                        <div class="keyboard-help-header">
+                            <h3>⌨️ <u>K</u>eyboard Shortcuts</h3>
+                            <button class="close-btn" onclick="hideKeyboardHelp()">×</button>
+                        </div>
+                        <div class="keyboard-help-body">
+            `;
+
+            Object.entries(keyboardHelpContent).forEach(([category, shortcuts]) => {
+                helpHTML += `
+                    <div class="shortcut-category">
+                        <h4>${category}</h4>
+                        <div class="shortcut-list">
+                `;
+
+                Object.entries(shortcuts).forEach(([key, description]) => {
+                    helpHTML += `
+                        <div class="shortcut-item">
+                            <kbd class="shortcut-key">${key}</kbd>
+                            <span class="shortcut-desc">${description}</span>
+                        </div>
+                    `;
+                });
+
+                helpHTML += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            helpHTML += `
+                        </div>
+                        <div class="keyboard-help-footer">
+                            <p><em>Press <kbd>Esc</kbd> to close this dialog</em></p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.innerHTML = helpHTML;
+            return modal;
+        }
+
+        function handleKeyboardShortcuts(event) {
+            if (event.target.tagName === 'INPUT' ||
+                event.target.tagName === 'TEXTAREA' ||
+                event.target.contentEditable === 'true') {
+                return;
+            }
+
+            if (event.ctrlKey || event.altKey || event.metaKey) {
+                return;
+            }
+
+            const key = event.key;
+
+            if (keyboardShortcuts[key]) {
+                event.preventDefault();
+                keyboardShortcuts[key]();
+            }
+        }
+
+        function initKeyboardShortcuts() {
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+        }
+
+        function enhanceMenuWithShortcuts() {
+            const menuItems = document.querySelectorAll('.menu-items a, .submenu-items a');
+
+            const shortcutMap = {
+                '/': 'H',
+                '/about.html': 'A',
+                '/resume.html': 'R',
+                '/projects/swapblocku/about.html': 'S',
+                '/projects/wartorn.html': 'W',
+                '/projects/asuryas_embers.html': 'E',
+                '/projects/seafeud.html': 'F'
+            };
+
+            menuItems.forEach(item => {
+                const href = item.getAttribute('href');
+                const shortcut = shortcutMap[href];
+
+                if (shortcut) {
+                    const text = item.textContent;
+                    item.innerHTML = `
+                        <span>${text}</span>
+                        <kbd class="menu-shortcut">${shortcut}</kbd>
+                    `;
+                }
+            });
+        }
+
+        async function initBackgroundParticles() {
+            const options = {
+                background: { color: { value: "transparent" } },
+                fpsLimit: 60,
+                particles: {
+                    color: { value: ["rgba(255,255,255,0.5)", "rgba(144,136,234,0.5)", "rgba(148,145,242,0.5)"] },
+                    links: { color: "rgba(255,255,255,0.4)", distance: 120, enable: true, opacity: 0.2, width: 1 },
+                    move: { enable: true, speed: 0.5 },
+                    number: { density: { enable: true, area: 1000 }, value: 80 },
+                    opacity: { value: { min: 0.2, max: 0.8 } },
+                    shape: { type: "circle" },
+                    size: { value: { min: 1, max: 3 } }
+                }
+            };
+
+            await tsParticles.load("bg-particles", options);
+        }
+    </script>
+  </body>
+</html>
