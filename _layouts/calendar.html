@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calendar</title>
+  <style>
+    html, body { margin: 0; padding: 0; background:#fff; }
+    iframe { display:block; width:100%; border:0; }
+  </style>
+</head>
+<body>
+  <iframe
+    id="gcal"
+    title="Week view: Sept 14–18"
+    loading="lazy"
+    referrerpolicy="no-referrer"
+    allowtransparency="true"
+    style="height: 760px;"
+    src=""
+  ></iframe>
+
+  <script>
+    const baseSrc =
+      "https://calendar.google.com/calendar/embed?src=c_de4cd5d1498be5ca677326fc32ffa68f2989069cc30bc4dce5871c1353decc48%40group.calendar.google.com&ctz=America%2FChicago";
+
+    // Sept 14–18, 2026
+    const start = "20260914";
+    const endExclusive = "20260919"; // day after the 18th
+
+    const params = new URLSearchParams({
+      // Week view (this is the key change)
+      mode: "WEEK",
+
+      // Minimize extra UI (Google still renders some internal header branding)
+      showTitle: "0",
+      showNav: "0",
+      showTabs: "0",
+      showCalendars: "0",
+      hidePrint: "1",
+      wkst: "1",
+
+      // Pin the visible range
+      dates: `${start}/${endExclusive}`
+    });
+
+    document.getElementById("gcal").src = `${baseSrc}&${params.toString()}`;
+  </script>
+</body>
+</html>
