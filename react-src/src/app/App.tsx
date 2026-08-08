@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo, forwardRef, useImperativeHandle, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "motion/react";
 import { Heart, X, Star, Send, MapPin, Image as ImageIcon, Gamepad2 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
@@ -18,7 +18,7 @@ interface Profile {
   answer: string;
 }
 
-const PROFILES: Profile[] = [
+const ALL_PROFILES: Profile[] = [
   {
     id: 1,
     version: "The Singer",
@@ -104,6 +104,24 @@ const PROFILES: Profile[] = [
     answer: "You're bold enough to be real—and calm enough to be kind.",
   },
 ];
+
+// Each playthrough only shows a random subset — "extended mode" (see
+// EmptyState / App) lets a visitor draw further random batches until every
+// profile in ALL_PROFILES has been shown at least once.
+const DECK_SIZE = 5;
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickRandomProfiles(pool: Profile[], count: number): Profile[] {
+  return shuffle(pool).slice(0, Math.min(count, pool.length));
+}
 
 const HEARTS = [
   { left: "8%", top: "12%", delay: 0, size: "text-3xl" },
@@ -353,7 +371,7 @@ function MatchToast({ profile, onClose }: { profile: Profile; onClose: () => voi
       </div>
       <div className="min-w-0">
         <p className="text-white text-sm font-semibold leading-tight">New match!</p>
-        <p className="text-white text-xs font-sans truncate">{profile.version} liked you back</p>
+        <p className="text-white/55 text-xs font-sans truncate">{profile.version} liked you back</p>
       </div>
       <Heart size={16} fill="#FF3B5C" className="text-[#FF3B5C] ml-auto shrink-0" />
     </motion.div>
@@ -603,16 +621,49 @@ function MessageModal({ onClose, onSent }: { onClose: () => void; onSent: () => 
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
+function pluralMatches(n: number): string {
+  return `${n} match${n === 1 ? "" : "es"}`;
+}
+
+// Quippy commentary on this round's match rate — only used while there's
+// still more of the pool left to draw. Once the pool's exhausted, the
+// central message switches over to the "met them all" line instead.
+function getMatchQuip(matchCount: number, deckSize: number): string {
+  if (matchCount === 0) {
+    return "You didn't vibe with any of these Alejandros.";
+  }
+  if (matchCount === deckSize) {
+    return "Gotta catch 'em all! You matched with every Alejandro this round.";
+  }
+  const ratio = matchCount / deckSize;
+  if (ratio < 0.5) {
+    return `Picky, picky — just ${pluralMatches(matchCount)} this round.`;
+  }
+  return `${pluralMatches(matchCount)} this round — not bad!`;
+}
+
 function EmptyState({
   matches,
+  deckSize,
   hasMessaged,
+  remainingCount,
+  onExtend,
   onMessage,
 }: {
   matches: Profile[];
+  deckSize: number;
   hasMessaged: boolean;
+  remainingCount: number;
+  onExtend: () => void;
   onMessage: () => void;
 }) {
   const showMessageCta = !hasMessaged;
+  const hasMoreProfiles = remainingCount > 0;
+  const nextBatchSize = Math.min(DECK_SIZE, remainingCount);
+
+  const centralMessage = hasMoreProfiles
+    ? getMatchQuip(matches.length, deckSize)
+    : "You've now met every version of Alejandro 🎉";
 
   return (
     <motion.div
@@ -627,33 +678,40 @@ function EmptyState({
         You&apos;ve seen all sides
       </h3>
 
-      {/* Match stats summary */}
-      {matches.length > 0 ? (
-        <>
-          <div className="flex -space-x-3 mb-4">
-            {matches.slice(0, 6).map((m, i) => (
-              <div
-                key={`${m.id}-${i}`}
-                className="w-11 h-11 rounded-full border-2 border-white overflow-hidden shadow-md"
-              >
-                <img src={m.photo} alt={m.version} className="w-full h-full object-cover" />
-              </div>
-            ))}
-            {matches.length > 6 && (
-              <div className="w-11 h-11 rounded-full border-2 border-white bg-stone-800 text-white text-xs font-mono flex items-center justify-center shadow-md">
-                +{matches.length - 6}
-              </div>
-            )}
-          </div>
-          <p className="text-stone-400 text-sm font-sans max-w-[260px] leading-relaxed mb-8">
-            {matches.length} match{matches.length === 1 ? "" : "es"} out of {PROFILES.length} versions of Alejandro.
-            {hasMessaged ? " Alejandro will get back to you soon." : ""}
-          </p>
-        </>
-      ) : (
-        <p className="text-stone-400 text-sm font-sans max-w-[240px] leading-relaxed mb-8">
-          You explored every version of Alejandro. Ready to reach out?
-        </p>
+      {/* Matched avatars */}
+      {matches.length > 0 && (
+        <div className="flex -space-x-3 mb-4">
+          {matches.slice(0, 6).map((m, i) => (
+            <div
+              key={`${m.id}-${i}`}
+              className="w-11 h-11 rounded-full border-2 border-white overflow-hidden shadow-md"
+            >
+              <img src={m.photo} alt={m.version} className="w-full h-full object-cover" />
+            </div>
+          ))}
+          {matches.length > 6 && (
+            <div className="w-11 h-11 rounded-full border-2 border-white bg-stone-800 text-white text-xs font-mono flex items-center justify-center shadow-md">
+              +{matches.length - 6}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Central message: quippy match-rate commentary, or the pool-exhausted line */}
+      <p className="text-stone-400 text-sm font-sans max-w-[260px] leading-relaxed mb-6">
+        {centralMessage}
+        {hasMessaged ? " Alejandro will get back to you soon." : ""}
+      </p>
+
+      {/* Extended mode: draw another random batch until the pool's exhausted */}
+      {hasMoreProfiles && (
+        <button
+          onClick={onExtend}
+          className="px-8 py-3.5 mb-3 bg-[#FF3B5C] text-white font-semibold rounded-2xl flex items-center gap-2 hover:bg-[#E8344F] transition-colors shadow-md shadow-[#FF3B5C]/20 text-[15px]"
+        >
+          <Heart size={15} fill="white" />
+          Meet {nextBatchSize} More Alejandro{nextBatchSize === 1 ? "" : "s"}
+        </button>
       )}
 
       {showMessageCta && (
@@ -685,19 +743,27 @@ function EmptyState({
 
 export default function App() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [deck, setDeck] = useState<Profile[]>(() => pickRandomProfiles(ALL_PROFILES, DECK_SIZE));
   const [matches, setMatches] = useState<Profile[]>([]);
   const [matchOverlayProfile, setMatchOverlayProfile] = useState<Profile | null>(null);
   const [matchToast, setMatchToast] = useState<Profile | null>(null);
   const [showMessage, setShowMessage] = useState(false);
   const [hasMessaged, setHasMessaged] = useState(false);
+  const [roundStartIndex, setRoundStartIndex] = useState(0);
   const cardRef = useRef<CardHandle>(null);
   const idxRef = useRef(0);
   const matchesRef = useRef<Profile[]>([]);
 
+  const shownIds = useMemo(() => new Set(deck.map((p) => p.id)), [deck]);
+  const remainingProfiles = useMemo(
+    () => ALL_PROFILES.filter((p) => !shownIds.has(p.id)),
+    [shownIds]
+  );
+
   const handleExited = useCallback((dir: "left" | "right") => {
     const idx = idxRef.current;
     if (dir === "right") {
-      const profile = PROFILES[idx];
+      const profile = deck[idx];
       const isFirstMatch = matchesRef.current.length === 0;
       matchesRef.current = [...matchesRef.current, profile];
       setMatches(matchesRef.current);
@@ -713,12 +779,32 @@ export default function App() {
     }
     idxRef.current = idx + 1;
     setCurrentIndex(idx + 1);
-  }, []);
+  }, [deck]);
+
+  const handleExtend = useCallback(() => {
+    // Mark where this new batch begins so the dot display resets to it,
+    // instead of tacking on to the tail end of the previous round's dots.
+    setRoundStartIndex(deck.length);
+    setDeck((prev) => [
+      ...prev,
+      ...pickRandomProfiles(remainingProfiles, DECK_SIZE),
+    ]);
+    // currentIndex already sits at prev.length (all caught up), so appending
+    // to the deck alone is enough to bring the swipe UI back — no reset needed.
+  }, [deck, remainingProfiles]);
 
   const swipe = (dir: "left" | "right") => cardRef.current?.triggerSwipe(dir);
 
-  const allDone = currentIndex >= PROFILES.length;
-  const activeProfile = PROFILES[currentIndex];
+  const allDone = currentIndex >= deck.length;
+  const activeProfile = deck[currentIndex];
+
+  // Dots/counter only reflect the current round (initial 5, or whatever was
+  // last drawn via "extend"), not the full cumulative session deck.
+  const currentRoundDeck = useMemo(
+    () => deck.slice(roundStartIndex),
+    [deck, roundStartIndex]
+  );
+  const roundPosition = currentIndex - roundStartIndex;
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden font-sans">
@@ -729,18 +815,18 @@ export default function App() {
           Alejandro.
         </span>
 
-        {/* Progress dots */}
+        {/* Progress dots — reflect only the current round, resets on extend */}
         <div className="flex items-center gap-1.5">
-          {PROFILES.map((_, i) => (
+          {currentRoundDeck.map((_, i) => (
             <div
               key={i}
               className="h-1.5 rounded-full transition-all duration-300"
               style={{
-                width: i === currentIndex ? 24 : 16,
+                width: i === roundPosition ? 24 : 16,
                 background:
-                  i < currentIndex
+                  i < roundPosition
                     ? "#D0CEC9"
-                    : i === currentIndex
+                    : i === roundPosition
                     ? "#FF3B5C"
                     : "#E5E3DE",
               }}
@@ -749,7 +835,7 @@ export default function App() {
         </div>
 
         <span className="font-mono text-xs text-muted-foreground">
-          {Math.min(currentIndex + 1, PROFILES.length)}&thinsp;/&thinsp;{PROFILES.length}
+          {Math.min(roundPosition + 1, currentRoundDeck.length)}&thinsp;/&thinsp;{currentRoundDeck.length}
         </span>
       </header>
 
@@ -758,7 +844,10 @@ export default function App() {
         {allDone ? (
           <EmptyState
             matches={matches}
+            deckSize={deck.length}
             hasMessaged={hasMessaged}
+            remainingCount={remainingProfiles.length}
+            onExtend={handleExtend}
             onMessage={() => setShowMessage(true)}
           />
         ) : (
@@ -767,7 +856,7 @@ export default function App() {
             style={{ height: "min(560px, calc(100dvh - 200px))" }}
           >
             {/* Back card 3 */}
-            {PROFILES[currentIndex + 2] && (
+            {deck[currentIndex + 2] && (
               <div
                 className="absolute bg-card rounded-3xl"
                 style={{
@@ -781,7 +870,7 @@ export default function App() {
               />
             )}
             {/* Back card 2 */}
-            {PROFILES[currentIndex + 1] && (
+            {deck[currentIndex + 1] && (
               <div
                 className="absolute bg-card rounded-3xl"
                 style={{
