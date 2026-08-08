@@ -1,109 +1,8 @@
 import { useState, useRef, useEffect, useMemo, forwardRef, useImperativeHandle, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "motion/react";
-import { Heart, X, Star, Send, MapPin, Image as ImageIcon, Gamepad2 } from "lucide-react";
+import { Heart, X, Star, Send, MapPin, Image as ImageIcon, Gamepad2, Trophy } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
-
-// ─── Data ────────────────────────────────────────────────────────────────────
-
-interface Profile {
-  id: number;
-  version: string;
-  name: string;
-  subtitle: string;
-  location: string;
-  photo: string;
-  bio: string;
-  tags: string[];
-  prompt: string;
-  answer: string;
-}
-
-const ALL_PROFILES: Profile[] = [
-  {
-    id: 1,
-    version: "The Singer",
-    name: "Alejandro",
-    subtitle: '33 yrs of "Always down for karaoke"',
-    location: "Humble, TX | Where the mic's at",
-    photo: "/assets/img/match/mic.jpeg",
-    bio: "Never shies away from a microphone, a duet, or a party anthem!",
-    tags: ["John Legend", "Coldplay", "Switchfoot", "The Killers"],
-    prompt: "Wake me up:",
-    answer: "Before you go, go!",
-  },
-  {
-    id: 2,
-    version: "The Gym-Goer",
-    name: "Alejandro",
-    subtitle: "Aesthetics *and* better health? Why not!",
-    location: "Humble, TX | Away from the treadmill",
-    photo: "/assets/img/match/mirror2.jpeg",
-    bio: "I would've complimented you first, but I'm shy (and don't want to get banned from EōS)",
-    tags: ["Fitness", "Calisthenics", "Discipline", "Dates that move"],
-    prompt: "Train-or-date?",
-    answer: "Either. Preferably both—then we grab Chipotle!",
-  },
-  {
-    id: 7,
-    version: "The Party Connector",
-    name: "Alejandro",
-    subtitle: "People hype-r · flirts with chaos",
-    location: "Humble, TX",
-    photo: "/assets/img/match/party.jpeg",
-    bio: "The man (without) a plan, but the fun never stops! Variety is the spice of life! 💃🕺",
-    tags: ["Friends", "Events", "Host energy", "Fun-first"],
-    prompt: "My claim to party fame:",
-    answer: "MC'd my sisters wedding... in two languages!",
-  },
-  {
-    id: 8,
-    version: "The Little Gamer",
-    name: "Alejandro",
-    subtitle: "Co-op > competitiveness",
-    location: "Humble, TX",
-    photo: "/assets/img/match/hair.jpeg",
-    bio: "Long-time solo player, but love a good co-op! Let's have fun together and make memories!",
-    tags: ["Co-op", "Nintendo", "Smash Bros", "Play", "Board Games"],
-    prompt: "Gaming red flag:",
-    answer: "Ending my longest road streak in Catan.",
-  },
-  {
-    id: 9,
-    version: "The Kid-at-Heart",
-    name: "Alejandro",
-    subtitle: "24/7 imagination · childlike wonder",
-    location: "Humble, TX",
-    photo: "/assets/img/match/upsidedown.jpeg",
-    bio: "Playgrounds, cartwheels, and Lunchables. Real kids, kids at heart, we're all children of heaven!",
-    tags: ["Play", "Adventures", "Curiosity", "Big goofy grin"],
-    prompt: "How I know we'll click:",
-    answer: "If we can laugh at something stupid and still feel safe doing it.",
-  },
-  {
-    id: 10,
-    version: "The Automator",
-    name: "Alejandro",
-    subtitle: "Builds fast · breaks things",
-    location: "Humble, TX | tokens == Chuck-E-Cheese",
-    photo: "/assets/img/match/rainbow.jpeg",
-    bio: "Coding is a necessary evil to bring about wondrous magic! :(){ :|:& };:",
-    tags: ["Techie", "Nerd", "Systematic approach", "KISS it til it's DRY", "Sunday is for REST"],
-    prompt: "My dating promise:",
-    answer: "I'll stop trying to explain code principles if you say you aren't interested.",
-  },
-  {
-    id: 11,
-    version: "The Supporter",
-    name: "Alejandro",
-    subtitle: "Romance—it's love that's sacrificial",
-    location: "Humble, TX | or wherever the heart lies",
-    photo: "/assets/img/match/drama.jpeg",
-    bio: "I'll be wherever you need me to be, ready to support you in both light and heavy burdens.",
-    tags: ["Servant hearted", "Playful intimacy", "Love is patient", "Love is kind"],
-    prompt: "Green flag on a first date:",
-    answer: "You're bold enough to be real—and calm enough to be kind.",
-  },
-];
+import { Profile, ALL_PROFILES } from "./profiles";
 
 // Each playthrough only shows a random subset — "extended mode" (see
 // EmptyState / App) lets a visitor draw further random batches until every
@@ -619,6 +518,162 @@ function MessageModal({ onClose, onSent }: { onClose: () => void; onSent: () => 
   );
 }
 
+// ─── Leaderboard Modal ─────────────────────────────────────────────────────────
+
+// Same trust model as the message form above: this is gated by a localStorage
+// flag for UX/etiquette purposes only (so a visitor doesn't accidentally
+// double-submit by refreshing), not real anti-abuse. Anyone with the anon
+// key that ships in this bundle could call the RPC directly — acceptable
+// for a personal vanity project, but worth knowing if this ever needs to be
+// airtight.
+const LEADERBOARD_SUBMITTED_KEY = "leaderboard_submitted";
+
+function hasSubmittedLeaderboard(): boolean {
+  return localStorage.getItem(LEADERBOARD_SUBMITTED_KEY) === "true";
+}
+
+interface LeaderboardEntry {
+  profile: Profile;
+  matchCount: number;
+}
+
+function LeaderboardModal({ matches, onClose }: { matches: Profile[]; onClose: () => void }) {
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function run() {
+      try {
+        if (!hasSubmittedLeaderboard()) {
+          const profileIds = matches.map((m) => m.id);
+          const { error: rpcError } = await supabase.rpc("increment_match_counts", {
+            p_profile_ids: profileIds,
+          });
+          if (rpcError) throw rpcError;
+          localStorage.setItem(LEADERBOARD_SUBMITTED_KEY, "true");
+        }
+
+        const { data, error: fetchError } = await supabase
+          .from("profile_match_stats")
+          .select("profile_id, match_count")
+          .order("match_count", { ascending: false });
+        if (fetchError) throw fetchError;
+
+        const byId = new Map(ALL_PROFILES.map((p) => [p.id, p]));
+        const mapped: LeaderboardEntry[] = (data ?? [])
+          .map((row): LeaderboardEntry | null => {
+            const profile = byId.get(row.profile_id);
+            return profile ? { profile, matchCount: row.match_count as number } : null;
+          })
+          .filter((e): e is LeaderboardEntry => e !== null);
+
+        if (!cancelled) {
+          setEntries(mapped);
+          setStatus("ready");
+        }
+      } catch (err) {
+        console.error("Leaderboard error:", err);
+        if (!cancelled) setStatus("error");
+      }
+    }
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+    // Intentionally run once per mount — `matches` is the snapshot for this
+    // round and shouldn't re-trigger a resubmission if it were to change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const myMatchIds = useMemo(() => new Set(matches.map((m) => m.id)), [matches]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 bg-black/55 flex items-end sm:items-center justify-center"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ y: 80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 80, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 280, damping: 28 }}
+        className="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md max-h-[80vh] flex flex-col"
+      >
+        <div className="flex items-center justify-between mb-5 shrink-0">
+          <div>
+            <h3 className="font-display text-xl font-semibold text-stone-900">Leaderboard</h3>
+            <p className="text-stone-400 text-xs font-sans mt-0.5">Most-matched Alejandros, across everyone</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:bg-stone-200 transition-colors shrink-0"
+          >
+            <X size={15} />
+          </button>
+        </div>
+
+        {status === "loading" && (
+          <div className="flex-1 flex items-center justify-center py-10">
+            <p className="text-stone-400 text-sm font-sans">Tallying votes...</p>
+          </div>
+        )}
+
+        {status === "error" && (
+          <div className="flex-1 flex flex-col items-center justify-center py-10 text-center gap-4">
+            <p className="text-stone-400 text-sm font-sans">Couldn&apos;t load the leaderboard right now.</p>
+            <button
+              onClick={onClose}
+              className="px-6 py-2.5 bg-stone-900 text-white text-sm font-medium rounded-xl hover:bg-stone-800 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        )}
+
+        {status === "ready" && entries.length === 0 && (
+          <div className="flex-1 flex items-center justify-center py-10">
+            <p className="text-stone-400 text-sm font-sans text-center">
+              No matches recorded yet — you&apos;re the first!
+            </p>
+          </div>
+        )}
+
+        {status === "ready" && entries.length > 0 && (
+          <div className="flex flex-col gap-2 overflow-y-auto">
+            {entries.map((entry, i) => (
+              <div
+                key={entry.profile.id}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${
+                  myMatchIds.has(entry.profile.id) ? "bg-[#FFF1F3]" : "bg-stone-50"
+                }`}
+              >
+                <span className="font-mono text-xs text-stone-400 w-4 shrink-0">{i + 1}</span>
+                <div className="w-9 h-9 rounded-full overflow-hidden shrink-0">
+                  <img
+                    src={entry.profile.photo}
+                    alt={entry.profile.version}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-stone-700 text-sm font-sans flex-1 truncate">
+                  {entry.profile.version}
+                </span>
+                <span className="font-mono text-sm text-stone-500 shrink-0">{entry.matchCount}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
 function pluralMatches(n: number): string {
@@ -649,6 +704,7 @@ function EmptyState({
   remainingCount,
   onExtend,
   onMessage,
+  onViewLeaderboard,
 }: {
   matches: Profile[];
   deckSize: number;
@@ -656,6 +712,7 @@ function EmptyState({
   remainingCount: number;
   onExtend: () => void;
   onMessage: () => void;
+  onViewLeaderboard: () => void;
 }) {
   const showMessageCta = !hasMessaged;
   const hasMoreProfiles = remainingCount > 0;
@@ -724,16 +781,30 @@ function EmptyState({
         </button>
       )}
 
+      {/* Optional leaderboard — submitting this round's matches unlocks it */}
+      {!hasMoreProfiles || hasSubmittedLeaderboard() ? (
+        <button
+          onClick={onViewLeaderboard}
+          className="mt-3 px-6 py-2.5 border-2 border-stone-200 text-stone-500 text-sm font-medium rounded-xl flex items-center gap-2 hover:border-stone-300 hover:text-stone-700 transition-colors"
+        >
+          <Trophy size={14} />
+          {hasSubmittedLeaderboard() ? "View Leaderboard" : "Submit & View Leaderboard"}
+        </button>
+      ) : (
+        <div className="mt-3 px-6 py-2.5 border-2 border-stone-100 bg-stone-50 text-stone-300 text-sm font-medium rounded-xl flex items-center gap-2 cursor-not-allowed">
+          <Trophy size={14} />
+          Swipe {remainingCount} more to unlock Leaderboard
+        </div>
+      )}
+
       <a
         href="https://alejandorlazaro.github.io/block_game.html"
         target="_blank"
         rel="noopener noreferrer"
-        className={`inline-flex items-center gap-2 text-stone-400 text-sm font-sans hover:text-stone-600 transition-colors ${
-          showMessageCta ? "mt-4" : "mt-2"
-        }`}
+        className="mt-3 inline-flex items-center gap-2 text-stone-400 text-sm font-sans hover:text-stone-600 transition-colors"
       >
         <Gamepad2 size={15} />
-        Looking for more fun? Try the puzzle game!
+        Need a break? Try the puzzle game
       </a>
     </motion.div>
   );
@@ -749,6 +820,7 @@ export default function App() {
   const [matchToast, setMatchToast] = useState<Profile | null>(null);
   const [showMessage, setShowMessage] = useState(false);
   const [hasMessaged, setHasMessaged] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [roundStartIndex, setRoundStartIndex] = useState(0);
   const cardRef = useRef<CardHandle>(null);
   const idxRef = useRef(0);
@@ -849,6 +921,7 @@ export default function App() {
             remainingCount={remainingProfiles.length}
             onExtend={handleExtend}
             onMessage={() => setShowMessage(true)}
+            onViewLeaderboard={() => setShowLeaderboard(true)}
           />
         ) : (
           <div
@@ -961,6 +1034,16 @@ export default function App() {
             key="message"
             onClose={() => setShowMessage(false)}
             onSent={() => setHasMessaged(true)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showLeaderboard && (
+          <LeaderboardModal
+            key="leaderboard"
+            matches={matches}
+            onClose={() => setShowLeaderboard(false)}
           />
         )}
       </AnimatePresence>
