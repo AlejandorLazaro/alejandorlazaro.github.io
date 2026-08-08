@@ -19,6 +19,8 @@ _site
 ENV
 
 # React
-react-src
+react-src/dist
+node_modules
+
 
 _plugins
