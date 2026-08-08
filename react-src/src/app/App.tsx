@@ -353,7 +353,7 @@ function MatchToast({ profile, onClose }: { profile: Profile; onClose: () => voi
       </div>
       <div className="min-w-0">
         <p className="text-white text-sm font-semibold leading-tight">New match!</p>
-        <p className="text-white/55 text-xs font-sans truncate">{profile.version} liked you back</p>
+        <p className="text-white text-xs font-sans truncate">{profile.version} liked you back</p>
       </div>
       <Heart size={16} fill="#FF3B5C" className="text-[#FF3B5C] ml-auto shrink-0" />
     </motion.div>
@@ -675,7 +675,7 @@ function EmptyState({
         }`}
       >
         <Gamepad2 size={15} />
-        Need a break? Try the puzzle game
+        Looking for more fun? Try the puzzle game!
       </a>
     </motion.div>
   );
