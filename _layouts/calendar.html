@@ -3,48 +3,893 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calendar</title>
+  <title>Staff Advance — Sept 2026</title>
   <style>
-    html, body { margin: 0; padding: 0; background:#fff; }
-    iframe { display:block; width:100%; border:0; }
+    :root {
+      --row-height: 16px;
+      --time-col-width: 64px;
+      --day-col-min: 150px;
+      --border: #d0d0d0;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --bg: #f7f7f8;
+      --panel: #ffffff;
+
+      /* Category palette — approximate matches to the source sheet, easy to
+         retune since every block just reads these by `category`. */
+      --cat-meal: #d9d9d9;
+      --cat-break: #ececec;
+      --cat-worship: #9fc5e8;
+      --cat-session: #a9d18e;
+      --cat-freetime: #ffd966;
+      --cat-breakout: #b4a7d6;
+      --cat-executive: #d6e4f0;
+      --cat-meeting: #d5a6bd;
+      --cat-afterhours: #c27ba0;
+      --cat-depart: #fce5cd;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    a { color: inherit; }
+
+    .home-link {
+      display: inline-block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0.5rem 1rem 0;
+    }
+    .home-link:hover { color: var(--ink); }
+
+    header.page-header {
+      padding: 0.5rem 1rem 1rem;
+      text-align: center;
+    }
+
+    header.page-header h1 {
+      margin: 0.25rem 0 0.1rem;
+      font-size: 1.4rem;
+    }
+
+    header.page-header .subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem 1rem;
+    }
+
+    .toggle-group {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--panel);
+    }
+
+    .toggle-group button {
+      border: none;
+      background: transparent;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .toggle-group button.active {
+      background: var(--ink);
+      color: white;
+    }
+
+    .day-tabs {
+      display: flex;
+      gap: 0.4rem;
+      overflow-x: auto;
+      padding: 0 1rem 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .day-tabs button {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .day-tabs button.active {
+      background: var(--ink);
+      color: white;
+      border-color: var(--ink);
+    }
+
+    main { padding: 0 0 4rem; }
+
+    /* ---- Week grid view ---- */
+    .week-scroll {
+      overflow-x: auto;
+      padding: 0 1rem;
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: var(--time-col-width) repeat(5, minmax(var(--day-col-min), 1fr));
+      min-width: 760px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--panel);
+    }
+
+    .grid-corner {
+      grid-column: 1;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 3;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+
+    .day-header {
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+      text-align: center;
+      padding: 0.4rem 0.25rem;
+      font-size: 0.8rem;
+      line-height: 1.3;
+    }
+
+    .day-header strong { display: block; font-size: 0.85rem; }
+
+    .time-label {
+      grid-column: 1;
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      border-top: 1px solid #eee;
+      font-size: 0.65rem;
+      color: var(--muted);
+      padding: 2px 4px 0;
+      text-align: right;
+    }
+
+    .event-block {
+      position: relative;
+      margin: 1px;
+      border-radius: 5px;
+      border-left: 1px solid #ffffff88;
+      padding: 3px 5px;
+      font-size: 0.72rem;
+      line-height: 1.25;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    .event-block .title { font-weight: 600; display: block; }
+    .event-block .time { display: block; font-size: 0.65rem; opacity: 0.75; }
+    .event-block .desc {
+      display: block;
+      font-size: 0.65rem;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    .event-block.editable { cursor: pointer; }
+    .event-block.editable:hover { outline: 2px solid var(--ink); }
+
+    /* ---- Day agenda (mobile-first) view ---- */
+    .day-agenda {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .agenda-card {
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      border-left: 5px solid rgba(0,0,0,0.15);
+    }
+
+    .agenda-card .time {
+      font-size: 0.75rem;
+      font-weight: 600;
+      opacity: 0.8;
+    }
+
+    .agenda-card .title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-top: 0.1rem;
+    }
+
+    .agenda-card .desc {
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+      opacity: 0.9;
+    }
+
+    .agenda-card.editable { cursor: pointer; }
+    .agenda-card.editable:hover { outline: 2px solid var(--ink); }
+
+    .empty-note {
+      text-align: center;
+      color: var(--muted);
+      padding: 2rem 1rem;
+    }
+
+    /* ---- category color application ---- */
+    .cat-meal { background: var(--cat-meal); }
+    .cat-break { background: var(--cat-break); }
+    .cat-worship { background: var(--cat-worship); }
+    .cat-session { background: var(--cat-session); }
+    .cat-freetime { background: var(--cat-freetime); }
+    .cat-breakout { background: var(--cat-breakout); }
+    .cat-executive { background: var(--cat-executive); }
+    .cat-meeting { background: var(--cat-meeting); }
+    .cat-afterhours { background: var(--cat-afterhours); }
+    .cat-depart { background: var(--cat-depart); }
+
+    /* ---- sign-in / edit affordances ---- */
+    .auth-corner {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 50;
+      font-size: 0.8rem;
+    }
+
+    .auth-pill {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.4rem 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .auth-panel {
+      position: absolute;
+      bottom: 2.75rem;
+      right: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem;
+      width: 240px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      display: none;
+    }
+
+    .auth-panel.open { display: block; }
+
+    .auth-panel input {
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      margin: 0.4rem 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    .auth-panel button.primary,
+    .modal button.primary {
+      width: 100%;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 6px;
+      background: var(--ink);
+      color: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .auth-status { font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; }
+    .auth-error { font-size: 0.75rem; color: #b91c1c; margin-top: 0.4rem; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 1.25rem;
+      width: 100%;
+      max-width: 420px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal h2 { margin-top: 0; font-size: 1.1rem; }
+
+    .modal label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin: 0.6rem 0 0.2rem;
+    }
+
+    .modal input, .modal select, .modal textarea {
+      width: 100%;
+      padding: 0.45rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    .modal textarea { min-height: 70px; resize: vertical; }
+
+    .modal .row { display: flex; gap: 0.5rem; }
+    .modal .row > div { flex: 1; }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .modal-actions button.secondary {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--panel);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .modal-actions button.danger {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #b91c1c;
+      color: #b91c1c;
+      border-radius: 6px;
+      background: var(--panel);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .modal-actions button.primary { flex: 2; }
+
+    .add-event-row {
+      text-align: center;
+      margin: 0.25rem 0 0.5rem;
+    }
+
+    .add-event-row button {
+      border: 1px dashed var(--border);
+      background: transparent;
+      border-radius: 8px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    @media (max-width: 700px) {
+      .week-grid { min-width: 640px; }
+    }
   </style>
 </head>
 <body>
-  <iframe
-    id="gcal"
-    title="Week view: Sept 14–18"
-    loading="lazy"
-    referrerpolicy="no-referrer"
-    allowtransparency="true"
-    style="height: 760px;"
-    src=""
-  ></iframe>
+  <header class="page-header">
+    <h1>Staff Advance — Sept 2026</h1>
+    <div class="subtitle">Augustine Institute, Missouri &middot; Sept 14&ndash;18, 2026</div>
+  </header>
 
-  <script>
-    const baseSrc =
-      "https://calendar.google.com/calendar/embed?src=c_de4cd5d1498be5ca677326fc32ffa68f2989069cc30bc4dce5871c1353decc48%40group.calendar.google.com&ctz=America%2FChicago";
+  <div class="controls">
+    <div class="toggle-group" id="viewToggle">
+      <button data-view="day">Day</button>
+      <button data-view="week">Week</button>
+    </div>
+    <div class="toggle-group" id="editToggle" style="display:none;">
+      <button data-edit="off" class="active">View</button>
+      <button data-edit="on">Edit</button>
+    </div>
+  </div>
 
-    // Sept 14–18, 2026
-    const start = "20260914";
-    const endExclusive = "20260919"; // day after the 18th
+  <div class="day-tabs" id="dayTabs"></div>
 
-    const params = new URLSearchParams({
-      // Week view (this is the key change)
-      mode: "WEEK",
+  <main>
+    <div class="week-scroll" id="weekView" style="display:none;">
+      <div class="week-grid" id="weekGrid"></div>
+    </div>
+    <div class="day-agenda" id="dayView"></div>
+  </main>
 
-      // Minimize extra UI (Google still renders some internal header branding)
-      showTitle: "0",
-      showNav: "0",
-      showTabs: "0",
-      showCalendars: "0",
-      hidePrint: "1",
-      wkst: "1",
+  <div class="add-event-row" id="addEventRow" style="display:none;">
+    <button id="addEventBtn">+ Add event</button>
+  </div>
 
-      // Pin the visible range
-      dates: `${start}/${endExclusive}`
+  <div class="auth-corner">
+    <button class="auth-pill" id="authPillBtn">Sign in to edit</button>
+    <div class="auth-panel" id="authPanel">
+      <div id="authSignedOut">
+        <label style="font-size:0.75rem;color:var(--muted);">Editor email</label>
+        <input type="email" id="authEmail" placeholder="you@example.com" />
+        <button class="primary" id="authSendLink">Send magic link</button>
+        <div class="auth-status" id="authStatus"></div>
+        <div class="auth-error" id="authError"></div>
+      </div>
+      <div id="authSignedIn" style="display:none;">
+        <div class="auth-status">Signed in as <strong id="authEmailLabel"></strong></div>
+        <button class="primary" id="authSignOut" style="margin-top:0.5rem;">Sign out</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="eventModalBackdrop">
+    <div class="modal">
+      <h2 id="modalTitle">Edit event</h2>
+      <label>Title</label>
+      <input type="text" id="fieldTitle" />
+      <div class="row">
+        <div>
+          <label>Day</label>
+          <select id="fieldDay"></select>
+        </div>
+        <div>
+          <label>Category</label>
+          <select id="fieldCategory"></select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Start</label>
+          <input type="time" id="fieldStart" />
+        </div>
+        <div>
+          <label>End</label>
+          <input type="time" id="fieldEnd" />
+        </div>
+      </div>
+      <label>Description (optional)</label>
+      <textarea id="fieldDescription"></textarea>
+      <div class="auth-error" id="modalError"></div>
+      <div class="modal-actions">
+        <button class="secondary" id="modalCancel">Cancel</button>
+        <button class="danger" id="modalDelete" style="display:none;">Delete</button>
+        <button class="primary" id="modalSave">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    // --- Supabase config -------------------------------------------------
+    const SUPABASE_URL = "https://szsvmzfcujqfqngnqjau.supabase.co";
+    const SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6c3ZtemZjdWpxZnFuZ25xamF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MzYyMTIsImV4cCI6MjA3MTMxMjIxMn0.7tu5hHmCGqUhxJwVMR3AMAULB6t-3AkBWqeYvl8uoAo";
+    const SUPABASE_CONFIGURED = !SUPABASE_URL.includes("PLACEHOLDER");
+
+    const supabase = SUPABASE_CONFIGURED
+      ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null;
+
+    // --- Static schedule metadata -----------------------------------------
+    const DAYS = [
+      { date: "2026-09-14", label: "Monday", short: "Mon 14" },
+      { date: "2026-09-15", label: "Tuesday", short: "Tue 15" },
+      { date: "2026-09-16", label: "Wednesday", short: "Wed 16" },
+      { date: "2026-09-17", label: "Thursday", short: "Thu 17" },
+      { date: "2026-09-18", label: "Friday", short: "Fri 18" },
+    ];
+
+    const CATEGORIES = [
+      "meal", "break", "worship", "session", "freetime",
+      "breakout", "executive", "meeting", "afterhours", "depart",
+    ];
+
+    // Same data as snake-game-backend/supabase/calendar_seed.sql, kept here
+    // as a fallback so the page still renders a real schedule if Supabase
+    // isn't configured yet or the fetch fails.
+    const FALLBACK_EVENTS = [
+        { day: "2026-09-14", start: "10:00", end: "18:00", title: "Error Fetching Calendar", description: "Requires Internet access to fetch event data", category: "executive" },
+        { day: "2026-09-15", start: "10:00", end: "18:00", title: "Error Fetching Calendar", description: "Requires Internet access to fetch event data", category: "executive" },
+        { day: "2026-09-16", start: "10:00", end: "18:00", title: "Error Fetching Calendar", description: "Requires Internet access to fetch event data", category: "executive" },
+        { day: "2026-09-17", start: "10:00", end: "18:00", title: "Error Fetching Calendar", description: "Requires Internet access to fetch event data", category: "executive" },
+        { day: "2026-09-18", start: "10:00", end: "18:00", title: "Error Fetching Calendar", description: "Requires Internet access to fetch event data", category: "executive" }
+        ];
+
+    // --- App state ---------------------------------------------------------
+    let events = FALLBACK_EVENTS.slice();
+    let viewMode = localStorage.getItem("calendarView") || (window.innerWidth < 800 ? "day" : "week");
+    let activeDayIndex = 0;
+    let session = null;
+    let editMode = false;
+    let editingId = null; // event id being edited, or null when adding
+
+    const todayIso = null; // Date.now() is unavailable in some tooling contexts here; default to Monday.
+    if (todayIso) {
+      const idx = DAYS.findIndex((d) => d.date === todayIso);
+      if (idx >= 0) activeDayIndex = idx;
+    }
+
+    // --- Helpers -------------------------------------------------------------
+    function timeToMinutes(t) {
+      const [h, m] = t.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    function formatTime(t) {
+      const [h, m] = t.split(":").map(Number);
+      const period = h >= 12 ? "PM" : "AM";
+      const hour12 = h % 12 === 0 ? 12 : h % 12;
+      return m === 0 ? `${hour12} ${period}` : `${hour12}:${String(m).padStart(2, "0")} ${period}`;
+    }
+
+    function eventsForDay(dateIso) {
+      return events
+        .filter((e) => e.day === dateIso)
+        .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+    }
+
+    // --- Rendering: week grid ------------------------------------------------
+    const ROW_MINUTES = 15;
+
+    function computeGridBounds() {
+      let min = 24 * 60;
+      let max = 0;
+      events.forEach((e) => {
+        min = Math.min(min, timeToMinutes(e.start));
+        max = Math.max(max, timeToMinutes(e.end));
+      });
+      if (events.length === 0) { min = 8 * 60; max = 18 * 60; }
+      min = Math.floor(min / 60) * 60;
+      max = Math.ceil(max / 60) * 60;
+      return { min, max };
+    }
+
+    function renderWeekGrid() {
+      const grid = document.getElementById("weekGrid");
+      grid.innerHTML = "";
+
+      const { min, max } = computeGridBounds();
+      const totalRows = Math.max(1, (max - min) / ROW_MINUTES);
+      grid.style.gridTemplateRows = `28px repeat(${totalRows}, var(--row-height))`;
+
+      const corner = document.createElement("div");
+      corner.className = "grid-corner";
+      grid.appendChild(corner);
+
+      DAYS.forEach((d, i) => {
+        const header = document.createElement("div");
+        header.className = "day-header";
+        header.style.gridColumn = String(i + 2);
+        header.innerHTML = `${d.label}<strong>${d.short.split(" ")[1] ? "Sept " + d.short.split(" ")[1] : ""}</strong>`;
+        grid.appendChild(header);
+      });
+
+      for (let m = min; m <= max; m += 60) {
+        const rowLine = Math.round((m - min) / ROW_MINUTES) + 2;
+        const label = document.createElement("div");
+        label.className = "time-label";
+        label.style.gridRow = `${rowLine} / span 1`;
+        label.textContent = formatTime(`${String(Math.floor(m / 60)).padStart(2, "0")}:00`);
+        grid.appendChild(label);
+      }
+
+      events.forEach((e) => {
+        const dayIdx = DAYS.findIndex((d) => d.date === e.day);
+        if (dayIdx === -1) return;
+        const startRow = Math.round((timeToMinutes(e.start) - min) / ROW_MINUTES) + 2;
+        const endRow = Math.round((timeToMinutes(e.end) - min) / ROW_MINUTES) + 2;
+
+        const block = document.createElement("div");
+        block.className = `event-block cat-${e.category}${editMode ? " editable" : ""}`;
+        block.style.gridColumn = String(dayIdx + 2);
+        block.style.gridRow = `${startRow} / ${endRow}`;
+        block.innerHTML = `
+          <span class="title">${escapeHtml(e.title)}</span>
+          <span class="time">${formatTime(e.start)}–${formatTime(e.end)}</span>
+          ${e.description ? `<span class="desc">${escapeHtml(e.description)}</span>` : ""}
+        `;
+        if (editMode) block.addEventListener("click", () => openEditModal(e));
+        grid.appendChild(block);
+      });
+    }
+
+    // --- Rendering: day agenda ----------------------------------------------
+    function renderDayAgenda() {
+      const container = document.getElementById("dayView");
+      container.innerHTML = "";
+
+      const day = DAYS[activeDayIndex];
+      const dayEvents = eventsForDay(day.date);
+
+      if (dayEvents.length === 0) {
+        const note = document.createElement("div");
+        note.className = "empty-note";
+        note.textContent = "Nothing scheduled yet for this day.";
+        container.appendChild(note);
+        return;
+      }
+
+      dayEvents.forEach((e) => {
+        const card = document.createElement("div");
+        card.className = `agenda-card cat-${e.category}${editMode ? " editable" : ""}`;
+        card.innerHTML = `
+          <div class="time">${formatTime(e.start)} – ${formatTime(e.end)}</div>
+          <div class="title">${escapeHtml(e.title)}</div>
+          ${e.description ? `<div class="desc">${escapeHtml(e.description)}</div>` : ""}
+        `;
+        if (editMode) card.addEventListener("click", () => openEditModal(e));
+        container.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // --- View / day tab controls ---------------------------------------------
+    function renderDayTabs() {
+      const tabs = document.getElementById("dayTabs");
+      tabs.innerHTML = "";
+      tabs.style.display = viewMode === "day" ? "flex" : "none";
+      DAYS.forEach((d, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = d.short;
+        if (i === activeDayIndex) btn.classList.add("active");
+        btn.addEventListener("click", () => {
+          activeDayIndex = i;
+          renderAll();
+        });
+        tabs.appendChild(btn);
+      });
+    }
+
+    function applyViewMode() {
+      document.getElementById("weekView").style.display = viewMode === "week" ? "block" : "none";
+      document.getElementById("dayView").style.display = viewMode === "day" ? "flex" : "none";
+      document.getElementById("addEventRow").style.display = editMode && viewMode === "day" ? "block" : "none";
+      document.querySelectorAll("#viewToggle button").forEach((b) => {
+        b.classList.toggle("active", b.dataset.view === viewMode);
+      });
+    }
+
+    function renderAll() {
+      applyViewMode();
+      renderDayTabs();
+      if (viewMode === "week") renderWeekGrid();
+      else renderDayAgenda();
+    }
+
+    document.getElementById("viewToggle").addEventListener("click", (evt) => {
+      const btn = evt.target.closest("button[data-view]");
+      if (!btn) return;
+      viewMode = btn.dataset.view;
+      localStorage.setItem("calendarView", viewMode);
+      renderAll();
     });
 
-    document.getElementById("gcal").src = `${baseSrc}&${params.toString()}`;
+    // --- Data loading + realtime ---------------------------------------------
+    async function fetchEvents() {
+      if (!supabase) return;
+      const { data, error } = await supabase
+        .from("events")
+        .select("id, day, start_time, end_time, title, description, category")
+        .order("day")
+        .order("start_time");
+      if (error) {
+        console.warn("Falling back to bundled schedule — Supabase fetch failed:", error.message);
+        return;
+      }
+      if (!data || data.length === 0) return;
+      events = data.map((row) => ({
+        id: row.id,
+        day: row.day,
+        start: row.start_time.slice(0, 5),
+        end: row.end_time.slice(0, 5),
+        title: row.title,
+        description: row.description,
+        category: row.category,
+      }));
+      renderAll();
+    }
+
+    if (supabase) {
+      fetchEvents();
+      supabase
+        .channel("events-changes")
+        .on("postgres_changes", { event: "*", schema: "public", table: "events" }, fetchEvents)
+        .subscribe();
+    }
+
+    // --- Auth ------------------------------------------------------------------
+    const authPillBtn = document.getElementById("authPillBtn");
+    const authPanel = document.getElementById("authPanel");
+    const authSignedOut = document.getElementById("authSignedOut");
+    const authSignedIn = document.getElementById("authSignedIn");
+    const authEmailLabel = document.getElementById("authEmailLabel");
+    const authStatus = document.getElementById("authStatus");
+    const authError = document.getElementById("authError");
+
+    authPillBtn.addEventListener("click", () => authPanel.classList.toggle("open"));
+
+    document.getElementById("authSendLink").addEventListener("click", async () => {
+      authError.textContent = "";
+      authStatus.textContent = "";
+      if (!supabase) {
+        authError.textContent = "Supabase isn't configured on this page yet.";
+        return;
+      }
+      const email = document.getElementById("authEmail").value.trim();
+      if (!email) { authError.textContent = "Enter an email first."; return; }
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.href },
+      });
+      if (error) authError.textContent = error.message;
+      else authStatus.textContent = "Check your email for a sign-in link.";
+    });
+
+    document.getElementById("authSignOut").addEventListener("click", async () => {
+      if (supabase) await supabase.auth.signOut();
+    });
+
+    function applyAuthState() {
+      const signedIn = !!session;
+      authSignedOut.style.display = signedIn ? "none" : "block";
+      authSignedIn.style.display = signedIn ? "block" : "none";
+      authPillBtn.textContent = signedIn ? (session.user.email || "Signed in") : "Sign in to edit";
+      document.getElementById("editToggle").style.display = signedIn ? "inline-flex" : "none";
+      if (signedIn) authEmailLabel.textContent = session.user.email;
+      if (!signedIn) {
+        editMode = false;
+        applyEditToggleUI();
+      }
+    }
+
+    function applyEditToggleUI() {
+      document.querySelectorAll("#editToggle button").forEach((b) => {
+        b.classList.toggle("active", (b.dataset.edit === "on") === editMode);
+      });
+      renderAll();
+    }
+
+    document.getElementById("editToggle").addEventListener("click", (evt) => {
+      const btn = evt.target.closest("button[data-edit]");
+      if (!btn) return;
+      editMode = btn.dataset.edit === "on";
+      applyEditToggleUI();
+    });
+
+    if (supabase) {
+      supabase.auth.getSession().then(({ data }) => {
+        session = data.session;
+        applyAuthState();
+      });
+      supabase.auth.onAuthStateChange((_event, newSession) => {
+        session = newSession;
+        applyAuthState();
+      });
+    }
+
+    // --- Edit modal --------------------------------------------------------
+    const modalBackdrop = document.getElementById("eventModalBackdrop");
+    const fieldTitle = document.getElementById("fieldTitle");
+    const fieldDay = document.getElementById("fieldDay");
+    const fieldCategory = document.getElementById("fieldCategory");
+    const fieldStart = document.getElementById("fieldStart");
+    const fieldEnd = document.getElementById("fieldEnd");
+    const fieldDescription = document.getElementById("fieldDescription");
+    const modalError = document.getElementById("modalError");
+    const modalDelete = document.getElementById("modalDelete");
+
+    DAYS.forEach((d) => {
+      const opt = document.createElement("option");
+      opt.value = d.date;
+      opt.textContent = `${d.label} (${d.short})`;
+      fieldDay.appendChild(opt);
+    });
+    CATEGORIES.forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = c;
+      fieldCategory.appendChild(opt);
+    });
+
+    function openEditModal(existing) {
+      editingId = existing ? existing.id : null;
+      modalError.textContent = "";
+      document.getElementById("modalTitle").textContent = existing ? "Edit event" : "Add event";
+      fieldTitle.value = existing ? existing.title : "";
+      fieldDay.value = existing ? existing.day : DAYS[activeDayIndex].date;
+      fieldCategory.value = existing ? existing.category : "session";
+      fieldStart.value = existing ? existing.start : "09:00";
+      fieldEnd.value = existing ? existing.end : "10:00";
+      fieldDescription.value = existing && existing.description ? existing.description : "";
+      modalDelete.style.display = existing ? "inline-block" : "none";
+      modalBackdrop.classList.add("open");
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.remove("open");
+      editingId = null;
+    }
+
+    document.getElementById("modalCancel").addEventListener("click", closeModal);
+
+    document.getElementById("addEventBtn").addEventListener("click", () => openEditModal(null));
+
+    document.getElementById("modalSave").addEventListener("click", async () => {
+      if (!supabase) { modalError.textContent = "Supabase isn't configured on this page yet."; return; }
+      const payload = {
+        title: fieldTitle.value.trim(),
+        day: fieldDay.value,
+        start_time: fieldStart.value,
+        end_time: fieldEnd.value,
+        category: fieldCategory.value,
+        description: fieldDescription.value.trim() || null,
+      };
+      if (!payload.title || !payload.day || !payload.start_time || !payload.end_time) {
+        modalError.textContent = "Title, day, start, and end are required.";
+        return;
+      }
+      const query = editingId
+        ? supabase.from("events").update(payload).eq("id", editingId)
+        : supabase.from("events").insert(payload);
+      const { error } = await query;
+      if (error) { modalError.textContent = error.message; return; }
+      closeModal();
+      fetchEvents();
+    });
+
+    modalDelete.addEventListener("click", async () => {
+      if (!supabase || !editingId) return;
+      const { error } = await supabase.from("events").delete().eq("id", editingId);
+      if (error) { modalError.textContent = error.message; return; }
+      closeModal();
+      fetchEvents();
+    });
+
+    // --- Init -----------------------------------------------------------------
+    renderAll();
   </script>
 </body>
 </html>
