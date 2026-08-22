@@ -122,9 +122,42 @@
     main { padding: 0 0 4rem; }
 
     /* ---- Week grid view ---- */
+    .week-frame {
+      /* Purely visual: the rounded-corner card border, kept OUTSIDE the
+         scrolling element (.week-scroll) on purpose. Safari has a
+         long-standing bug where `position: sticky` silently fails on
+         any element whose ancestor chain — between the sticky element
+         and its scrolling container — includes an `overflow: hidden`
+         box. `.week-grid` used to carry the border/radius/overflow-
+         hidden combo directly, sitting between the sticky day-header/
+         time-label and the scroll container, and Chrome tolerated it
+         while Safari didn't. Moving the clipping to a wrapper that sits
+         *outside* the scroll container removes that ancestor from the
+         sticky elements' path entirely, so sticky works consistently
+         in both engines. */
+      margin: 0 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--panel);
+    }
+
     .week-scroll {
-      overflow-x: auto;
-      padding: 0 1rem;
+      /* Both axes need an explicit scrolling value (not the default
+         `visible`) on the SAME element the sticky day-header / time
+         column live inside. With only overflow-x set, the spec forces
+         the browser to compute overflow-y as `auto` too — but with no
+         height limit here, that auto-generated vertical scrollport
+         never actually scrolls (the whole page does instead), so
+         `position: sticky` has no real scrolling ancestor to stick
+         within and silently does nothing. Giving this element its own
+         bounded height makes it the true scroll container on both
+         axes, so the sticky day-header/time-label/grid-corner rules
+         below actually take effect. This element IS the sticky
+         elements' scrolling ancestor — see .week-frame above for why
+         the rounded-corner clipping lives outside it instead of here. */
+      overflow: auto;
+      max-height: calc(100vh - 14rem);
     }
 
     .week-grid {
@@ -136,11 +169,9 @@
          unreachable. We only use 1fr when there's actually room to fit
          every column without scrolling; otherwise every track gets a
          fixed pixel width and the grid an explicit max-content width,
-         which is unambiguous in every browser. */
+         which is unambiguous in every browser. No border/radius/
+         overflow-hidden here anymore — see .week-frame above. */
       display: grid;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
       background: var(--panel);
     }
 
@@ -486,8 +517,10 @@
   <div class="day-tabs" id="dayTabs"></div>
 
   <main>
-    <div class="week-scroll" id="weekView" style="display:none;">
-      <div class="week-grid" id="weekGrid"></div>
+    <div class="week-frame" id="weekView" style="display:none;">
+      <div class="week-scroll">
+        <div class="week-grid" id="weekGrid"></div>
+      </div>
     </div>
     <div class="day-agenda" id="dayView"></div>
   </main>
@@ -681,11 +714,18 @@
         grid.appendChild(header);
       });
 
+      const rowsPerHour = 60 / ROW_MINUTES;
       for (let m = min; m <= max; m += 60) {
         const rowLine = Math.round((m - min) / ROW_MINUTES) + 2;
+        // Span the label's cell across the whole hour (not just the single
+        // 15-minute row it's printed on) so its background fills the gap
+        // down to the next label instead of leaving the quarter-hour rows
+        // in between unstyled — those unstyled rows were what produced the
+        // jagged "teeth" look down the time column.
+        const endRowLine = Math.min(rowLine + rowsPerHour, totalRows + 2);
         const label = document.createElement("div");
         label.className = "time-label";
-        label.style.gridRow = `${rowLine} / span 1`;
+        label.style.gridRow = `${rowLine} / ${endRowLine}`;
         label.textContent = formatTime(`${String(Math.floor(m / 60)).padStart(2, "0")}:00`);
         grid.appendChild(label);
       }
