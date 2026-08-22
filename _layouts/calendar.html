@@ -7,8 +7,6 @@
   <style>
     :root {
       --row-height: 16px;
-      --time-col-width: 64px;
-      --day-col-min: 150px;
       --border: #d0d0d0;
       --ink: #1f2937;
       --muted: #6b7280;
@@ -130,9 +128,16 @@
     }
 
     .week-grid {
+      /* grid-template-columns and width are set from JS (see
+         renderWeekGrid) — 1fr tracks inside an auto-width scroll
+         container are a circular-sizing case that Safari resolves by
+         clamping the scrollable width to the viewport instead of
+         expanding to the tracks' true size, so the last column becomes
+         unreachable. We only use 1fr when there's actually room to fit
+         every column without scrolling; otherwise every track gets a
+         fixed pixel width and the grid an explicit max-content width,
+         which is unambiguous in every browser. */
       display: grid;
-      grid-template-columns: var(--time-col-width) repeat(5, minmax(var(--day-col-min), 1fr));
-      min-width: 760px;
       border: 1px solid var(--border);
       border-radius: 8px;
       overflow: hidden;
@@ -407,10 +412,6 @@
       color: var(--muted);
     }
 
-    @media (max-width: 700px) {
-      .week-grid { min-width: 640px; }
-    }
-
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
@@ -633,9 +634,36 @@
       return { min, max };
     }
 
+    const TIME_COL_PX = 64;
+    const DAY_COL_PX = 150;
+
+    function sizeWeekGrid(grid) {
+      // 1fr tracks only make sense once the grid's own width is known —
+      // but here the grid's width is itself supposed to come FROM the
+      // tracks (it's the intrinsic-content min inside an auto-width
+      // scroll wrapper). That's a circular case: Chromium/Firefox
+      // resolve it by expanding to the tracks' true minimum, but Safari
+      // clamps the scrollable width to the viewport instead, so the
+      // last column ends up unreachable by scroll. Sidestep it: when
+      // there's enough room to fit every column already, use flexible
+      // 1fr tracks (nice fluid desktop layout, no scrolling needed
+      // anyway); otherwise use fixed pixel tracks + an explicit
+      // max-content width, which every engine sizes identically.
+      const available = document.getElementById("weekView").clientWidth;
+      const minRequired = TIME_COL_PX + DAYS.length * DAY_COL_PX;
+      if (available >= minRequired) {
+        grid.style.width = "";
+        grid.style.gridTemplateColumns = `${TIME_COL_PX}px repeat(${DAYS.length}, minmax(${DAY_COL_PX}px, 1fr))`;
+      } else {
+        grid.style.width = "max-content";
+        grid.style.gridTemplateColumns = `${TIME_COL_PX}px repeat(${DAYS.length}, ${DAY_COL_PX}px)`;
+      }
+    }
+
     function renderWeekGrid() {
       const grid = document.getElementById("weekGrid");
       grid.innerHTML = "";
+      sizeWeekGrid(grid);
 
       const { min, max } = computeGridBounds();
       const totalRows = Math.max(1, (max - min) / ROW_MINUTES);
@@ -799,6 +827,13 @@
       viewMode = btn.dataset.view;
       localStorage.setItem("calendarView", viewMode);
       renderAll();
+    });
+
+    // Re-run the width check on resize (rotating a phone, or resizing a
+    // desktop window) so the grid doesn't get stuck using whichever
+    // column-sizing mode was correct at the last render.
+    window.addEventListener("resize", () => {
+      if (viewMode === "week" && phase === "ready") renderWeekGrid();
     });
 
     // --- Data loading + realtime ---------------------------------------------
