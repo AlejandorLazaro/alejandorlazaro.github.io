@@ -211,6 +211,22 @@
       background: var(--panel);
       border-right: 1px solid var(--border);
       border-top: 1px solid #eee;
+    }
+
+    .time-label-text {
+      /* Sticks to the top of the SCROLL CONTAINER, but its containing
+         block is `.time-label` — the multi-row cell for this hour —
+         so it can only stay pinned while some part of that cell is
+         still on screen. Once the cell scrolls past, this text scrolls
+         away with it and the next hour's label (in the next cell)
+         takes over the same stuck position. `top` is offset by the
+         rendered height of the day-header row (set as a CSS var from
+         JS, since that row's height is auto/content-based) so the
+         time text tucks in just below the sticky weekday header
+         instead of underneath it. */
+      display: block;
+      position: sticky;
+      top: var(--week-header-height, 0px);
       font-size: 0.65rem;
       color: var(--muted);
       padding: 2px 4px 0;
@@ -715,6 +731,14 @@
       });
 
       const rowsPerHour = 60 / ROW_MINUTES;
+
+      // The sticky time-label text tucks in just below the sticky
+      // day-header row. That row's height is `auto` (content-driven),
+      // so measure it once it's actually laid out rather than
+      // hardcoding a guess, and expose it to the time-label-text rule
+      // above via a CSS custom property.
+      grid.style.setProperty("--week-header-height", `${corner.offsetHeight}px`);
+
       for (let m = min; m <= max; m += 60) {
         const rowLine = Math.round((m - min) / ROW_MINUTES) + 2;
         // Span the label's cell across the whole hour (not just the single
@@ -726,7 +750,10 @@
         const label = document.createElement("div");
         label.className = "time-label";
         label.style.gridRow = `${rowLine} / ${endRowLine}`;
-        label.textContent = formatTime(`${String(Math.floor(m / 60)).padStart(2, "0")}:00`);
+        const labelText = document.createElement("span");
+        labelText.className = "time-label-text";
+        labelText.textContent = formatTime(`${String(Math.floor(m / 60)).padStart(2, "0")}:00`);
+        label.appendChild(labelText);
         grid.appendChild(label);
       }
 
