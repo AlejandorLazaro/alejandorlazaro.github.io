@@ -410,6 +410,59 @@
     @media (max-width: 700px) {
       .week-grid { min-width: 640px; }
     }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinner {
+        width: 34px;
+        height: 34px;
+        margin: 0 auto;
+        border-radius: 50%;
+        border: 3px solid var(--ink);
+        border-top-color: transparent;
+        animation: spin 0.8s linear infinite;
+    }
+
+    .state-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 55vh;
+      padding: 2rem 1rem;
+    }
+
+    .state-card {
+      text-align: center;
+      max-width: 320px;
+    }
+
+    .state-icon { font-size: 2rem; margin-bottom: 0.6rem; }
+
+    .state-message {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      margin-bottom: 1rem;
+    }
+
+    .error-card .state-message { color: #b91c1c; }
+
+    .retry-btn {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 0.5rem 1.25rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .retry-btn:not(:disabled):hover { border-color: var(--ink); }
+
+    .retry-btn:disabled {
+      color: var(--muted);
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body>
@@ -522,19 +575,17 @@
       "breakout", "executive", "meeting", "afterhours", "depart",
     ];
 
-    // Same data as snake-game-backend/supabase/calendar_seed.sql, kept here
-    // as a fallback so the page still renders a real schedule if Supabase
-    // isn't configured yet or the fetch fails.
-    const FALLBACK_EVENTS = [
-        { day: "2026-09-14", start: "10:00", end: "18:00", title: "Error Fetching Calendar", description: "Requires Internet access to fetch event data", category: "executive" },
-        { day: "2026-09-15", start: "10:00", end: "18:00", title: "Error Fetching Calendar", description: "Requires Internet access to fetch event data", category: "executive" },
-        { day: "2026-09-16", start: "10:00", end: "18:00", title: "Error Fetching Calendar", description: "Requires Internet access to fetch event data", category: "executive" },
-        { day: "2026-09-17", start: "10:00", end: "18:00", title: "Error Fetching Calendar", description: "Requires Internet access to fetch event data", category: "executive" },
-        { day: "2026-09-18", start: "10:00", end: "18:00", title: "Error Fetching Calendar", description: "Requires Internet access to fetch event data", category: "executive" }
-        ];
+    const RETRY_COOLDOWN_SECONDS = 5;
 
     // --- App state ---------------------------------------------------------
-    let events = FALLBACK_EVENTS.slice();
+    let events = [];
+    // "loading" until the first fetch settles, then "ready" or "error".
+    // There's no bundled fallback schedule — if Supabase can't be reached
+    // we show an explicit error + retry rather than quietly displaying
+    // data that might be stale or wrong.
+    let phase = SUPABASE_CONFIGURED ? "loading" : "error";
+    let hasLoadedOnce = false;
+    let retryCountdownTimer = null;
     let viewMode = localStorage.getItem("calendarView") || (window.innerWidth < 800 ? "day" : "week");
     let activeDayIndex = 0;
     let session = null;
@@ -588,7 +639,7 @@
 
       const { min, max } = computeGridBounds();
       const totalRows = Math.max(1, (max - min) / ROW_MINUTES);
-      grid.style.gridTemplateRows = `28px repeat(${totalRows}, var(--row-height))`;
+      grid.style.gridTemplateRows = `auto repeat(${totalRows}, var(--row-height))`;
 
       const corner = document.createElement("div");
       corner.className = "grid-corner";
@@ -692,9 +743,52 @@
       });
     }
 
+    function renderLoadingState() {
+      const cardHtml = `
+        <div class="state-card">
+          <div class="spinner" role-"status" aria-label="Loading"</div>
+        </div>`;
+      document.getElementById("weekGrid").innerHTML = `<div class="state-wrap" style="grid-column: 1 / -1;">${cardHtml}</div>`;
+      document.getElementById("dayView").innerHTML = `<div class="state-wrap">${cardHtml}</div>`;
+    }
+
+    function renderErrorState() {
+      clearInterval(retryCountdownTimer);
+      const cardHtml = `
+        <div class="state-card error-card">
+          <div class="state-icon" aria-hidden="true">⚠️</div>
+          <div class="state-message">Couldn't load the calendar. Check your connection and try again.</div>
+          <button type="button" class="retry-btn" disabled>Retry in ${RETRY_COOLDOWN_SECONDS}s</button>
+        </div>`;
+      document.getElementById("weekGrid").innerHTML = `<div class="state-wrap" style="grid-column: 1 / -1;">${cardHtml}</div>`;
+      document.getElementById("dayView").innerHTML = `<div class="state-wrap">${cardHtml}</div>`;
+
+      document.querySelectorAll(".retry-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          if (!btn.disabled) fetchEvents();
+        });
+      });
+
+      let secondsLeft = RETRY_COOLDOWN_SECONDS;
+      const tick = () => {
+        document.querySelectorAll(".retry-btn").forEach((btn) => {
+          btn.disabled = secondsLeft > 0;
+          btn.textContent = secondsLeft > 0 ? `Retry in ${secondsLeft}s` : "Retry";
+        });
+      };
+      tick();
+      retryCountdownTimer = setInterval(() => {
+        secondsLeft -= 1;
+        tick();
+        if (secondsLeft <= 0) clearInterval(retryCountdownTimer);
+      }, 1000);
+    }
+
     function renderAll() {
       applyViewMode();
       renderDayTabs();
+      if (phase === "loading") { renderLoadingState(); return; }
+      if (phase === "error") { renderErrorState(); return; }
       if (viewMode === "week") renderWeekGrid();
       else renderDayAgenda();
     }
@@ -709,18 +803,35 @@
 
     // --- Data loading + realtime ---------------------------------------------
     async function fetchEvents() {
-      if (!supabase) return;
+      if (!supabase) { phase = "error"; renderAll(); return; }
+
+      clearInterval(retryCountdownTimer);
+
+      // Only show the loading state on the very first load (or a retry
+      // after a failed one) — realtime-triggered refetches once we have
+      // good data on screen should swap it in quietly, not blank the page
+      // every time someone else saves an edit.
+      if (!hasLoadedOnce) {
+        phase = "loading";
+        renderAll();
+      }
+
       const { data, error } = await supabase
         .from("events")
         .select("id, day, start_time, end_time, title, description, category")
         .order("day")
         .order("start_time");
+
       if (error) {
-        console.warn("Falling back to bundled schedule — Supabase fetch failed:", error.message);
-        return;
+        console.warn("Supabase fetch failed:", error.message);
+        if (!hasLoadedOnce) {
+          phase = "error";
+          renderAll();
+        }
+        return; // leave whatever's already on screen alone on a silent refetch failure
       }
-      if (!data || data.length === 0) return;
-      events = data.map((row) => ({
+
+      events = (data || []).map((row) => ({
         id: row.id,
         day: row.day,
         start: row.start_time.slice(0, 5),
@@ -729,6 +840,8 @@
         description: row.description,
         category: row.category,
       }));
+      phase = "ready";
+      hasLoadedOnce = true;
       renderAll();
     }
 
@@ -889,7 +1002,10 @@
     });
 
     // --- Init -----------------------------------------------------------------
-    renderAll();
+    // If Supabase is configured, fetchEvents() above already kicked off the
+    // loading state + first render. Otherwise there's nothing to fetch, so
+    // go straight to the error state (with its retry button).
+    if (!supabase) renderAll();
   </script>
 </body>
 </html>
