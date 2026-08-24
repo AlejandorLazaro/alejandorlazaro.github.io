@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>LastPass data-lpignore Override Test</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --border:#dde1e6; --text:#1b1f24; --muted:#5b6470;
+    --code-bg:#eef0f3; --ok:#1a7f37; --ok-bg:#e6f4ea;
+    --bad:#c0242a; --bad-bg:#fdecec;
+    --warn:#9a6700; --warn-bg:#fff6e0;
+    --accent:#2a5adf;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#14161a; --panel:#1c1f24; --border:#30343b; --text:#e7e9ec; --muted:#9aa3af;
+      --code-bg:#25292f; --ok:#4fbf68; --ok-bg:#153320;
+      --bad:#ff6b6b; --bad-bg:#3a1616;
+      --warn:#f0b429; --warn-bg:#3a2f10;
+      --accent:#6f97ff;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font:15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding:24px 16px 80px;
+  }
+  .wrap{max-width:920px; margin:0 auto;}
+  h1{font-size:1.4rem; margin:0 0 4px;}
+  .sub{color:var(--muted); margin:0 0 20px; font-size:.92rem;}
+  .panel{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    padding:16px 18px; margin-bottom:20px;
+  }
+  .panel h2{margin:0 0 8px; font-size:1.02rem;}
+  .panel ol{margin:8px 0 0; padding-left:20px; color:var(--muted); font-size:.9rem;}
+  .panel ol li{margin-bottom:4px;}
+  .section-title{font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:28px 0 10px;}
+  .field-row{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    padding:14px 16px; margin-bottom:12px; display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  }
+  .field-main{flex:1 1 320px; min-width:260px;}
+  .field-label{font-weight:600; font-size:.9rem; margin-bottom:2px;}
+  .field-desc{color:var(--muted); font-size:.8rem; margin-bottom:8px;}
+  .field-row input{
+    width:100%; padding:8px 10px; border-radius:6px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:.92rem;
+  }
+  .attrs{
+    display:block; margin-top:6px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size:.72rem; color:var(--muted); background:var(--code-bg); padding:6px 8px;
+    border-radius:6px; word-break:break-all;
+  }
+  .badge{
+    flex:0 0 auto; padding:6px 12px; border-radius:999px; font-size:.78rem; font-weight:600;
+    background:var(--ok-bg); color:var(--ok); white-space:nowrap; align-self:flex-start;
+  }
+  .badge.bad{background:var(--bad-bg); color:var(--bad);}
+  .badge.warn{background:var(--warn-bg); color:var(--warn);}
+  .controls{display:flex; gap:10px; flex-wrap:wrap; margin:20px 0;}
+  button{
+    font-size:.85rem; padding:8px 14px; border-radius:7px; border:1px solid var(--border);
+    background:var(--panel); color:var(--text); cursor:pointer;
+  }
+  button.primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+  button:hover{filter:brightness(1.05);}
+  #log{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    padding:10px 12px; height:220px; overflow-y:auto; font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size:.76rem; color:var(--muted);
+  }
+  #log .entry{padding:3px 0; border-bottom:1px dashed var(--border);}
+  #log .entry:last-child{border-bottom:none;}
+  #log .entry.hit{color:var(--bad); font-weight:600;}
+  #log .entry.heur{color:var(--warn);}
+  .summary{font-size:.85rem; margin-top:10px; color:var(--muted);}
+  .summary strong{color:var(--text);}
+  footer{margin-top:30px; color:var(--muted); font-size:.78rem; text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>LastPass <code>data-lpignore</code> Override Test</h1>
+  <p class="sub">Minimal reproduction page for a LastPass support ticket: fields below are configured with
+  <code>data-lpignore="true"</code> and other documented opt-out attributes, and should never be touched by LastPass.
+  Any badge that turns <strong style="color:var(--bad)">red</strong> means LastPass injected its UI into (or filled) that field anyway.</p>
+
+  <div class="panel">
+    <h2>How to record this for support</h2>
+    <ol>
+      <li>Start from a fresh browser session (LastPass extension enabled, default settings) and load this page.</li>
+      <li>Show the field and its attribute string underneath it (visible proof of config).</li>
+      <li>Wait a few seconds without touching the field &mdash; watch for the LastPass icon to appear and/or the badge to flip.</li>
+      <li>Show the Detection Log panel below picking up the event with a timestamp.</li>
+      <li>Click <em>Reset Fields</em> between takes to re-arm the test without reloading.</li>
+    </ol>
+  </div>
+
+  <div class="section-title">Login-style fields</div>
+
+  <div class="field-row" data-testfield="a1">
+    <div class="field-main">
+      <div class="field-label">A1 &middot; Baseline (no opt-out)</div>
+      <div class="field-desc">Expected to be filled by LastPass &mdash; control for comparison.</div>
+      <input type="text" name="username" autocomplete="username" placeholder="username">
+      <code class="attrs">name="username" autocomplete="username"</code>
+    </div>
+    <div class="badge" data-badge>Watching</div>
+  </div>
+
+  <div class="field-row" data-testfield="a2">
+    <div class="field-main">
+      <div class="field-label">A2 &middot; data-lpignore only</div>
+      <div class="field-desc">Should be ignored by LastPass per its documented attribute.</div>
+      <input type="text" name="username2" data-lpignore="true" placeholder="username">
+      <code class="attrs">name="username2" data-lpignore="true"</code>
+    </div>
+    <div class="badge" data-badge>Watching</div>
+  </div>
+
+  <div class="field-row" data-testfield="a3">
+    <div class="field-main">
+      <div class="field-label">A3 &middot; data-lpignore + autocomplete=off</div>
+      <div class="field-desc">Combined with the "Respect AutoComplete=off" preference.</div>
+      <input type="text" name="username3" data-lpignore="true" autocomplete="off" placeholder="username">
+      <code class="attrs">name="username3" data-lpignore="true" autocomplete="off"</code>
+    </div>
+    <div class="badge" data-badge>Watching</div>
+  </div>
+
+  <div class="field-row" data-testfield="a4">
+    <div class="field-main">
+      <div class="field-label">A4 &middot; data-lpignore + autocomplete=do-not-autofill</div>
+      <div class="field-desc">Community-suggested workaround from the LastPass forum thread.</div>
+      <input type="text" name="username4" data-lpignore="true" autocomplete="do-not-autofill" placeholder="username">
+      <code class="attrs">name="username4" data-lpignore="true" autocomplete="do-not-autofill"</code>
+    </div>
+    <div class="badge" data-badge>Watching</div>
+  </div>
+
+  <div class="field-row" data-testfield="a5">
+    <div class="field-main">
+      <div class="field-label">A5 &middot; password field, data-lpignore + autocomplete=new-password</div>
+      <div class="field-desc">Common opt-out combo for password inputs.</div>
+      <input type="password" name="password5" data-lpignore="true" autocomplete="new-password" placeholder="password">
+      <code class="attrs">type="password" name="password5" data-lpignore="true" autocomplete="new-password"</code>
+    </div>
+    <div class="badge" data-badge>Watching</div>
+  </div>
+
+  <div class="section-title">Form-filler fields (identity autofill, not login)</div>
+
+  <div class="field-row" data-testfield="b1">
+    <div class="field-main">
+      <div class="field-label">B1 &middot; Baseline (no opt-out)</div>
+      <div class="field-desc">Mirrors the "First Name" field from the original report &mdash; control.</div>
+      <input type="text" name="firstName" placeholder="First Name">
+      <code class="attrs">name="firstName"</code>
+    </div>
+    <div class="badge" data-badge>Watching</div>
+  </div>
+
+  <div class="field-row" data-testfield="b2">
+    <div class="field-main">
+      <div class="field-label">B2 &middot; data-lpignore only</div>
+      <input type="text" name="firstName2" data-lpignore="true" placeholder="First Name">
+      <code class="attrs">name="firstName2" data-lpignore="true"</code>
+    </div>
+    <div class="badge" data-badge>Watching</div>
+  </div>
+
+  <div class="field-row" data-testfield="b3">
+    <div class="field-main">
+      <div class="field-label">B3 &middot; data-lpignore + autocomplete=off</div>
+      <input type="text" name="firstName3" data-lpignore="true" autocomplete="off" placeholder="First Name">
+      <code class="attrs">name="firstName3" data-lpignore="true" autocomplete="off"</code>
+    </div>
+    <div class="badge" data-badge>Watching</div>
+  </div>
+
+  <div class="field-row" data-testfield="b4">
+    <div class="field-main">
+      <div class="field-label">B4 &middot; data-lpignore + autocomplete=off + data-form-type=other</div>
+      <div class="field-desc">Matches the exact attribute set seen in the original bug report's DOM inspection.</div>
+      <input type="text" name="lastName4" data-lpignore="true" autocomplete="off" data-form-type="other" placeholder="Last Name">
+      <code class="attrs">name="lastName4" data-lpignore="true" autocomplete="off" data-form-type="other"</code>
+    </div>
+    <div class="badge" data-badge>Watching</div>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="resetBtn">Reset Fields</button>
+    <button id="clearLogBtn">Clear Log</button>
+    <button id="downloadBtn">Download Log (.txt)</button>
+  </div>
+
+  <div class="section-title">Detection log</div>
+  <div id="log"></div>
+  <div class="summary" id="summary"></div>
+
+  <footer>Client-side only &middot; nothing here is submitted anywhere &middot; built to accompany a LastPass support ticket.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var rows = Array.prototype.slice.call(document.querySelectorAll(".field-row[data-testfield]"));
+  var state = {};
+  rows.forEach(function(row){
+    var id = row.getAttribute("data-testfield");
+    state[id] = { row: row, badge: row.querySelector("[data-badge]"), input: row.querySelector("input"),
+                  recentKeystroke: false, overridden: false, heuristic: false };
+    var s = state[id];
+
+    s.input.addEventListener("keydown", function(){
+      s.recentKeystroke = true;
+      clearTimeout(s._kt);
+      s._kt = setTimeout(function(){ s.recentKeystroke = false; }, 400);
+    });
+
+    s.input.addEventListener("input", function(){
+      if (s.overridden) return;
+      if (!s.recentKeystroke && document.activeElement !== s.input) {
+        setHeuristic(id);
+      } else if (!s.recentKeystroke && s.input.value.length > 1) {
+        // value jumped by more than one char without a keystroke -> likely programmatic fill
+        setHeuristic(id);
+      }
+    });
+  });
+
+  function ts(){
+    var d = new Date();
+    return d.toLocaleTimeString(undefined, { hour12:false }) + "." + String(d.getMilliseconds()).padStart(3,"0");
+  }
+
+  function log(msg, cls){
+    var el = document.getElementById("log");
+    var line = document.createElement("div");
+    line.className = "entry" + (cls ? " " + cls : "");
+    line.textContent = "[" + ts() + "] " + msg;
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
+    updateSummary();
+  }
+
+  function setOverridden(id, detail){
+    var s = state[id];
+    if (s.overridden) return;
+    s.overridden = true;
+    s.badge.textContent = "OVERRIDDEN";
+    s.badge.className = "badge bad";
+    log("Field \"" + id + "\": LastPass UI injected despite opt-out attributes. " + detail, "hit");
+  }
+
+  function setHeuristic(id){
+    var s = state[id];
+    if (s.overridden || s.heuristic) return;
+    s.heuristic = true;
+    s.badge.textContent = "Possible autofill (heuristic)";
+    s.badge.className = "badge warn";
+    log("Field \"" + id + "\": value changed without a keystroke while unfocused (heuristic, not confirmed).", "heur");
+  }
+
+  function updateSummary(){
+    var total = rows.length;
+    var hit = rows.filter(function(r){ return state[r.getAttribute("data-testfield")].overridden; }).length;
+    document.getElementById("summary").innerHTML =
+      "<strong>" + hit + " / " + total + "</strong> opt-out fields were overridden by LastPass this session.";
+  }
+
+  // LastPass injects a wrapper such as <div data-lastpass-icon-root> next to / around fields it decides to handle,
+  // even when data-lpignore="true" is set. Watch the whole document for that marker and attribute it to the
+  // nearest test field.
+  function isLastPassNode(node){
+    if (!(node instanceof Element)) return false;
+    if (node.hasAttribute && node.hasAttribute("data-lastpass-icon-root")) return true;
+    if (node.querySelector && node.querySelector("[data-lastpass-icon-root]")) return true;
+    var idcls = (node.id || "") + " " + (node.className && node.className.toString ? node.className.toString() : "");
+    return /lastpass/i.test(idcls);
+  }
+
+  function attributeToNearestField(node){
+    // Prefer a field-row ancestor if LastPass injected inside it.
+    var container = node.closest ? node.closest(".field-row[data-testfield]") : null;
+    if (container) return container.getAttribute("data-testfield");
+
+    // Otherwise fall back to whichever known input is the nearest previous sibling / DOM neighbor.
+    var best = null, bestDist = Infinity;
+    rows.forEach(function(row){
+      var id = row.getAttribute("data-testfield");
+      var input = state[id].input;
+      if (!node.compareDocumentPosition) return;
+      var rect1 = input.getBoundingClientRect();
+      var rect2 = node.getBoundingClientRect ? node.getBoundingClientRect() : rect1;
+      var dist = Math.abs(rect1.top - rect2.top) + Math.abs(rect1.left - rect2.left);
+      if (dist < bestDist) { bestDist = dist; best = id; }
+    });
+    return best;
+  }
+
+  var observer = new MutationObserver(function(mutations){
+    mutations.forEach(function(m){
+      m.addedNodes.forEach(function(node){
+        if (!isLastPassNode(node)) return;
+        var id = attributeToNearestField(node);
+        if (id) {
+          setOverridden(id, "(matched by DOM proximity)");
+        } else {
+          log("LastPass UI detected in the DOM but could not be matched to a specific test field.", "hit");
+        }
+      });
+    });
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
+  document.getElementById("resetBtn").addEventListener("click", function(){
+    rows.forEach(function(row){
+      var id = row.getAttribute("data-testfield");
+      var s = state[id];
+      s.input.value = "";
+      s.overridden = false;
+      s.heuristic = false;
+      s.badge.textContent = "Watching";
+      s.badge.className = "badge";
+    });
+    log("--- fields reset for a new take ---");
+  });
+
+  document.getElementById("clearLogBtn").addEventListener("click", function(){
+    document.getElementById("log").innerHTML = "";
+    updateSummary();
+  });
+
+  document.getElementById("downloadBtn").addEventListener("click", function(){
+    var lines = Array.prototype.map.call(document.querySelectorAll("#log .entry"), function(e){ return e.textContent; });
+    var blob = new Blob([lines.join("\n") + "\n"], { type: "text/plain" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "lastpass-lpignore-log.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  log("Page loaded. Watching " + rows.length + " opt-out fields for LastPass overrides.");
+  updateSummary();
+})();
+</script>
+</body>
+</html>
