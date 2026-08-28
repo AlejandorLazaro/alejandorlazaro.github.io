@@ -19,7 +19,7 @@ _site
 ENV
 
 # React
-react-src/dist
+*-src/dist
 node_modules
 
 

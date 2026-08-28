@@ -1,0 +1,23 @@
+{
+  "width": 640,
+  "height": 375,
+  "title": "Level 01 — Two to the Door",
+  "timeLimitSec": 60,
+  "maxSpawnCount": 3,
+  "spawns": [
+    { "x": 50, "y": 240 },
+    { "x": 70, "y": 240 },
+    { "x": 90, "y": 240 }
+  ],
+  "platforms": [
+    { "id": "upper-ground", "x": 0, "y": 260, "w": 220, "h": 115, "type": "normal" },
+    { "id": "mid-plat", "x": 218, "y": 298, "w": 84, "h": 12, "type": "normal" },
+    { "id": "lower-ground", "x": 302, "y": 340, "w": 338, "h": 35, "type": "normal" },
+    { "id": "deco-plat", "x": 352, "y": 290, "w": 128, "h": 12, "type": "normal" }
+  ],
+  "hazards": [
+    { "id": "spikes", "x": 236, "y": 316, "w": 60, "h": 40 }
+  ],
+  "button": { "id": "btn", "x": 432, "y": 328, "w": 24, "h": 12, "activated": false },
+  "exit": { "x": 576, "y": 292, "w": 44, "h": 50, "required": 2 }
+}
