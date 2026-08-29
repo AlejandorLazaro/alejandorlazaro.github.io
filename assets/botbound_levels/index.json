@@ -1,9 +1,5 @@
 [
   { "id": "level-01", "title": "Change the Count", "unlocked": true },
   { "id": "level-02", "title": "Hold the Button", "unlocked": true },
-  { "id": "level-03", "title": "Shared Counter", "unlocked": false },
-  { "id": "level-04", "title": "Sacrifice One", "unlocked": false },
-  { "id": "level-05", "title": "Ghost or Solid", "unlocked": false },
-  { "id": "level-06", "title": "Add Bounce", "unlocked": false },
-  { "id": "level-07", "title": "Coordinate the Exit", "unlocked": false }
+  { "id": "level-03", "title": "Shared Counter", "unlocked": false }
 ]

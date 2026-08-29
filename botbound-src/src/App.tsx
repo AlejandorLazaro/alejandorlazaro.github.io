@@ -297,35 +297,33 @@ function GameCanvas({
         );
       })}
 
-      <g
-        onClick={() => onSelectObject(buttonInspector(simState.buttonActivated))}
-        style={{ cursor: "pointer" }}
-      >
-        <rect
-          x={level.button.x}
-          y={level.button.y}
-          width={level.button.w}
-          height={level.button.h}
-          fill={simState.buttonActivated ? "#0d3320" : "#2d200a"}
-          rx={3}
-        />
-        <circle
-          cx={level.button.x + level.button.w / 2}
-          cy={level.button.y + 4}
-          r={5}
-          fill={simState.buttonActivated ? "#3fb950" : "#d29922"}
-        />
-        <text
-          x={level.button.x + level.button.w / 2}
-          y={level.button.y - 5}
-          textAnchor="middle"
-          fill={simState.buttonActivated ? "#3fb950" : "#d29922"}
-          fontSize={7}
-          fontFamily="JetBrains Mono"
-        >
-          BTN
-        </text>
-      </g>
+      {level.buttons.map((btn) => {
+        const isActivated = simState.activeButtonIds.includes(btn.id);
+        return (
+          <g
+            key={btn.id}
+            onClick={() => onSelectObject(buttonInspector(isActivated))}
+            style={{ cursor: "pointer" }}
+          >
+            <rect
+              x={btn.x}
+              y={btn.y}
+              width={btn.w}
+              height={btn.h}
+              fill={isActivated ? "#0d3320" : "#2d200a"}
+              stroke={isActivated ? "#10b981" : "#d97706"}
+              strokeWidth="1.5"
+              rx={3}
+            />
+            <circle
+              cx={btn.x + btn.w / 2}
+              cy={btn.y + btn.h / 2}
+              r={Math.min(btn.w, btn.h) / 4}
+              fill={isActivated ? "#10b981" : "#d97706"}
+            />
+          </g>
+        );
+      })}
 
       <g
         onClick={() => onSelectObject(exitInspector(level.exit.required, simState.botsExited))}
@@ -443,7 +441,7 @@ function StatsPanel({
 
   return (
     <div className="flex flex-col gap-2 p-3">
-      <div className="text-[10px] font-mono text-[#484f58] uppercase tracking-widest mb-1">Objective</div>
+      <div className="text-base font-mono text-[#484f58] uppercase tracking-widest mb-1">Objective</div>
 
       <StatRow label="Required at Exit" value={`${simState.botsExited} / ${level.exit.required}`} color="#3fb950" />
       <StatRow label="Bots Alive" value={String(simState.botsAlive)} color="#79c0ff" />
@@ -452,8 +450,8 @@ function StatsPanel({
 
       <div className="mt-1">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-[10px] font-mono text-[#484f58]">Time Remaining</span>
-          <span className="text-[11px] font-mono" style={{ color: timeColor }}>
+          <span className="text-base font-mono text-[#484f58]">Time Remaining</span>
+          <span className="text-base font-mono" style={{ color: timeColor }}>
             {timeLeft.toFixed(1)}s
           </span>
         </div>
@@ -466,8 +464,8 @@ function StatsPanel({
       </div>
 
       <div className="flex justify-between items-center mt-1">
-        <span className="text-[10px] font-mono text-[#484f58]">Tick</span>
-        <span className="text-[11px] font-mono text-[#8b949e]">#{simState.tick}</span>
+        <span className="text-base font-mono text-[#484f58]">Tick</span>
+        <span className="text-base font-mono text-[#8b949e]">#{simState.tick}</span>
       </div>
     </div>
   );
@@ -476,8 +474,8 @@ function StatsPanel({
 function StatRow({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div className="flex justify-between items-center">
-      <span className="text-[10px] font-mono text-[#8b949e]">{label}</span>
-      <span className="text-[11px] font-mono font-medium" style={{ color }}>{value}</span>
+      <span className="text-base font-mono text-[#8b949e]">{label}</span>
+      <span className="text-base font-mono font-medium" style={{ color }}>{value}</span>
     </div>
   );
 }
@@ -488,21 +486,21 @@ function EventLog({ events }: { events: SimEvent[] }) {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="text-[10px] font-mono text-[#484f58] uppercase tracking-widest px-3 pt-3 pb-1 shrink-0">
+      <div className="text-base font-mono text-[#484f58] uppercase tracking-widest px-3 pt-3 pb-1 shrink-0">
         Event Log
       </div>
       <div className="flex-1 overflow-y-auto px-3 pb-2 space-y-0.5">
         {events.map((ev) => (
           <div key={ev.id} className="flex items-start gap-2 py-0.5">
             <span
-              className="text-[11px] font-mono w-3 shrink-0 mt-0.5"
+              className="text-base font-mono w-3 shrink-0 mt-0.5"
               style={{ color: EVENT_COLORS[ev.type] }}
             >
               {EVENT_ICONS[ev.type]}
             </span>
             <div className="flex-1 min-w-0">
-              <span className="text-[10px] font-mono text-[#8b949e] mr-1.5">t={ev.tick}</span>
-              <span className="text-[10px] font-mono text-[#c9d1d9] break-all">{ev.message}</span>
+              <span className="text-base font-mono text-[#8b949e] mr-1.5">t={ev.tick}</span>
+              <span className="text-base font-mono text-[#c9d1d9] break-all">{ev.message}</span>
             </div>
           </div>
         ))}
@@ -523,7 +521,7 @@ function Inspector({
   return (
     <div className="absolute inset-0 bg-[#161b22] z-10 flex flex-col">
       <div className="flex items-center justify-between px-3 pt-2.5 pb-1.5 border-b border-[#30363d] shrink-0">
-        <span className="text-[11px] font-mono text-[#e6edf3] font-medium">{target.label}</span>
+        <span className="text-base font-mono text-[#e6edf3] font-medium">{target.label}</span>
         <button
           onClick={onClose}
           className="text-[#8b949e] hover:text-[#e6edf3] text-xs font-mono transition-colors"
@@ -534,18 +532,18 @@ function Inspector({
       <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
         {target.props.map((p) => (
           <div key={p.name} className="flex items-center justify-between gap-2">
-            <span className="text-[10px] font-mono text-[#8b949e]">{p.name}</span>
+            <span className="text-base font-mono text-[#8b949e]">{p.name}</span>
             <div className="flex items-center gap-1">
               {p.locked ? (
-                <span className="text-[10px] font-mono text-[#484f58] flex items-center gap-1">
-                  <span className="text-[9px]">🔒</span>
+                <span className="text-base font-mono text-[#484f58] flex items-center gap-1">
+                  <span className="text-sm">🔒</span>
                   <span>locked</span>
                 </span>
               ) : (
                 <>
-                  <span className="text-[10px] font-mono text-[#e6edf3]">{p.value}</span>
+                  <span className="text-base font-mono text-[#e6edf3]">{p.value}</span>
                   {p.readOnly && (
-                    <span className="text-[9px] font-mono text-[#484f58] ml-1">r/o</span>
+                    <span className="text-sm font-mono text-[#484f58] ml-1">r/o</span>
                   )}
                 </>
               )}
@@ -564,6 +562,7 @@ function CodeEditor({
   editable,
   hasError,
   onChange,
+  onRequestEdit,
 }: {
   tab: Tab;
   code: string;
@@ -571,12 +570,13 @@ function CodeEditor({
   editable: boolean;
   hasError: boolean;
   onChange: (v: string) => void;
+  onRequestEdit: () => void;
 }) {
   const lines = code.split("\n");
 
   if (tab === "console") {
     return (
-      <div className="flex-1 overflow-auto p-4 font-mono text-[12px] text-[#8b949e] bg-[#0d1117]">
+      <div className="flex-1 overflow-auto p-4 font-mono text-base text-[#8b949e] bg-[#0d1117]">
         <div className="text-[#58a6ff] mb-2">// Console output</div>
         {code ? code.split("\n").map((l, i) => (
           <div key={i} className={l.startsWith("✗") ? "text-[#f85149]" : l.startsWith("✓") ? "text-[#3fb950]" : "text-[#8b949e]"}>{l}</div>
@@ -586,7 +586,7 @@ function CodeEditor({
   }
 
   return (
-    <div className={`flex flex-1 overflow-hidden relative text-[12px] font-mono ${hasError ? "ring-1 ring-[#f85149] ring-inset" : ""}`}>
+    <div className={`flex flex-1 overflow-hidden relative text-base font-mono ${hasError ? "ring-1 ring-[#f85149] ring-inset" : ""}`}>
       <div className="select-none text-right text-[#484f58] bg-[#0d1117] px-3 pt-4 leading-6 shrink-0 min-w-[44px]">
         {lines.map((_, i) => (
           <div key={i}>{i + 1}</div>
@@ -594,17 +594,27 @@ function CodeEditor({
       </div>
 
       <div className="relative flex-1 overflow-auto">
-        <pre className="absolute inset-0 p-4 leading-6 pointer-events-none whitespace-pre overflow-visible text-[12px] font-mono">
+        <pre className="absolute inset-0 p-4 leading-6 pointer-events-none whitespace-pre overflow-visible text-base font-mono">
           <HighlightedCode code={code} />
         </pre>
 
         {(locked || !editable) && (
-          <div className="absolute inset-0" />
+          <div
+            className={`absolute inset-0 ${!locked ? "cursor-pointer group" : ""}`}
+            onClick={!locked ? onRequestEdit : undefined}
+            title={!locked ? "Click to pause and edit" : undefined}
+          >
+            {!locked && (
+              <div className="absolute top-2 right-3 flex items-center gap-1.5 bg-[#21262d] px-2 py-1 rounded text-sm font-mono text-[#8b949e] opacity-0 group-hover:opacity-100 transition-opacity">
+                <span>❚❚</span> Click to pause &amp; edit
+              </div>
+            )}
+          </div>
         )}
 
         {!locked && editable && (
           <textarea
-            className="code-textarea absolute inset-0 w-full h-full p-4 leading-6 text-[12px] font-mono"
+            className="code-textarea absolute inset-0 w-full h-full p-4 leading-6 text-base font-mono"
             value={code}
             onChange={(e) => onChange(e.target.value)}
             spellCheck={false}
@@ -613,7 +623,7 @@ function CodeEditor({
         )}
 
         {locked && (
-          <div className="absolute top-2 right-3 flex items-center gap-1.5 bg-[#21262d] px-2 py-1 rounded text-[9px] font-mono text-[#484f58]">
+          <div className="absolute top-2 right-3 flex items-center gap-1.5 bg-[#21262d] px-2 py-1 rounded text-sm font-mono text-[#484f58]">
             <span>🔒</span> Read-only
           </div>
         )}
@@ -641,18 +651,18 @@ function ApiReference({ simState, level }: { simState: SimState; level: LevelDef
   return (
     <div className="border-t border-[#30363d] bg-[#0d1117]">
       <div className="px-3 py-2 flex items-center justify-between">
-        <span className="text-[10px] font-mono text-[#484f58] uppercase tracking-widest">API Reference</span>
-        <span className="text-[9px] font-mono text-[#484f58]">live values</span>
+        <span className="text-base font-mono text-[#484f58] uppercase tracking-widest">API Reference</span>
+        <span className="text-sm font-mono text-[#484f58]">live values</span>
       </div>
       <div className="overflow-y-auto max-h-44 pb-2">
         {props.map((p) => (
           <div key={p.name} className="flex items-center gap-2 px-3 py-0.5 hover:bg-[#161b22] group">
-            <span className="text-[11px] font-mono text-[#d2a8ff] min-w-0 flex-1 truncate">{p.name}</span>
-            <span className="text-[9px] font-mono text-[#484f58] shrink-0">{p.type}</span>
+            <span className="text-base font-mono text-[#d2a8ff] min-w-0 flex-1 truncate">{p.name}</span>
+            <span className="text-sm font-mono text-[#484f58] shrink-0">{p.type}</span>
             {p.locked ? (
-              <span className="text-[9px] font-mono text-[#484f58] shrink-0">🔒</span>
+              <span className="text-sm font-mono text-[#484f58] shrink-0">🔒</span>
             ) : (
-              <span className={`text-[10px] font-mono shrink-0 ${p.editable ? "text-[#a5d6ff]" : "text-[#8b949e]"}`}>{p.value}</span>
+              <span className={`text-base font-mono shrink-0 ${p.editable ? "text-[#a5d6ff]" : "text-[#8b949e]"}`}>{p.value}</span>
             )}
           </div>
         ))}
@@ -667,12 +677,14 @@ function SuccessScreen({
   level,
   onReplay,
   onEditProgram,
+  onNextLevel,
 }: {
   simState: SimState;
   timeLeft: number;
   level: LevelDef;
   onReplay: () => void;
   onEditProgram: () => void;
+  onNextLevel: () => void;
 }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-[rgba(9,14,24,0.88)] z-30">
@@ -705,7 +717,10 @@ function SuccessScreen({
             Edit Program
           </button>
         </div>
-        <button className="w-full mt-2 py-2 text-xs font-mono text-[#58a6ff] hover:text-[#79c0ff] transition-colors">
+        <button
+          onClick={onNextLevel}
+          className="w-full mt-2 py-2 text-xs font-mono text-[#58a6ff] hover:text-[#79c0ff] transition-colors"
+        >
           Next Level →
         </button>
       </div>
@@ -912,11 +927,22 @@ export default function App() {
     return () => { cancelled = true; };
   }, [levelId, retryToken]);
 
+  // Wrap the returns in a consistent shell
   if (loadError) {
-    return <LoadErrorScreen message={loadError} onRetry={() => setRetryToken((n) => n + 1)} />;
+    return (
+      <div className="h-full flex flex-col bg-[#0d1117]">
+        <div className="shrink-0 h-12 bg-[#161b22] border-b border-[#30363d] flex items-center px-3" />
+        <LoadErrorScreen message={loadError} onRetry={() => setRetryToken((n) => n + 1)} />
+      </div>
+    );
   }
   if (!level) {
-    return <LoadingScreen />;
+    return (
+      <div className="h-full flex flex-col bg-[#0d1117]">
+        <div className="shrink-0 h-12 bg-[#161b22] border-b border-[#30363d] flex items-center px-3" />
+        <LoadingScreen />
+      </div>
+    );
   }
 
   // Keying by levelId forces a clean remount of all game state
@@ -929,6 +955,37 @@ export default function App() {
       manifest={manifest}
       onSelectLevel={setLevelId}
     />
+  );
+}
+
+function ToolbarBtn({
+  label,
+  title,
+  disabled,
+  active,
+  onClick,
+}: {
+  label: string;
+  title: string;
+  disabled: boolean;
+  active?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`px-2.5 py-1.5 text-base font-mono rounded-lg transition-colors ${
+        disabled
+          ? "text-[#484f58] cursor-not-allowed"
+          : active
+          ? "text-[#f85149] bg-[#2d0a0a] hover:bg-[#3d1010]"
+          : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d]"
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -1057,6 +1114,13 @@ function GameShell({
     if (gameStatus === "error") setGameStatus("paused");
   };
 
+  const handleNextLevel = () => {
+    const currentIndex = manifest.findIndex((m) => m.id === levelId);
+    if (currentIndex >= 0 && currentIndex < manifest.length - 1) {
+      onSelectLevel(manifest[currentIndex + 1].id);
+    }
+  };
+
   const isRunning = gameStatus === "running";
   const isPaused = gameStatus === "paused" || gameStatus === "error";
   const isCompiling = gameStatus === "compiling";
@@ -1124,7 +1188,7 @@ function GameShell({
             <button
               key={s}
               onClick={() => setSpeed(s)}
-              className={`px-1.5 py-1 text-[10px] font-mono rounded transition-colors ${
+              className={`px-1.5 py-1 text-base font-mono rounded transition-colors ${
                 speed === s
                   ? "bg-[#58a6ff] text-[#0d1117] font-bold"
                   : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d]"
@@ -1160,26 +1224,26 @@ function GameShell({
           ↺
         </button>
 
-        <button className="px-2.5 py-1.5 text-xs font-mono text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d] rounded-lg transition-colors" title="Submit Solution">
+        {/* <button className="px-2.5 py-1.5 text-xs font-mono text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d] rounded-lg transition-colors" title="Submit Solution">
           ✓ Submit
         </button>
 
         <div className="w-px h-6 bg-[#30363d] mx-1" />
 
         <button className="px-2.5 py-1.5 text-xs font-mono text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d] rounded-lg transition-colors">?</button>
-        <button className="px-2.5 py-1.5 text-xs font-mono text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d] rounded-lg transition-colors">⚙</button>
+        <button className="px-2.5 py-1.5 text-xs font-mono text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d] rounded-lg transition-colors">⚙</button> */}
       </div>
 
       {/* ── Main content ── */}
       <div className="flex flex-1 overflow-hidden relative">
 
         {/* ── Left: Game Panel ── */}
-        <div className="flex flex-col w-[56%] border-r border-[#30363d] relative overflow-hidden">
+        <div className="flex flex-col w-[65%] border-r border-[#30363d] relative overflow-hidden">
 
           {unsaved && isPaused && (
             <div className="shrink-0 bg-[#2d1f0a] border-b border-[#d29922]/40 px-4 py-1.5 flex items-center justify-between">
               <span className="text-xs font-mono text-[#d29922]">● Unsaved changes — compile to apply</span>
-              <span className="text-[10px] font-mono text-[#8b949e]">Resume disabled until compiled</span>
+              <span className="text-base font-mono text-[#8b949e]">Resume disabled until compiled</span>
             </div>
           )}
 
@@ -1201,6 +1265,7 @@ function GameShell({
                   handleReset();
                   setActiveTab("bot-program");
                 }}
+                onNextLevel={handleNextLevel}
               />
             )}
             {gameStatus === "failure" && (
@@ -1216,7 +1281,7 @@ function GameShell({
             )}
           </div>
 
-          <div className="shrink-0 h-44 flex border-t border-[#30363d] overflow-hidden">
+          <div className="shrink-0 h-64 flex border-t border-[#30363d] overflow-hidden">
             <div className="w-44 shrink-0 border-r border-[#30363d] overflow-y-auto">
               <StatsPanel simState={simState} timeLeft={timeLeft} level={level} />
             </div>
@@ -1242,13 +1307,13 @@ function GameShell({
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-1.5 px-3 py-2.5 text-[11px] font-mono whitespace-nowrap border-b-2 transition-colors shrink-0 ${
+                  className={`flex items-center gap-1.5 px-3 py-2.5 text-base font-mono whitespace-nowrap border-b-2 transition-colors shrink-0 ${
                     isActive
                       ? "border-[#58a6ff] text-[#e6edf3] bg-[#0d1117]"
                       : "border-transparent text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#1c2128]"
                   }`}
                 >
-                  {isLocked && <span className="text-[9px] text-[#484f58]">🔒</span>}
+                  {isLocked && <span className="text-sm text-[#484f58]">🔒</span>}
                   {TAB_LABELS[tab]}
                   {isDirty && <span className="w-1.5 h-1.5 rounded-full bg-[#d29922] shrink-0" />}
                 </button>
@@ -1270,20 +1335,21 @@ function GameShell({
               editable={isPaused && !LOCKED_TABS.includes(activeTab) && activeTab !== "console"}
               hasError={gameStatus === "error" && activeTab === "bot-program"}
               onChange={(v) => handleCodeChange(activeTab, v)}
+              onRequestEdit={handlePause}
             />
           </div>
 
           <ApiReference simState={simState} level={level} />
 
           <div className="shrink-0 h-7 flex items-center justify-between px-4 bg-[#161b22] border-t border-[#30363d]">
-            <span className="text-[10px] font-mono text-[#484f58]">
+            <span className="text-base font-mono text-[#484f58]">
               One program runs for every active bot.
             </span>
             <div className="flex items-center gap-3">
               {unsaved && (
-                <span className="text-[10px] font-mono text-[#d29922]">● unsaved</span>
+                <span className="text-base font-mono text-[#d29922]">● unsaved</span>
               )}
-              <span className="text-[10px] font-mono text-[#484f58]">
+              <span className="text-base font-mono text-[#484f58]">
                 {activeTab === "bot-program" ? "JavaScript" : "Read-only"}
               </span>
             </div>
@@ -1303,36 +1369,5 @@ function GameShell({
         )}
       </div>
     </div>
-  );
-}
-
-function ToolbarBtn({
-  label,
-  title,
-  disabled,
-  active,
-  onClick,
-}: {
-  label: string;
-  title: string;
-  disabled: boolean;
-  active?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      title={title}
-      className={`px-2.5 py-1.5 text-[11px] font-mono rounded-lg transition-colors ${
-        disabled
-          ? "text-[#484f58] cursor-not-allowed"
-          : active
-          ? "text-[#f85149] bg-[#2d0a0a] hover:bg-[#3d1010]"
-          : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#21262d]"
-      }`}
-    >
-      {label}
-    </button>
   );
 }

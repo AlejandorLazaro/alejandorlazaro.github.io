@@ -23,38 +23,35 @@ export type Tab =
   | "objects"
   | "console";
 
-export interface Platform {
+interface GameEnvObject {
   id: string;
   x: number;
   y: number;
   w: number;
   h: number;
+}
+
+interface ActivatableGameEnvObject extends GameEnvObject {
+  requiredActivations?: number;
+}
+
+export interface Platform extends ActivatableGameEnvObject {
   type: "normal" | "bounce";
   bouncePower?: number;
 }
 
-export interface Hazard {
-  id: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+export interface Hazard extends GameEnvObject {
+  type: "spike";
 }
 
-export interface GameButton {
-  id: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+export interface GameButton extends GameEnvObject {
   activated: boolean;
+  toggleable?: false;
+  requireHold?: false;
+  targetIds?: string[];
 }
 
-export interface ExitDoor {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+export interface ExitDoor extends ActivatableGameEnvObject {
   required: number;
 }
 
@@ -67,7 +64,7 @@ export interface LevelDef {
   spawns: Array<{ x: number; y: number }>;
   platforms: Platform[];
   hazards: Hazard[];
-  button: GameButton;
+  buttons: GameButton[];
   exit: ExitDoor;
 }
 
@@ -81,6 +78,8 @@ export interface BotState {
   grounded: boolean;
   touchingWall: boolean;
   touchingButton: boolean;
+  pauseTimer: number;
+  _curPauseTimer: number;
   color: string;
   frame: number;
 }
@@ -94,7 +93,7 @@ export interface SimEvent {
 
 export interface SimState {
   bots: BotState[];
-  buttonActivated: boolean;
+  activeButtonIds: string[];
   botsExited: number;
   botsAlive: number;
   botsDead: number;
@@ -118,13 +117,15 @@ export function createSimState(level: LevelDef, spawnCount: number): SimState {
     grounded: false,
     touchingWall: false,
     touchingButton: false,
+    pauseTimer: 0,
+    _curPauseTimer: 0,
     color: BOT_COLORS[i % BOT_COLORS.length],
     frame: 0,
   }));
 
   return {
     bots,
-    buttonActivated: false,
+    activeButtonIds: [],
     botsExited: 0,
     botsAlive: count,
     botsDead: 0,
@@ -152,12 +153,33 @@ function hOverlap(
 
 export function tickSim(state: SimState, level: LevelDef): SimState {
   const newEvents: SimEvent[] = [];
-  let buttonActivated = state.buttonActivated;
 
+  // 1. Evaluate current target activations based on the previous tick's active buttons
+  const targetActivations = new Map<string, number>();
+  for (const btnId of state.activeButtonIds) {
+    const btn = level.buttons.find(b => b.id === btnId);
+    btn?.targetIds?.forEach(tId => {
+      targetActivations.set(tId, (targetActivations.get(tId) || 0) + 1);
+    });
+  }
+
+  const isTargetActivated = (targetId: string, required: number = 1) => {
+    return (targetActivations.get(targetId) || 0) >= required;
+  };
+
+  // Verify exit requirement
+  const exitActivated = isTargetActivated(level.exit.id, level.exit.requiredActivations ?? 1);
+
+  // 2. Process Bots and Physics
   const newBots = state.bots.map((bot) => {
     if (bot.status !== "alive") return bot;
 
-    const vx = bot.direction === "right" ? WALK_SPEED : -WALK_SPEED;
+    let vx = bot.direction === "right" ? WALK_SPEED : -WALK_SPEED;
+    if (bot._curPauseTimer > 0) {
+        bot._curPauseTimer--;
+        vx = 0;
+    }
+
     let vy = Math.min(bot.vy + GRAVITY, MAX_FALL_VEL);
     let nx = bot.x + vx;
     let ny = bot.y + vy;
@@ -166,7 +188,6 @@ export function tickSim(state: SimState, level: LevelDef): SimState {
     let newDir = bot.direction;
     const frame = (bot.frame + 1) % 8;
 
-    // Vertical: land on platforms
     for (const plat of level.platforms) {
       if (!hOverlap(nx, BOT_W, plat.x, plat.w)) continue;
       const prevBottom = bot.y + BOT_H;
@@ -188,7 +209,6 @@ export function tickSim(state: SimState, level: LevelDef): SimState {
       }
     }
 
-    // Horizontal: collide with platform sides
     for (const plat of level.platforms) {
       if (ny + BOT_H <= plat.y + 2 || ny >= plat.y + plat.h - 2) continue;
       if (bot.x + BOT_W <= plat.x + 2 && nx + BOT_W > plat.x) {
@@ -202,7 +222,6 @@ export function tickSim(state: SimState, level: LevelDef): SimState {
       }
     }
 
-    // Level boundary walls
     if (nx < 0) {
       nx = 0;
       newDir = "right";
@@ -223,7 +242,6 @@ export function tickSim(state: SimState, level: LevelDef): SimState {
       });
     }
 
-    // Hazard check
     for (const h of level.hazards) {
       if (nx + BOT_W > h.x && nx < h.x + h.w && ny + BOT_H > h.y) {
         newEvents.push({
@@ -242,27 +260,18 @@ export function tickSim(state: SimState, level: LevelDef): SimState {
       }
     }
 
-    // Button check
-    const btn = level.button;
-    const onBtn =
-      grounded &&
-      nx + BOT_W > btn.x &&
-      nx < btn.x + btn.w &&
-      ny + BOT_H >= btn.y &&
-      ny < btn.y + btn.h + 8;
-    if (onBtn && !bot.touchingButton && !buttonActivated) {
-      buttonActivated = true;
-      newEvents.push({
-        id: _eid++,
-        tick: state.tick,
-        type: "button",
-        message: `Bot ${bot.id + 1} activated button`,
-      });
+    // Determine if bot is touching any button for their personal state
+    let touchingAnyBtn = false;
+    for (const btn of level.buttons) {
+      if (grounded && nx + BOT_W > btn.x && nx < btn.x + btn.w && ny + BOT_H >= btn.y && ny < btn.y + btn.h + 8) {
+        touchingAnyBtn = true;
+        break;
+      }
     }
 
-    // Exit check
     const ex = level.exit;
     if (
+      exitActivated &&
       nx + BOT_W > ex.x &&
       nx < ex.x + ex.w &&
       ny + BOT_H > ex.y &&
@@ -283,7 +292,6 @@ export function tickSim(state: SimState, level: LevelDef): SimState {
       };
     }
 
-    // Fall off screen
     if (ny > level.height + 60) {
       return { ...bot, status: "dead" as BotStatus };
     }
@@ -296,10 +304,58 @@ export function tickSim(state: SimState, level: LevelDef): SimState {
       direction: newDir,
       grounded,
       touchingWall,
-      touchingButton: onBtn,
+      touchingButton: touchingAnyBtn,
       frame,
+      _curPauseTimer: bot._curPauseTimer
     };
   });
+
+  // 3. Determine which buttons are pressed on THIS tick
+  const newActiveButtonIds: string[] = [];
+  for (const btn of level.buttons) {
+    // If requireHold is false, it stays active once pressed
+    let isPressed = btn.requireHold === false ? state.activeButtonIds.includes(btn.id) : false;
+
+    if (!isPressed) {
+      isPressed = newBots.some(b =>
+        b.status === "alive" && b.grounded && b.x + BOT_W > btn.x && b.x < btn.x + btn.w &&
+        b.y + BOT_H >= btn.y && b.y < btn.y + btn.h + 8
+      );
+    }
+
+    if (isPressed) {
+      newActiveButtonIds.push(btn.id);
+      if (!state.activeButtonIds.includes(btn.id)) {
+        newEvents.push({ id: _eid++, tick: state.tick, type: "button", message: `Button ${btn.id} pressed` });
+      }
+    }
+  }
+
+  // 4. Target activation check for logging events
+  const newTargetActivations = new Map<string, number>();
+  for (const btnId of newActiveButtonIds) {
+    const btn = level.buttons.find(b => b.id === btnId);
+    btn?.targetIds?.forEach(tId => newTargetActivations.set(tId, (newTargetActivations.get(tId) || 0) + 1));
+  }
+
+  for (const [targetId, count] of newTargetActivations.entries()) {
+    const oldActiveCount = targetActivations.get(targetId) || 0;
+
+    let threshold = 1;
+    if (level.exit.id === targetId) {
+      threshold = level.exit.requiredActivations ?? 1;
+    } else {
+      const p = level.platforms.find(p => p.id === targetId);
+      if (p && p.requiredActivations) threshold = p.requiredActivations;
+    }
+
+    if (oldActiveCount < threshold && count >= threshold) {
+      newEvents.push({
+        id: _eid++, tick: state.tick, type: "info",
+        message: `Target ${targetId} fully activated!`
+      });
+    }
+  }
 
   const botsExited = newBots.filter((b) => b.status === "exited").length;
   const botsDead = newBots.filter((b) => b.status === "dead").length;
@@ -307,7 +363,7 @@ export function tickSim(state: SimState, level: LevelDef): SimState {
 
   return {
     bots: newBots,
-    buttonActivated,
+    activeButtonIds: newActiveButtonIds,
     botsExited,
     botsAlive,
     botsDead,

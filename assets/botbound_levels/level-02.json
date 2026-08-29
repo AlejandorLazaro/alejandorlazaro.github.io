@@ -1,7 +1,7 @@
 {
   "width": 640,
   "height": 375,
-  "title": "Level 01 — Two to the Door",
+  "title": "Level 02 — Hold the Button",
   "timeLimitSec": 60,
   "maxSpawnCount": 3,
   "spawns": [
@@ -19,7 +19,8 @@
     { "id": "spikes", "x": 236, "y": 316, "w": 60, "h": 40 }
   ],
   "buttons": [
-    { "id": "btn", "x": 432, "y": 328, "w": 24, "h": 12, "activated": false }
+    { "id": "btn-1", "x": 380, "y": 328, "w": 24, "h": 12, "activated": false, "requireHold": true, "targetIds": ["exit-door"] },
+    { "id": "btn-2", "x": 480, "y": 328, "w": 24, "h": 12, "activated": false, "requireHold": true, "targetIds": ["exit-door"] }
   ],
-  "exit": { "x": 576, "y": 292, "w": 44, "h": 50, "required": 2 }
+  "exit": { "id": "exit-door", "x": 576, "y": 292, "w": 44, "h": 50, "required": 1, "requiredActivations": 1 }
 }
