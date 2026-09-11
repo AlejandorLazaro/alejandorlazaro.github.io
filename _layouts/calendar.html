@@ -445,18 +445,31 @@
     .modal-actions button.primary { flex: 2; }
 
     .add-event-row {
-      text-align: center;
-      margin: 0.25rem 0 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      margin: 0;
     }
 
     .add-event-row button {
-      border: 1px dashed var(--border);
-      background: transparent;
-      border-radius: 8px;
-      padding: 0.35rem 0.9rem;
-      font-size: 0.8rem;
-      cursor: pointer;
+
+      border: 1px solid var(--border);
+      background: var(--panel);
       color: var(--muted);
+      border-radius: 999px;
+
+      padding: 0.4rem 0.9rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      line-height: normal;
+
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .add-event-row button:hover {
+        border: 1px solid var(--ink);
+        background: var(--panel);
+        color: var(--ink);
     }
 
     @keyframes spin {
@@ -528,6 +541,9 @@
       <button data-edit="off" class="active">View</button>
       <button data-edit="on">Edit</button>
     </div>
+    <div class="add-event-row" id="addEventRow" style="display:none;">
+        <button id="addEventBtn">+ Add event</button>
+    </div>
   </div>
 
   <div class="day-tabs" id="dayTabs"></div>
@@ -540,10 +556,6 @@
     </div>
     <div class="day-agenda" id="dayView"></div>
   </main>
-
-  <div class="add-event-row" id="addEventRow" style="display:none;">
-    <button id="addEventBtn">+ Add event</button>
-  </div>
 
   <div class="auth-corner">
     <button class="auth-pill" id="authPillBtn">Sign in to edit</button>
@@ -832,7 +844,7 @@
     function applyViewMode() {
       document.getElementById("weekView").style.display = viewMode === "week" ? "block" : "none";
       document.getElementById("dayView").style.display = viewMode === "day" ? "flex" : "none";
-      document.getElementById("addEventRow").style.display = editMode && viewMode === "day" ? "block" : "none";
+      document.getElementById("addEventRow").style.display = editMode ? "block" : "none";
       document.querySelectorAll("#viewToggle button").forEach((b) => {
         b.classList.toggle("active", b.dataset.view === viewMode);
       });
@@ -1090,7 +1102,22 @@
         ? supabase.from("events").update(payload).eq("id", editingId)
         : supabase.from("events").insert(payload);
       const { error } = await query;
-      if (error) { modalError.textContent = error.message; return; }
+
+      if (error) {
+        const isPermissionError =
+          error.code === "42501" ||
+          error.message?.toLowerCase().includes("row-level security");
+
+        if (isPermissionError) {
+          modalError.textContent =
+          "You’re signed in, but your account does not have permission to add or edit events.";
+        } else {
+          modalError.textContent =
+          "Unable to save the event. Please try again.";
+        }
+
+        return;
+      }
       closeModal();
       fetchEvents();
     });
